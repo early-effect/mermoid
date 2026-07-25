@@ -3,7 +3,7 @@ package mermoid.docs
 import ascent.ast.{Attr, UI}
 import ascent.domtypes.AttrValue
 import ascent.html.Html
-import mermoid.{RenderConfig, SvgNode, SvgRenderer, css}
+import _root_.mermoid.{RenderConfig, SvgNode, SvgRenderer, css}
 import zio.test.*
 
 /** Proves the bridge round-trips: the ascent UI tree, once server-rendered, carries the same structure mermoid's own

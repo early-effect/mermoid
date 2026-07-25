@@ -2,7 +2,7 @@ package mermoid.docs
 
 import ascent.ast.{Attr, UI}
 import ascent.domtypes.AttrValue
-import mermoid.{MermaidParser, RenderConfig, SvgNode, SvgRenderer}
+import _root_.mermoid.{MermaidParser, RenderConfig, SvgNode, SvgRenderer}
 
 /** Bridges a mermoid `SvgNode` tree into an ascent `UI`, so a diagram can be embedded in a doc page.
   *

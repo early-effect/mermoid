@@ -55,7 +55,7 @@ insert a sibling. Use `as <name>` to pin an id you intend to select. Node and su
 source and never shift.
 """,
       exampleValue {
-        import mermoid.*
+        import _root_.mermoid.*
         MermaidParser
           .parse(sample)
           .map(SvgRenderer.render(_))
@@ -115,7 +115,7 @@ does not decode entities inside a raw-text element. If you map `Raw` into a fram
 CSS contains none of those characters — mermoid's generated CSS never does, and this site's bridge asserts it.
 """,
       exampleValue {
-        import mermoid.*
+        import _root_.mermoid.*
         def summarize(node: SvgNode, depth: Int = 0): List[String] = node match
           case SvgNode.Element(tag, attrs, children) =>
             val cls = attrs.collectFirst { case ("class", v) => s" class=$v" }.getOrElse("")

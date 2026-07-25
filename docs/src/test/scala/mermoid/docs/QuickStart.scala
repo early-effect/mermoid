@@ -30,7 +30,7 @@ Pre-1.0 on early-semver: pin the exact version and read the release notes before
 than swallow. `SvgRenderer.render` turns a `Diagram` into the SVG document.
 """,
       exampleValue {
-        import mermoid.*
+        import _root_.mermoid.*
 
         val source = """flowchart LR
                        |    A[Start] --> B{Ready?}
@@ -58,7 +58,7 @@ That same diagram, rendered:
 On the JVM, the whole job is one `Files.writeString`:
 
 ```scala
-import mermoid.*
+import _root_.mermoid.*
 import java.nio.file.{Files, Path}
 
 def renderToFile(mmd: Path, svg: Path): Either[String, Unit] =
@@ -77,7 +77,7 @@ The same artifact cross-builds for Scala.js, so a Scala.js app can render a diag
 mermaid.js:
 
 ```scala
-import mermoid.*
+import _root_.mermoid.*
 import org.scalajs.dom
 
 MermaidParser.parse(source).foreach { d =>
