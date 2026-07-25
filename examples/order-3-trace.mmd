@@ -1,0 +1,26 @@
+flowchart LR
+    Shipped((Shipped))
+    PaymentProcessing((PaymentProcessing))
+    ShippingRequested((ShippingRequested))
+    Delivered((Delivered))
+    Cancelled((Cancelled))
+    Paid((Paid))
+    Created((Created))
+
+    Created -->|InitiatePayment| PaymentProcessing
+    PaymentProcessing -->|PaymentSucceeded| Paid
+    PaymentProcessing -->|PaymentFailed| Cancelled
+    PaymentProcessing -->|PaymentTimeout| Cancelled
+    Paid -->|RequestShipping| ShippingRequested
+    ShippingRequested -->|ShipmentDispatched| Shipped
+    ShippingRequested -->|ShippingTimeout| ShippingRequested
+    ShippingRequested -->|ShippingRetry| ShippingRequested
+    Shipped -->|DeliveryConfirmed| Delivered
+
+    style Created fill:#ADD8E6
+    style Delivered fill:#ADD8E6
+    style ShippingRequested fill:#ADD8E6
+    style PaymentProcessing fill:#ADD8E6
+    style Shipped fill:#ADD8E6
+    style Paid fill:#ADD8E6
+    style Delivered fill:#90EE90

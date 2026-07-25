@@ -1,0 +1,27 @@
+stateDiagram-v2
+    [*] --> Created
+    Created --> PaymentProcessing: InitiatePayment
+    PaymentProcessing --> Paid: PaymentSucceeded
+    PaymentProcessing --> Cancelled: PaymentFailed
+    PaymentProcessing --> Cancelled: PaymentTimeout
+    Paid --> ShippingRequested: RequestShipping
+    ShippingRequested --> Shipped: ShipmentDispatched
+    ShippingRequested --> ShippingRequested: ShippingTimeout
+    ShippingRequested --> ShippingRequested: ShippingRetry
+    Shipped --> Delivered: DeliveryConfirmed
+    note right of PaymentProcessing
+      timeout: 5m
+      retries: 3
+      gateway: Stripe
+    end note
+    note right of ShippingRequested
+      timeout: 24h
+      carrier: FedEx
+      tracking: enabled
+    end note
+    note left of Shipped
+      awaiting
+      confirmation
+    end note
+    style PaymentProcessing noteAlign:center
+    style ShippingRequested noteAlign:right
