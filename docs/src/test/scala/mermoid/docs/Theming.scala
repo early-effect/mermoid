@@ -1,7 +1,7 @@
 package mermoid.docs
 
-import mermoid.RenderConfig
-import mermoid.css.{CssValue, ThemeName}
+import _root_.mermoid.RenderConfig
+import _root_.mermoid.css.{CssValue, ThemeName}
 import specular.*
 import specular.ziotest.DocSpecSuite
 import zio.test.*
@@ -51,7 +51,7 @@ The `primary`/`secondary`/`tertiary` triples (colour, border, text) are not cons
 there so a custom stylesheet can pick theme-consistent colours without hardcoding hexes.
 """,
       exampleValue {
-        import mermoid.css.*
+        import _root_.mermoid.css.*
         val sheet = Theme.toStylesheet(ThemeName.Dark)
         (sheet.variables.size, sheet.variables.get("--mermoid-node-border"))
       }.assert(r => assertTrue(r == ((20, Some(CssValue.Color("#81B1DB")))))),
@@ -67,7 +67,7 @@ to `true`.
   follows. This is what you want when the diagram is inline in a page you control.
 """,
       exampleValue {
-        import mermoid.*
+        import _root_.mermoid.*
         val diagram  = MermaidParser.parse(sample).getOrElse(throw new AssertionError("unparseable"))
         val resolved = SvgRenderer.render(diagram, RenderConfig(theme = ThemeName.Dark))
         val varForm  = SvgRenderer.render(diagram, RenderConfig(theme = ThemeName.Dark, resolveVariables = false))
@@ -102,13 +102,13 @@ The built-in themes are a convenience, not a ceiling. `Theme.toStylesheet(colors
 built yourself, and a whole stylesheet can be merged over any theme — see [Custom CSS](custom-css.html).
 """,
       exampleValue {
-        import mermoid.css.*
+        import _root_.mermoid.css.*
         val mine  = Theme.colors(ThemeName.Neutral).copy(nodeBorder = "#d97706", lineColor = "#92400e")
         val sheet = Theme.toStylesheet(mine)
         sheet.variables.get("--mermoid-node-border")
       }.assert(v => assertTrue(v == Some(CssValue.Color("#d97706")))),
       example {
-        import mermoid.css.*
+        import _root_.mermoid.css.*
         val mine = Theme.colors(ThemeName.Neutral).copy(nodeBorder = "#d97706", lineColor = "#92400e")
         // Theme.toStylesheet(ThemeColors) is the whole extension point: a palette in, a stylesheet out,
         // merged over the chosen theme by customStylesheet.

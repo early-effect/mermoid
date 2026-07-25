@@ -48,7 +48,7 @@ reads as start or end is positional — `[*] --> A` versus `A --> [*]`.
 Both directions in one diagram share the single `[*]` node, because states are collected by id.
 """,
       exampleValue {
-        import mermoid.*
+        import _root_.mermoid.*
         MermaidParser.parse("stateDiagram-v2\n  [*] --> A\n  A --> [*]\n").map(SvgRenderer.render(_)) match
           case Right(svg) => svg.sliding("start-end".length).count(_ == "start-end")
           case Left(_)    => -1
@@ -107,7 +107,7 @@ Like edges, notes take `as <name>` to pin their element id. Without it a note is
 earlier note on the same state renumbers the later ones.
 """,
       exampleValue {
-        import mermoid.*
+        import _root_.mermoid.*
         MermaidParser
           .parse("stateDiagram-v2\n  A --> B\n  note right of A as caveat\n    careful\n  end note\n")
           .map(SvgRenderer.render(_))

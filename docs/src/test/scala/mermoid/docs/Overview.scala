@@ -56,7 +56,7 @@ framework can map it to its own element type, a post-processor can rewrite it, a
 site does exactly that — its diagrams go through `SvgNode → ascent UI`, not through the string.
 """,
       exampleValue {
-        import mermoid.*
+        import _root_.mermoid.*
         MermaidParser
           .parse("flowchart TD\n  A[Hello] --> B((World))")
           .map(SvgRenderer.renderTree(_))

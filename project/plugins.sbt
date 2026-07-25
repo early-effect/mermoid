@@ -7,7 +7,7 @@ addSbtPlugin("com.github.sbt" % "sbt-pgp"      % "2.3.1")
 // `runReload` — restarts the forked docs server on rebuild, backing the `docsPreview` alias.
 addSbtPlugin("com.jamesward"     % "sbt-reload"    % "0.0.7")
 addSbtPlugin("rocks.earlyeffect" % "sbt-dynver-ci" % "0.2.2")
-addSbtPlugin("rocks.earlyeffect" % "sbt-specular"  % "0.7.3")
+addSbtPlugin("rocks.earlyeffect" % "sbt-specular"  % "0.9.0")
 addSbtPlugin("rocks.earlyeffect" % "sbt-zipx"      % "0.0.10")
 
 // zipx bundles sbt-remote-cache; compiler-interface is on both the sbt-2.x and zinc-1.x schemes.

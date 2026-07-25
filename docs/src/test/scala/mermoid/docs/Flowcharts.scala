@@ -84,7 +84,7 @@ The shape name lands in the wrapper's class list, so `.node-rhombus .node-shape 
 node without touching the diagram source. See [SVG structure](svg-structure.html).
 """,
       exampleValue {
-        import mermoid.*
+        import _root_.mermoid.*
         MermaidParser.parse("flowchart TD\n  A{Decide} --> B([Done])").map(SvgRenderer.render(_)) match
           case Right(svg) =>
             List("node-rhombus", "node-stadium").filter(svg.contains).mkString(", ")
@@ -188,7 +188,7 @@ Three statements, all of which end up as CSS rather than as baked-in attributes:
                             |""".stripMargin)
       },
       exampleValue {
-        import mermoid.*
+        import _root_.mermoid.*
         MermaidParser
           .parse("flowchart LR\n  classDef hot fill:#ffdddd\n  A[a] --> B[b]\n  class B hot\n  style A fill:#eee")
           .map(SvgRenderer.render(_))
@@ -207,7 +207,7 @@ Without an alias an edge is `edge-{from}-{to}-{index}`, so inserting an earlier 
 or test that selected `#edge-A-B-1` silently moves. An alias pins it:
 """,
       exampleValue {
-        import mermoid.*
+        import _root_.mermoid.*
         MermaidParser
           .parse("flowchart LR\n  A[a] --> B[b] as happy\n  A --> B\n")
           .map(SvgRenderer.render(_))
