@@ -82,7 +82,7 @@ selection and viewport reflow; see [Interactive](interactive.html).
               s"<$tag> with ${attrs.size} attributes and ${children.size} children"
             case other => other.toString
           }
-      }.assert(r => assertTrue(r == Right("<svg> with 4 attributes and 5 children"))),
+      }.assert(r => assertTrue(r == Right("<svg> with 4 attributes and 6 children"))),
     ),
     section("Status")(
       md"""
