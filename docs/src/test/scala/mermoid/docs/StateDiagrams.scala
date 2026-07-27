@@ -46,20 +46,25 @@ That is a two-state cycle, and it lays out rather than looping forever — layer
     section("Start and end")(
       md"""
 `[*]` is the start/end pseudo-state: a filled 16×16 circle carrying the `start-end` class, with no label. Whether it
-reads as start or end is positional — `[*] --> A` versus `A --> [*]`.
+reads as start or end is positional: `[*] --> A` versus `A --> [*]`.
 
-Both directions in one diagram share the single `[*]` node, because states are collected by id.
+When a diagram uses both, mermoid paints **two** markers (start keeps id `[*]`, end is `[*]-end`) so ranking does not
+cycle through a shared node and flip the layout. A diagram that only has one role still uses a single `[*]` node.
 """,
       exampleValue {
         import _root_.mermoid.*
         MermaidParser.parse("stateDiagram-v2\n  [*] --> A\n  A --> [*]\n").map(SvgRenderer.render(_)) match
-          case Right(svg) => svg.sliding("start-end".length).count(_ == "start-end")
-          case Left(_)    => -1
-      }.assert(n =>
-        // Two occurrences: the CSS rule in the <style> block, and one node's class list —
-        // proving both `[*]` mentions collapsed into a single rendered node.
-        assertTrue(n == 2)
-      ),
+          case Right(svg) =>
+            (
+              svg.sliding("start-end".length).count(_ == "start-end"),
+              svg.contains("""id="node-[*]""""),
+              svg.contains("""id="node-[*]-end""""),
+            )
+          case Left(_) => (-1, false, false)
+      }.assert { case (n, hasStart, hasEnd) =>
+        // CSS rule once + two painted markers.
+        assertTrue(n == 3, hasStart, hasEnd)
+      },
     ),
     section("Notes")(
       md"""

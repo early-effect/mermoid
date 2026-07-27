@@ -122,7 +122,7 @@ wide widths may flip to horizontal so the diagram uses available width.
 | Feature | Syntax |
 |---|---|
 | Transitions | `A --> B: label` |
-| Start / end | `[*] --> A`, `A --> [*]` (one shared `[*]` node) |
+| Start / end | `[*] --> A`, `A --> [*]` (separate markers when both roles appear) |
 | Self-transitions | `A --> A: retry` (labels stack) |
 | Notes | `note right of A` / `note left of A` … `end note` |
 | Note alignment | `style A noteAlign:center` (`left` / `center` / `right`) |

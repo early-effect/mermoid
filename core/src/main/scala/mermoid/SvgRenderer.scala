@@ -115,7 +115,7 @@ object SvgRenderer:
       ShapeRenderer.nodeToSvg(
         n,
         config,
-        includeLabel = n.id != "[*]",
+        includeLabel = !n.cssClasses.contains("start-end"),
         interaction = interaction,
       )
     }
@@ -127,13 +127,22 @@ object SvgRenderer:
     val noteSvg =
       scene.notes.flatMap(note => NoteRenderer.noteToSvg(config, note, nodeMap, selfLoopExtents))
 
+    // Opaque canvas so dark hosts (docs panels, dark mode) do not swallow #333 edges.
+    val background = SvgNode.leaf("rect")(
+      "class"  -> "diagram-bg",
+      "x"      -> "0",
+      "y"      -> "0",
+      "width"  -> scene.width.f,
+      "height" -> scene.height.f,
+    )
+
     svgRoot(
       scene.width,
       scene.height,
       arrowheadDefs(config) :: styleBlock(
         config,
         scene.classDefRules,
-      ).toList ++ subgraphSvg ++ edgeSvg ++ nodeSvg ++ noteSvg,
+      ).toList ++ (background :: subgraphSvg ++ edgeSvg ++ nodeSvg ++ noteSvg),
     )
   end paint
 end SvgRenderer

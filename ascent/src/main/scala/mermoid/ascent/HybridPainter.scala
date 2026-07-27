@@ -12,7 +12,7 @@ private[ascent] object HybridPainter:
 
   private val hybridCss: String =
     """
-      |.mermoid-diagram{position:relative;font-family:var(--mermoid-font-family,sans-serif);font-size:var(--mermoid-font-size,14px);color:var(--mermoid-text,#333);background:var(--mermoid-background,transparent);overflow:visible}
+      |.mermoid-diagram{position:relative;font-family:var(--mermoid-font-family,sans-serif);font-size:var(--mermoid-font-size,14px);color:var(--mermoid-text,#333);background:var(--mermoid-background,#ffffff);overflow:visible}
       |.mermoid-diagram-scaler{position:relative;transform-origin:top left}
       |.mermoid-edges{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
       |.mermoid-edges .edge.is-incident path,.mermoid-edges .edge.is-incident line{stroke-width:3;opacity:1}

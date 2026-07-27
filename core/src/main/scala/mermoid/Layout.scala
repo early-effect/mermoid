@@ -59,7 +59,7 @@ object Layout:
         .maxOption
         .getOrElse(0.0)
       val labelCount         = selfEs.size
-      val stackedLabelHeight = labelCount * (config.edgeLabelFontSize + 12)
+      val stackedLabelHeight = labelCount * (config.edgeLabelFontSize + 16)
       if isVertical then
         val extraRight = loopSize + Math.max(0.0, maxLabelW / 2) + config.selfLoopLabelPadding
         id -> (extraRight, 0.0)

@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="520" height="155" viewBox="0 0 520 155">
   <defs>
-    <marker id="arrowhead" markerWidth="8" markerHeight="6.8" refX="8" refY="3.4" orient="auto" markerUnits="userSpaceOnUse">
-      <polygon class="arrowhead" points="0 0, 8 3.4, 0 6.8"/>
+    <marker id="arrowhead" markerWidth="12" markerHeight="10.2" refX="12" refY="5.1" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon class="arrowhead" points="0 0, 12 5.1, 0 10.2"/>
     </marker>
   </defs>
   <style>
@@ -26,6 +26,10 @@
   --mermoid-tertiary-border: #cccccc;
   --mermoid-tertiary-text: #333;
   --mermoid-text: #333;
+}
+.diagram-bg {
+  fill: #ffffff;
+  stroke: none;
 }
 .node-shape {
   fill: #ECECFF;
@@ -93,11 +97,12 @@
   stroke: #333;
 }
 </style>
+  <rect class="diagram-bg" x="0" y="0" width="520" height="155"/>
   <g class="edge edge-arrow" id="edge-A-B-0" data-from="A" data-to="B">
-    <path class="edge-line" d="M130.5,90 L209.3,90" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M130.5,90 L202.5,90" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="edge edge-arrow" id="edge-B-C-0" data-from="B" data-to="C">
-    <path class="edge-line" d="M309.5,90 L388.3,90" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M309.5,90 L381.5,90" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="node node-rect" id="node-A">
     <title>Mermaid to AST</title>

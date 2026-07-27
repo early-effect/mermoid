@@ -47,6 +47,7 @@ object ThemeSpec extends ZIOSpecDefault:
           name
         }
         assertTrue(
+          selectorNames.contains("diagram-bg"),
           selectorNames.contains("node-shape"),
           selectorNames.contains("edge-line"),
           selectorNames.contains("note-rect"),

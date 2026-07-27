@@ -34,9 +34,9 @@ object NoteRenderer:
         cy - r * Math.sin(Math.toRadians(-20))
       case _ =>
         cy + hh * 0.15
-    val labelBaseY       = (startY + apexY) / 2 - (lc.edgeLabelFontSize + 12) * 0.5
+    val labelBaseY       = (startY + apexY) / 2 - (lc.edgeLabelFontSize + 16) * 0.5
     val lastLabelBottomY =
-      labelBaseY + (selfLoopCount - 1) * (lc.edgeLabelFontSize + 12) + (lc.edgeLabelFontSize + 8) / 2
+      labelBaseY + (selfLoopCount - 1) * (lc.edgeLabelFontSize + 16) + (lc.edgeLabelFontSize + 8) / 2
     Math.max(apexY, lastLabelBottomY)
   end selfLoopBottomExtent
 

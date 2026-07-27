@@ -63,6 +63,13 @@ object Theme:
 
     val rules = List(
       CssRule(
+        CssSelector.Class("diagram-bg"),
+        List(
+          CssDeclaration("fill", CssValue.Var("--mermoid-background", None)),
+          CssDeclaration("stroke", CssValue.Str("none")),
+        ),
+      ),
+      CssRule(
         CssSelector.Class("node-shape"),
         List(
           CssDeclaration("fill", CssValue.Var("--mermoid-main-bkg", None)),

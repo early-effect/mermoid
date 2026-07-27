@@ -1,7 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1813.5" height="725.3984375" viewBox="0 0 1813.5 725.3984375">
+<svg xmlns="http://www.w3.org/2000/svg" width="1737.5" height="669.2265625" viewBox="0 0 1737.5 669.2265625">
   <defs>
-    <marker id="arrowhead" markerWidth="8" markerHeight="6.8" refX="8" refY="3.4" orient="auto" markerUnits="userSpaceOnUse">
-      <polygon class="arrowhead" points="0 0, 8 3.4, 0 6.8"/>
+    <marker id="arrowhead" markerWidth="12" markerHeight="10.2" refX="12" refY="5.1" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon class="arrowhead" points="0 0, 12 5.1, 0 10.2"/>
     </marker>
   </defs>
   <style>
@@ -26,6 +26,10 @@
   --mermoid-tertiary-border: #cccccc;
   --mermoid-tertiary-text: #333;
   --mermoid-text: #333;
+}
+.diagram-bg {
+  fill: #ffffff;
+  stroke: none;
 }
 .node-shape {
   fill: #ECECFF;
@@ -93,49 +97,50 @@
   stroke: #333;
 }
 </style>
+  <rect class="diagram-bg" x="0" y="0" width="1737.5" height="669.2265625"/>
   <g class="edge edge-arrow" id="edge-Created-PaymentProcessing-0" data-from="Created" data-to="PaymentProcessing">
-    <path class="edge-line" d="M146.97381585818874,197.50252794020903 Q225.4313257032823,189.9865149662774 298.75398408594435,218.89774236700708" fill="none" marker-end="url(#arrowhead)"/>
-    <rect class="edge-label-bg" x="164.86389997206655" y="198.20013515360807" width="116" height="20" rx="3" ry="3"/>
-    <text class="edge-label" x="222.86389997206655" y="208.20013515360807" text-anchor="middle" dominant-baseline="central">InitiatePayment</text>
+    <path class="edge-line" d="M146.97381585818874,197.50252794020903 Q221.95071106668598,190.31994824522755 292.02055249830374,217.94858534387365" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="161.49718417824624" y="197.72555664204134" width="116" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="219.49718417824624" y="207.72555664204134" text-anchor="middle" dominant-baseline="central">InitiatePayment</text>
   </g>
   <g class="edge edge-arrow" id="edge-PaymentProcessing-Paid-0" data-from="PaymentProcessing" data-to="Paid">
-    <path class="edge-line" d="M487.5635052638155,259.74480218147147 Q586.996907390251,264.86428421202385 673.2759228869297,314.55474647212367" fill="none" marker-end="url(#arrowhead)"/>
-    <rect class="edge-label-bg" x="518.8197140753726" y="277.14977432679757" width="123.19999999999999" height="20" rx="3" ry="3"/>
-    <text class="edge-label" x="580.4197140753727" y="287.14977432679757" text-anchor="middle" dominant-baseline="central">PaymentSucceeded</text>
+    <path class="edge-line" d="M487.5635052638155,259.74480218147147 Q583.5049834788009,264.68449712504486 666.7540336838757,312.6299188894327" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="515.5587694738456" y="276.18736053545206" width="123.19999999999999" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="577.1587694738456" y="286.18736053545206" text-anchor="middle" dominant-baseline="central">PaymentSucceeded</text>
   </g>
   <g class="edge edge-arrow" id="edge-PaymentProcessing-Cancelled-0" data-from="PaymentProcessing" data-to="Cancelled">
-    <path class="edge-line" d="M488.71747543767617,209.52406617115622 C501.833255255947,204.68182959697674 540.3106151214001,186.0802890036893 567.4121543473011,180.4706467260794 C594.5136935732021,174.8610044484695 637.3409513854518,176.63361820892723 651.3267107930819,175.8662125054968" fill="none" marker-end="url(#arrowhead)"/>
-    <rect class="edge-label-bg" x="516.6121543473012" y="170.4706467260794" width="101.6" height="20" rx="3" ry="3"/>
-    <text class="edge-label" x="567.4121543473011" y="180.4706467260794" text-anchor="middle" dominant-baseline="central">PaymentFailed</text>
+    <path class="edge-line" d="M488.71747543767617,209.52406617115622 C501.278350880595,204.79668709706408 538.0909976199922,186.5397190040386 564.0827280951892,181.15979172660332 C590.0744585703861,175.77986444916803 631.2370032565797,177.8970507098877 644.6678582888578,177.2445025065446" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="513.2827280951892" y="171.15979172660332" width="101.6" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="564.0827280951892" y="181.15979172660332" text-anchor="middle" dominant-baseline="central">PaymentFailed</text>
   </g>
   <g class="edge edge-arrow" id="edge-PaymentProcessing-Cancelled-1" data-from="PaymentProcessing" data-to="Cancelled">
-    <path class="edge-line" d="M489.95102839992916,215.30181056053243 C503.9007359538161,214.36554433626065 546.6198382048361,215.6315765341943 573.6492737232506,209.6842132149017 C600.6787092416652,203.73684989560908 639.0479135458888,184.62872773979757 652.1276415104164,179.61763064477674" fill="none" marker-end="url(#arrowhead)"/>
-    <rect class="edge-label-bg" x="519.2492737232507" y="199.6842132149017" width="108.8" height="20" rx="3" ry="3"/>
-    <text class="edge-label" x="573.6492737232506" y="209.6842132149017" text-anchor="middle" dominant-baseline="central">PaymentTimeout</text>
+    <path class="edge-line" d="M489.95102839992916,215.30181056053243 C503.34730790283186,214.48731667915877 544.4061260008991,216.11866590578683 570.3287054173452,210.41484727229047 C596.2512848337913,204.71102863879412 632.9602049850621,185.968223511677 645.4865048986055,181.0788987595543" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="515.9287054173452" y="200.41484727229047" width="108.8" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="570.3287054173452" y="210.41484727229047" text-anchor="middle" dominant-baseline="central">PaymentTimeout</text>
   </g>
   <g class="edge edge-arrow" id="edge-Paid-ShippingRequested-0" data-from="Paid" data-to="ShippingRequested">
-    <path class="edge-line" d="M748.8747544893436,347.6483243322809 Q856.9491119149518,384.7045708957836 940.2644554881335,462.8824812516885" fill="none" marker-end="url(#arrowhead)"/>
-    <rect class="edge-label-bg" x="786.5696049887385" y="395.2654027919847" width="116" height="20" rx="3" ry="3"/>
-    <text class="edge-label" x="844.5696049887385" y="405.2654027919847" text-anchor="middle" dominant-baseline="central">RequestShipping</text>
+    <path class="edge-line" d="M747.8737171467567,349.2282187618859 Q855.7332852565629,392.23220491178535 936.9842070109905,475.18590869691207" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="784.4289620788736" y="402.207063729399" width="116" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="842.4289620788736" y="412.207063729399" text-anchor="middle" dominant-baseline="central">RequestShipping</text>
   </g>
   <g class="edge edge-arrow" id="edge-ShippingRequested-Shipped-0" data-from="ShippingRequested" data-to="Shipped">
-    <path class="edge-line" d="M1101.2191755537065,456.02935715876015 Q1218.1133392558318,399.66000642394647 1306.5221434111565,304.6566772311806" fill="none" marker-end="url(#arrowhead)"/>
-    <rect class="edge-label-bg" x="1135.0706594824317" y="370.34301719497034" width="137.6" height="20" rx="3" ry="3"/>
-    <text class="edge-label" x="1203.8706594824316" y="380.34301719497034" text-anchor="middle" dominant-baseline="central">ShipmentDispatched</text>
+    <path class="edge-line" d="M1099.3943678746912,473.46192473046983 Q1215.6470561278666,412.5355562431761 1302.2197172336398,313.885243257335" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="1132.0070425541655" y="383.6735839939024" width="137.6" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="1200.8070425541655" y="393.6735839939024" text-anchor="middle" dominant-baseline="central">ShipmentDispatched</text>
   </g>
   <g class="edge edge-arrow self-loop" id="edge-ShippingRequested-ShippingRequested-0" data-from="ShippingRequested" data-to="ShippingRequested">
-    <path class="edge-line" d="M1056.6694387950956,422.7030227493563 C1056.6694387950956,315.7030227493563 990.8305612049044,315.7030227493563 992.0305612049044,422.7030227493563" fill="none" marker-end="url(#arrowhead)"/>
-    <rect class="edge-label-bg" x="965.75" y="343.1530227493563" width="116" height="20" rx="3" ry="3"/>
-    <text class="edge-label" x="1023.75" y="353.1530227493563" text-anchor="middle" dominant-baseline="central">ShippingTimeout</text>
+    <path class="edge-line" d="M1056.6694387950956,442.5311477493563 C1056.6694387950956,329.5311477493563 990.8305612049044,329.5311477493563 990.8305612049044,434.5311477493563" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="965.75" y="359.0811477493563" width="116" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="1023.75" y="369.0811477493563" text-anchor="middle" dominant-baseline="central">ShippingTimeout</text>
   </g>
   <g class="edge edge-arrow self-loop" id="edge-ShippingRequested-ShippingRequested-1" data-from="ShippingRequested" data-to="ShippingRequested">
-    <rect class="edge-label-bg" x="972.95" y="367.1530227493563" width="101.6" height="20" rx="3" ry="3"/>
-    <text class="edge-label" x="1023.75" y="377.1530227493563" text-anchor="middle" dominant-baseline="central">ShippingRetry</text>
+    <rect class="edge-label-bg" x="972.95" y="387.0811477493563" width="101.6" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="1023.75" y="397.0811477493563" text-anchor="middle" dominant-baseline="central">ShippingRetry</text>
   </g>
   <g class="edge edge-arrow" id="edge-Shipped-Delivered-0" data-from="Shipped" data-to="Delivered">
-    <path class="edge-line" d="M1404.4615588534891,270.0144022380243 Q1488.9135353281144,286.93351606614164 1571.8453784324859,263.6805131952997" fill="none" marker-end="url(#arrowhead)"/>
-    <rect class="edge-label-bg" x="1422.9534686429874" y="256.847457716662" width="130.39999999999998" height="20" rx="3" ry="3"/>
-    <text class="edge-label" x="1488.1534686429875" y="266.847457716662" text-anchor="middle" dominant-baseline="central">DeliveryConfirmed</text>
+    <path class="edge-line" d="M1404.4635391365812,273.7236772429346 Q1485.4657365255455,290.0348534375527 1565.0476535005612,267.8058421848157" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="1419.5555963185711" y="260.76475971387515" width="130.39999999999998" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="1484.7555963185712" y="270.76475971387515" text-anchor="middle" dominant-baseline="central">DeliveryConfirmed</text>
   </g>
   <g class="node node-circle" id="node-Created">
     <circle class="node-shape" cx="93.75" cy="190" r="53.75"/>
@@ -154,15 +159,15 @@
     <text class="node-label" x="713.75" y="326.5" text-anchor="middle" dominant-baseline="central">Paid</text>
   </g>
   <g class="node node-circle" id="node-ShippingRequested">
-    <circle class="node-shape" cx="1023.75" cy="513.1484375" r="96.25"/>
-    <text class="node-label" x="1023.75" y="513.1484375" text-anchor="middle" dominant-baseline="central">ShippingRequested</text>
+    <circle class="node-shape" cx="1023.75" cy="532.9765625" r="96.25"/>
+    <text class="node-label" x="1023.75" y="532.9765625" text-anchor="middle" dominant-baseline="central">ShippingRequested</text>
   </g>
   <g class="node node-circle" id="node-Shipped">
-    <circle class="node-shape" cx="1350.75" cy="272.046875" r="53.75"/>
-    <text class="node-label" x="1350.75" y="272.046875" text-anchor="middle" dominant-baseline="central">Shipped</text>
+    <circle class="node-shape" cx="1350.75" cy="275.703125" r="53.75"/>
+    <text class="node-label" x="1350.75" y="275.703125" text-anchor="middle" dominant-baseline="central">Shipped</text>
   </g>
   <g class="node node-circle" id="node-Delivered">
-    <circle class="node-shape" cx="1635.25" cy="261.28125" r="62.25"/>
-    <text class="node-label" x="1635.25" y="261.28125" text-anchor="middle" dominant-baseline="central">Delivered</text>
+    <circle class="node-shape" cx="1635.25" cy="265.21875" r="62.25"/>
+    <text class="node-label" x="1635.25" y="265.21875" text-anchor="middle" dominant-baseline="central">Delivered</text>
   </g>
 </svg>

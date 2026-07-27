@@ -187,6 +187,7 @@ object SvgRendererSpec extends ZIOSpecDefault:
           svg.startsWith("<svg"),
           svg.endsWith("</svg>"),
           svg.contains("arrowhead"),
+          svg.contains("""class="diagram-bg""""),
           svg.contains("<path"),
           svg.contains("edge-line"),
           svg.contains("<rect"),

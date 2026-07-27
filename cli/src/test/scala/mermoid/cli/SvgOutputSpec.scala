@@ -97,7 +97,18 @@ object SvgOutputSpec extends ZIOSpecDefault:
   private def declaredNodeIds(diagram: Diagram): Set[String] = diagram match
     case Diagram.Flowchart(_, stmts) => StyleResolver.collectNodes(stmts).keySet
     case Diagram.StateDiagram(stmts) =>
-      stmts.collect { case StateStatement.TransitionSt(t) => List(t.from, t.to) }.flatten.toSet
+      val ends     = stmts.collect { case StateStatement.TransitionSt(t) => List(t.from, t.to) }.flatten
+      val hasStart = ends.contains("[*]") && stmts.exists {
+        case StateStatement.TransitionSt(t) => t.from == "[*]"
+        case _                              => false
+      }
+      val hasEnd = stmts.exists {
+        case StateStatement.TransitionSt(t) => t.to == "[*]"
+        case _                              => false
+      }
+      val base = ends.toSet
+      if hasStart && hasEnd then (base - "[*]") + "[*]" + "[*]-end"
+      else base
 
   /** Attribute values that are meant to be numbers — the geometry we can check numerically. */
   private val numericAttrs =
