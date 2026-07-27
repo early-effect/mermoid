@@ -1,0 +1,14 @@
+flowchart TD
+    Start[Start] --> L1[Layer 1a]
+    Start --> L2[Layer 1b]
+    Start --> L3[Layer 1c]
+    L1 --> M1[Mid a]
+    L2 --> M2[Mid b]
+    L3 --> M3[Mid c]
+    M1 --> End[End]
+    M2 --> End
+    M3 --> End
+    Start -->|skip mid| End
+    L1 -->|skip| End
+    L3 -->|skip| End
+    Start -->|far| M2

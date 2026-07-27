@@ -391,5 +391,58 @@ object ParserSpec extends ZIOSpecDefault:
         )
       },
     ),
+    suite("click")(
+      test("parses callback with tooltip") {
+        val input =
+          """flowchart LR
+            |  A --> B
+            |  click A callback "Tip A"
+            |""".stripMargin
+        MermaidParser.parse(input) match
+          case Left(err) => assertTrue(err.isEmpty)
+          case Right(Diagram.Flowchart(_, stmts)) =>
+            val click = stmts.collect { case FlowStatement.ClickSt(b) => b }.head
+            assertTrue(
+              click.nodeId == "A",
+              click.callbackName.contains("callback"),
+              click.tooltip.contains("Tip A"),
+            )
+          case Right(other) => assertTrue(other.isInstanceOf[Diagram.Flowchart])
+      },
+      test("parses call callback() form") {
+        val input =
+          """flowchart LR
+            |  A --> B
+            |  click A call myFn() "Hi"
+            |""".stripMargin
+        val stmts = MermaidParser.parse(input).toOption.get.asInstanceOf[Diagram.Flowchart].statements
+        val click = stmts.collect { case FlowStatement.ClickSt(b) => b }.head
+        assertTrue(click.callbackName.contains("myFn"), click.tooltip.contains("Hi"))
+      },
+      test("parses href with tooltip and target") {
+        val input =
+          """flowchart LR
+            |  A --> B
+            |  click B href "https://example.com" "Go" _blank
+            |""".stripMargin
+        val stmts = MermaidParser.parse(input).toOption.get.asInstanceOf[Diagram.Flowchart].statements
+        val click = stmts.collect { case FlowStatement.ClickSt(b) => b }.head
+        assertTrue(
+          click.href.contains("https://example.com"),
+          click.tooltip.contains("Go"),
+          click.linkTarget.contains("_blank"),
+        )
+      },
+      test("parses bare quoted URL as href") {
+        val input =
+          """flowchart LR
+            |  A --> B
+            |  click B "https://example.com" "Go"
+            |""".stripMargin
+        val stmts = MermaidParser.parse(input).toOption.get.asInstanceOf[Diagram.Flowchart].statements
+        val click = stmts.collect { case FlowStatement.ClickSt(b) => b }.head
+        assertTrue(click.href.contains("https://example.com"), click.tooltip.contains("Go"))
+      },
+    ),
   )
 end ParserSpec
