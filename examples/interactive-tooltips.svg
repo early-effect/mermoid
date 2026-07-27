@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="155" viewBox="0 0 520 155">
+  <defs>
+    <marker id="arrowhead" markerWidth="12" markerHeight="10.2" refX="12" refY="5.1" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon class="arrowhead" points="0 0, 12 5.1, 0 10.2"/>
+    </marker>
+  </defs>
+  <style>
+:root {
+  --mermoid-background: #ffffff;
+  --mermoid-edge-label-bg: #ffffff;
+  --mermoid-font-family: sans-serif;
+  --mermoid-font-size: 14px;
+  --mermoid-line: #333;
+  --mermoid-main-bkg: #ECECFF;
+  --mermoid-node-border: #9370DB;
+  --mermoid-note-bg: #ffffcc;
+  --mermoid-note-border: #333333;
+  --mermoid-note-text: #333333;
+  --mermoid-primary: #1f77b4;
+  --mermoid-primary-border: #1a5a8a;
+  --mermoid-primary-text: #333;
+  --mermoid-secondary: #ffffde;
+  --mermoid-secondary-border: #aaaa33;
+  --mermoid-secondary-text: #333;
+  --mermoid-tertiary: #f4f4f4;
+  --mermoid-tertiary-border: #cccccc;
+  --mermoid-tertiary-text: #333;
+  --mermoid-text: #333;
+}
+.diagram-bg {
+  fill: #ffffff;
+  stroke: none;
+}
+.node-shape {
+  fill: #ECECFF;
+  stroke: #9370DB;
+  stroke-width: 2;
+}
+.node-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+.edge-line {
+  stroke: #333;
+  stroke-width: 2;
+}
+.edge-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.edge-label-bg {
+  fill: #ffffff;
+}
+.note-rect {
+  fill: #ffffcc;
+  stroke: #333333;
+  stroke-width: 1;
+  stroke-dasharray: 4,2;
+}
+.note-text {
+  fill: #333333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.note-connector {
+  stroke: #333333;
+  stroke-width: 1;
+  stroke-dasharray: 4,2;
+}
+.subgraph-rect {
+  fill: none;
+  stroke: #9370DB;
+  stroke-width: 1;
+  stroke-dasharray: 6,3;
+}
+.subgraph-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+.edge-thick .edge-line {
+  stroke-width: 3;
+}
+.edge-dotted .edge-line {
+  stroke-dasharray: 5,5;
+}
+.edge-dotted-open .edge-line {
+  stroke-dasharray: 5,5;
+}
+.arrowhead {
+  fill: #333;
+}
+.start-end .node-shape {
+  fill: #333;
+  stroke: #333;
+}
+</style>
+  <rect class="diagram-bg" x="0" y="0" width="520" height="155"/>
+  <g class="edge edge-arrow" id="edge-A-B-0" data-from="A" data-to="B">
+    <path class="edge-line" d="M130.5,90 L202.5,90" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  <g class="edge edge-arrow" id="edge-B-C-0" data-from="B" data-to="C">
+    <path class="edge-line" d="M309.5,90 L381.5,90" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  <g class="node node-rect" id="node-A">
+    <title>Mermaid to AST</title>
+    <rect class="node-shape" x="40" y="65" width="90.5" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="85.25" y="90" text-anchor="middle" dominant-baseline="central">Parse</text>
+  </g>
+  <g class="node node-rect" id="node-B">
+    <title>DiagramScene and routes</title>
+    <rect class="node-shape" x="210.5" y="65" width="99" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="260" y="90" text-anchor="middle" dominant-baseline="central">Layout</text>
+  </g>
+  <a href="https://www.earlyeffect.rocks" target="_blank">
+    <g class="node node-rect" id="node-C">
+      <title>Open Early Effect</title>
+      <rect class="node-shape" x="389.5" y="65" width="90.5" height="50" rx="0" ry="0"/>
+      <text class="node-label" x="434.75" y="90" text-anchor="middle" dominant-baseline="central">Paint</text>
+    </g>
+  </a>
+</svg>

@@ -1,7 +1,8 @@
 package mermoid.docs
 
-import mermoid.RenderConfig
-import mermoid.css.{CssParser, Stylesheet, ThemeName}
+import mermoid.ascent.MermoidAscent
+import _root_.mermoid.RenderConfig
+import _root_.mermoid.css.{CssParser, Stylesheet, ThemeName}
 import specular.*
 import specular.ziotest.DocSpecSuite
 import zio.test.*
@@ -42,7 +43,7 @@ values, and `/* comments */`.
 """,
       example {
         val sheet = CssParser.parse(overrides).getOrElse(throw new AssertionError("bad css"))
-        MermoidUi.diagram(pipeline, RenderConfig(customStylesheet = Some(sheet), resolveVariables = false))
+        MermoidAscent.svgDiagram(pipeline, RenderConfig(customStylesheet = Some(sheet), resolveVariables = false))
       },
       md"""
 That is the same diagram as the Default theme renders — only the stylesheet changed. Note `resolveVariables = false`
@@ -63,7 +64,7 @@ Rules append rather than replace, so a custom rule with the same selector as a b
 order to win. That is deliberate: it means you can override one declaration without restating the rest of the rule.
 """,
       exampleValue {
-        import mermoid.css.*
+        import _root_.mermoid.css.*
         val base     = Theme.toStylesheet(ThemeName.Default)
         val mine     = CssParser.parse(".node-shape { stroke-width: 4; }").getOrElse(Stylesheet.empty)
         val merged   = Stylesheet.merge(base, mine)
@@ -82,7 +83,7 @@ For CSS generated in Scala, skip the parser and build `Stylesheet` values. The A
 over, or derived from application data.
 """,
       example {
-        import mermoid.css.*
+        import _root_.mermoid.css.*
         // A per-status palette computed in Scala rather than written as CSS text — one rule per entry,
         // matching the `classDef`-assigned class names in the diagram source.
         val statusColors = List("ok" -> "#16a34a", "warn" -> "#ca8a04", "fail" -> "#dc2626")
@@ -92,7 +93,7 @@ over, or derived from application data.
             List(CssDeclaration("stroke", CssValue.Color(color)), CssDeclaration("stroke-width", CssValue.Number(3))),
           )
         }
-        MermoidUi.diagram(
+        MermoidAscent.svgDiagram(
           """flowchart LR
             |    A[Healthy] --> B[Degraded]
             |    B --> C[Down]
@@ -118,7 +119,7 @@ The three in-diagram styling statements interact with a custom stylesheet like t
 from the outside, prefer `class` + `classDef`, or strip `style` statements before rendering.
 """,
       exampleValue {
-        import mermoid.*
+        import _root_.mermoid.*
         MermaidParser
           .parse("flowchart LR\n  classDef hot fill:#f00\n  A[a] --> B[b]\n  class B hot\n")
           .map(SvgRenderer.render(_))

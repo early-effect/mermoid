@@ -14,6 +14,8 @@ case class LayoutNode(
     height: Double,
     styles: Map[String, String] = Map.empty,
     cssClasses: List[String] = Nil,
+    /** Invisible routing waypoint; never painted as a node. */
+    dummy: Boolean = false,
 )
 
 case class LayoutEdge(

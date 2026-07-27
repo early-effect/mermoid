@@ -15,13 +15,16 @@ Mermaid-compatible diagram → SVG library in Scala 3, cross-built for the JVM a
 | Project | Dir | Artifact | Platforms |
 |---|---|---|---|
 | `root` | `.` | — (aggregate, `publish / skip`) | JVM |
-| `core` | `core/` | **`mermoid`** — the only published artifact | JVM + JS |
+| `core` | `core/` | **`mermoid`** — parser, layout (`DiagramScene`), SVG | JVM + JS |
+| `ascent` | `ascent/` | **`mermoid-ascent`** — hybrid HTML+SVG ascent painter + reflow | JVM + JS |
 | `cli` | `cli/` | — (assembly fat jar, `publish / skip`) | JVM |
-| `docs` | `docs/` | — (Specular site, `publish / skip`) | JVM |
+| `docs` | `docs/` | — (Specular site + docsJS remount client, `publish / skip`) | JVM + JS |
 
 `core` depends on **fastparse and nothing else** — that constraint is the point, not an accident.
-Integrations with other libraries (specular, marklit) live in their own repos and consume `SvgNode`.
-ZIO is a `cli`/test-only dependency; ascent/specular are `docs` test-only.
+`mermoid-ascent` depends on `mermoid` + ascent (+ ZIO). Specular/marklit integrations in other repos stay thin and
+consume `DiagramScene` / `SvgNode` / `MermoidAscent`. Docs SSR on the JVM; `.interactive` examples remount via `docsJS`
+(`assets/client.js`).
+ZIO is a `cli`/test-only dependency of core; ascent/specular are `docs` test-only (plus the published ascent module).
 
 ## Project Structure
 - Small files — break code into logical modules, one concern per file

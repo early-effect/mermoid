@@ -1,6 +1,6 @@
 package mermoid
 
-import mermoid.SvgNode.{elem, leaf, textElem}
+import mermoid.SvgNode.{leaf, textElem}
 
 object ShapeRenderer:
 
@@ -23,15 +23,27 @@ object ShapeRenderer:
     if styles.isEmpty then None
     else Some(styles.map((k, v) => s"$k: $v").mkString("; "))
 
-  def nodeToSvg(node: LayoutNode, config: RenderConfig, includeLabel: Boolean = true): SvgNode =
+  def nodeToSvg(
+      node: LayoutNode,
+      config: RenderConfig,
+      includeLabel: Boolean = true,
+      interaction: Option[NodeInteraction] = None,
+  ): SvgNode =
     val shapeClass  = shapeCssClass(node.shape)
     val userClasses = node.cssClasses.map(c => s" $c").mkString
-    val children    = shapeToSvg(node, config) ++ Option.when(includeLabel)(labelToSvg(node))
+    val titleChild  = interaction.flatMap(_.tooltip).map(t => SvgNode.elem("title")()(SvgNode.Text(t))).toList
+    val children    = titleChild ++ shapeToSvg(node, config) ++ Option.when(includeLabel)(labelToSvg(node))
     val attrs       = List(
       "class" -> s"node node-$shapeClass$userClasses",
       "id"    -> s"node-${node.id}",
     ) ++ inlineStyle(node.styles).map("style" -> _)
-    SvgNode.Element("g", attrs, children)
+    val group = SvgNode.Element("g", attrs, children)
+    interaction.flatMap(_.href) match
+      case Some(url) =>
+        val linkAttrs = List("href" -> url) ++ interaction.flatMap(_.linkTarget).map("target" -> _)
+        SvgNode.Element("a", linkAttrs, List(group))
+      case None => group
+  end nodeToSvg
 
   /** The shape primitives for a node — most shapes are one element, a few need two or three. */
   def shapeToSvg(node: LayoutNode, config: RenderConfig): List[SvgNode] =

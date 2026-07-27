@@ -1,6 +1,10 @@
+import org.scalajs.linker.interface.ModuleKind
+import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.*
+
+val ascentVersion   = "0.3.1"
 val scala3Version   = "3.8.4"
 val zioVersion      = "2.1.26"
-val specularVersion = "0.7.3"
+val specularVersion = "0.9.0"
 
 // sbt 2.x scopes bare build.sbt settings to ThisBuild, so these apply build-wide to every module.
 scalaVersion         := scala3Version
@@ -79,7 +83,7 @@ val zioTestSettings = Def.settings(
 )
 
 lazy val root = (project in file("."))
-  .aggregate((core.projectRefs ++ cli.projectRefs ++ docs.projectRefs)*)
+  .aggregate((core.projectRefs ++ ascent.projectRefs ++ cli.projectRefs ++ docs.projectRefs)*)
   .settings(
     // sbt 2.x derives output directories from `name`, so the aggregate cannot share `core`'s name.
     name           := "mermoid-root",
@@ -87,9 +91,7 @@ lazy val root = (project in file("."))
     test / skip    := true,
   )
 
-// --- mermoid : the parser, layout and SVG renderer. The ONLY published artifact.
-//   fastparse is its only dependency — no ZIO, no ascent, no specular. Integrations with other
-//   libraries live in those libraries' repos and consume `SvgNode` as the contract.
+// --- mermoid : the parser, layout and SVG renderer. Published; fastparse only.
 lazy val core = (projectMatrix in file("core"))
   .settings(
     name        := "mermoid",
@@ -100,6 +102,48 @@ lazy val core = (projectMatrix in file("core"))
   )
   .jvmPlatform(scalaVersions = scalaVersions)
   .jsPlatform(scalaVersions = scalaVersions)
+
+val javaTimePolyfill = Def.settings(
+  libraryDependencies ++= Seq(
+    "io.github.cquiroz" %% "scala-java-time"      % "2.7.0",
+    "io.github.cquiroz" %% "scala-java-time-tzdb" % "2.7.0",
+  )
+)
+
+// --- mermoid-ascent : hybrid HTML+SVG ascent painter with reactive reflow. Published; depends on ascent.
+lazy val ascent = (projectMatrix in file("ascent"))
+  .dependsOn(core)
+  .settings(
+    name        := "mermoid-ascent",
+    description := "Ascent UI painter for mermoid diagrams (hybrid HTML nodes, SVG edges, reactive reflow)",
+    scalacOptions ++= commonScalacOptions,
+    libraryDependencies ++= Seq(
+      "rocks.earlyeffect" %% "ascent-core" % ascentVersion,
+      "rocks.earlyeffect" %% "ascent-css"  % ascentVersion,
+      "dev.zio"           %% "zio"         % zioVersion,
+    ),
+  )
+  .jvmPlatform(
+    scalaVersions,
+    Nil,
+    (p: Project) =>
+      p.settings(
+        libraryDependencies += "rocks.earlyeffect" %% "ascent-html" % ascentVersion,
+        zioTestSettings,
+      ),
+  )
+  .jsPlatform(
+    scalaVersions,
+    Nil,
+    (p: Project) =>
+      p.settings(
+        javaTimePolyfill,
+        libraryDependencies += "rocks.earlyeffect" %% "ascent-js" % ascentVersion,
+        // SSR round-trip specs need ascent-html (JVM-only).
+        Test / skip    := true,
+        Test / sources := Nil,
+      ),
+  )
 
 // --- mermoid-cli : fat-jar renderer for .mmd files. JVM only (java.nio.file), never published.
 lazy val cli = (projectMatrix in file("cli"))
@@ -122,6 +166,13 @@ lazy val cli = (projectMatrix in file("cli"))
       val files = (dir * "*.mmd").get().map(_.getAbsolutePath).sorted.mkString(" ")
       Def.uncached((Compile / runMain).toTask(s" mermoid.cli.MermoidCli $files"))
     }.value,
+    layoutGallery := Def.taskDyn {
+      val base  = (ThisBuild / baseDirectory).value
+      val dir   = base / "examples"
+      val out   = base / "target" / "layout-gallery"
+      val files = (dir * "*.mmd").get().map(_.getAbsolutePath).sorted.mkString(" ")
+      Def.uncached((Compile / runMain).toTask(s" mermoid.cli.MermoidCli $files --gallery ${out.getAbsolutePath}"))
+    }.value,
   )
   .jvmPlatform(scalaVersions = scalaVersions)
 
@@ -131,51 +182,103 @@ lazy val specularPreview =
 lazy val regenerateExamples =
   taskKey[Unit]("Re-render every examples/*.mmd to its sibling .svg (paired with SvgOutputSpec's staleness check)")
 
+lazy val layoutGallery =
+  taskKey[Unit]("Re-render examples and write target/layout-gallery/index.html for visual review")
+
 // --- mermoid-docs : Specular docs-as-tests site. Never published; every diagram on the site is
 //   rendered and asserted by `sbt test`, so a broken diagram is a red CI check.
+//   JVM builds the static site; docsJS remounts `.interactive` examples in the browser (Specular pattern).
 lazy val docs = (projectMatrix in file("docs"))
-  .dependsOn(core)
+  .dependsOn(core, ascent)
   .settings(
     name            := "mermoid-docs",
     publish / skip  := true,
     publishArtifact := false,
     scalacOptions ++= commonScalacOptions,
-    libraryDependencies ++= Seq(
-      "rocks.earlyeffect" %% "specular-core"           % specularVersion % Test,
-      "rocks.earlyeffect" %% "specular-zio-test"       % specularVersion % Test,
-      "rocks.earlyeffect" %% "specular-site"           % specularVersion % Test,
-      "rocks.earlyeffect" %% "early-effect-docs-theme" % specularVersion % Test,
-      "dev.zio"           %% "zio"                     % zioVersion      % Test,
-    ),
-    zioTestSettings,
-    Test / mainClass       := Some("specular.site.DocsServe"),
-    Test / run / mainClass := (Test / mainClass).value,
-    Test / runReloadArgs   := Seq(specularPort.value.toString),
-    // runReload forks with the docs project as cwd, so a relative target/site would miss the
-    // repo-root site written by specularSite. Point DocsServe at specularSiteDirectory.
-    Test / run / javaOptions ++= {
-      val dir = specularSiteDirectory.value.getAbsolutePath
-      Seq(
-        s"-Dspecular.site.dir=$dir",
-        s"-Dspecular.site.port=${specularPort.value}",
-      )
-    },
-    specularBuildMain := "mermoid.docs.BuildSite",
-    // The JVM row of the core matrix — a bare LocalProject name resolves to it.
-    specularMetaProject   := Some(LocalProject("core")),
-    specularSiteDirectory := (ThisBuild / baseDirectory).value / "target" / "site",
-    // Docs-only (workflow_dispatch) builds are dynver `-ci`; don't advertise that as a Central coord.
-    specularDisplayVersion := {
-      val v = (ThisBuild / version).value
-      if (v.endsWith("-ci") || v.endsWith("-SNAPSHOT")) previousStableVersion.value.getOrElse("<version>")
-      else ""
-    },
-    specularPreview := Def.uncached {
-      specularSite.value
-      (Test / runReload).value
-    },
   )
-  .jvmPlatform(scalaVersions = scalaVersions, Nil, (p: Project) => p.enablePlugins(SpecularPlugin))
+  .jvmPlatform(
+    scalaVersions,
+    Nil,
+    (p: Project) =>
+      p.enablePlugins(SpecularPlugin)
+        .settings(
+          libraryDependencies ++= Seq(
+            "rocks.earlyeffect" %% "specular-core"           % specularVersion % Test,
+            "rocks.earlyeffect" %% "specular-zio-test"       % specularVersion % Test,
+            "rocks.earlyeffect" %% "specular-site"           % specularVersion % Test,
+            "rocks.earlyeffect" %% "early-effect-docs-theme" % specularVersion % Test,
+            "dev.zio"           %% "zio"                     % zioVersion      % Test,
+          ),
+          zioTestSettings,
+          Test / mainClass       := Some("specular.site.DocsServe"),
+          Test / run / mainClass := (Test / mainClass).value,
+          Test / runReloadArgs   := Seq(specularPort.value.toString),
+          // runReload forks with the docs project as cwd, so a relative target/site would miss the
+          // repo-root site written by specularSite. Point DocsServe at specularSiteDirectory.
+          Test / run / javaOptions ++= {
+            val dir = specularSiteDirectory.value.getAbsolutePath
+            Seq(
+              s"-Dspecular.site.dir=$dir",
+              s"-Dspecular.site.port=${specularPort.value}",
+            )
+          },
+          specularBuildMain := "mermoid.docs.BuildSite",
+          // The JVM row of the core matrix — a bare LocalProject name resolves to it.
+          specularMetaProject   := Some(LocalProject("core")),
+          specularSiteDirectory := (ThisBuild / baseDirectory).value / "target" / "site",
+          // Docs-only (workflow_dispatch) builds are dynver `-ci`; don't advertise that as a Central coord.
+          specularDisplayVersion := {
+            val v = (ThisBuild / version).value
+            if (v.endsWith("-ci") || v.endsWith("-SNAPSHOT")) previousStableVersion.value.getOrElse("<version>")
+            else ""
+          },
+          // Link docsJS then write marker path for BuildSite.afterBuild → assets/client.js.
+          specularJsLink := Def
+            .uncached(Def.task {
+              (LocalProject("docsJS") / Compile / fastLinkJS).value
+              val outDir = (LocalProject("docsJS") / Compile / fastLinkJSOutput).value
+              val mainJs = outDir / "main.js"
+              if (!mainJs.exists)
+                sys.error(
+                  s"Expected $mainJs after fastLinkJS; directory contains: " +
+                    Option(outDir.list).toSeq.flatten.mkString(", ")
+                )
+              val marker = (ThisBuild / baseDirectory).value / "target" / "specular-client-js.path"
+              IO.write(marker, mainJs.getAbsolutePath)
+            })
+            .value,
+          specularPreview := Def
+            .uncached(Def.task {
+              specularSite.value
+              (Test / runReload).value
+            })
+            .value,
+        ),
+  )
+  .jsPlatform(
+    scalaVersions,
+    Nil,
+    (p: Project) =>
+      p.settings(
+        javaTimePolyfill,
+        libraryDependencies ++= Seq(
+          "rocks.earlyeffect" %% "specular-core" % specularVersion,
+          "rocks.earlyeffect" %% "ascent-js"     % ascentVersion,
+          "rocks.earlyeffect" %% "ascent-css"    % ascentVersion,
+          "dev.zio"           %% "zio"           % zioVersion,
+        ),
+        // Share Interactive DocSpec + registry with the JVM Test CP (Specular LibraryAuthors pattern).
+        Compile / unmanagedSources ++= {
+          val dir = (ThisBuild / baseDirectory).value / "docs" / "src" / "test" / "scala" / "mermoid" / "docs"
+          Seq(dir / "Interactive.scala", dir / "ExampleRegistry.scala")
+        },
+        scalaJSUseMainModuleInitializer := true,
+        scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.ESModule)),
+        Compile / mainClass := Some("mermoid.docs.ClientMain"),
+        Test / skip         := true,
+        Test / sources      := Nil,
+      ),
+  )
 
 addCommandAlias("docsPreview", "~docs/specularPreview")
 addCommandAlias("release", "; publishSigned; sonaRelease")

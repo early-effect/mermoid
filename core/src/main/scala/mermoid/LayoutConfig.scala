@@ -8,7 +8,9 @@ case class LayoutConfig(
     hSpacing: Double = 80.0,
     vSpacing: Double = 80.0,
     padding: Double = 40.0,
-    arrowSize: Double = 8.0,
+    arrowSize: Double = 12.0,
+    /** How far to pull the path end back so the marker tip sits just clear of the node stroke. */
+    arrowTipPadding: Double = 6.0,
     cornerRadius: Double = 15.0,
     subroutineInset: Double = 8.0,
     cylinderRy: Double = 8.0,
@@ -16,9 +18,15 @@ case class LayoutConfig(
     parallelogramSkew: Double = 15.0,
     trapezoidIndent: Double = 15.0,
     doubleCircleGap: Double = 5.0,
-    selfLoopSize: Double = 30.0,
-    selfLoopLabelPadding: Double = 10.0,
+    selfLoopSize: Double = 36.0,
+    selfLoopLabelPadding: Double = 14.0,
     fontSize: Int = 14,
     edgeLabelFontSize: Int = 12,
     fontFamily: String = "sans-serif",
+    /** Forward/backward barycenter sweeps for crossing minimization. */
+    barycenterIterations: Int = 4,
+    /** Median-alignment sweeps for cross-axis coordinate assignment. */
+    coordinateIterations: Int = 4,
+    /** Perpendicular offset between parallel edges sharing the same endpoints. */
+    parallelEdgeSpacing: Double = 20.0,
 )

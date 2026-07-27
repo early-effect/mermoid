@@ -1,0 +1,169 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="805" viewBox="0 0 480 805">
+  <defs>
+    <marker id="arrowhead" markerWidth="12" markerHeight="10.2" refX="12" refY="5.1" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon class="arrowhead" points="0 0, 12 5.1, 0 10.2"/>
+    </marker>
+  </defs>
+  <style>
+:root {
+  --mermoid-background: #ffffff;
+  --mermoid-edge-label-bg: #ffffff;
+  --mermoid-font-family: sans-serif;
+  --mermoid-font-size: 14px;
+  --mermoid-line: #333;
+  --mermoid-main-bkg: #ECECFF;
+  --mermoid-node-border: #9370DB;
+  --mermoid-note-bg: #ffffcc;
+  --mermoid-note-border: #333333;
+  --mermoid-note-text: #333333;
+  --mermoid-primary: #1f77b4;
+  --mermoid-primary-border: #1a5a8a;
+  --mermoid-primary-text: #333;
+  --mermoid-secondary: #ffffde;
+  --mermoid-secondary-border: #aaaa33;
+  --mermoid-secondary-text: #333;
+  --mermoid-tertiary: #f4f4f4;
+  --mermoid-tertiary-border: #cccccc;
+  --mermoid-tertiary-text: #333;
+  --mermoid-text: #333;
+}
+.diagram-bg {
+  fill: #ffffff;
+  stroke: none;
+}
+.node-shape {
+  fill: #ECECFF;
+  stroke: #9370DB;
+  stroke-width: 2;
+}
+.node-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+.edge-line {
+  stroke: #333;
+  stroke-width: 2;
+}
+.edge-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.edge-label-bg {
+  fill: #ffffff;
+}
+.note-rect {
+  fill: #ffffcc;
+  stroke: #333333;
+  stroke-width: 1;
+  stroke-dasharray: 4,2;
+}
+.note-text {
+  fill: #333333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.note-connector {
+  stroke: #333333;
+  stroke-width: 1;
+  stroke-dasharray: 4,2;
+}
+.subgraph-rect {
+  fill: none;
+  stroke: #9370DB;
+  stroke-width: 1;
+  stroke-dasharray: 6,3;
+}
+.subgraph-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+.edge-thick .edge-line {
+  stroke-width: 3;
+}
+.edge-dotted .edge-line {
+  stroke-dasharray: 5,5;
+}
+.edge-dotted-open .edge-line {
+  stroke-dasharray: 5,5;
+}
+.arrowhead {
+  fill: #333;
+}
+.start-end .node-shape {
+  fill: #333;
+  stroke: #333;
+}
+</style>
+  <rect class="diagram-bg" x="0" y="0" width="480" height="805"/>
+  <g class="edge edge-arrow" id="edge-A-B-0" data-from="A" data-to="B">
+    <path class="edge-line" d="M120,431.25 Q159.83281172643305,437.2838997262137 192.58826738302153,460.7389836243525" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  <g class="edge edge-arrow" id="edge-A-C-0" data-from="A" data-to="C">
+    <path class="edge-line" d="M100.51282051282051,440 Q174.12058311762462,495.73972738835744 214.41264659375528,578.8154130361393" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  <g class="edge edge-arrow" id="edge-A-D-0" data-from="A" data-to="D">
+    <path class="edge-line" d="M92.3076923076923,440 Q179.76536012446235,563.3109006927741 224.15883549128648,707.8226345916756" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  <g class="edge edge-arrow" id="edge-A-E-0" data-from="A" data-to="E">
+    <path class="edge-line" d="M92.3076923076923,390 Q179.76536012446235,266.6890993072257 224.15883549128648,122.1773654083243" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  <g class="edge edge-arrow" id="edge-A-F-0" data-from="A" data-to="F">
+    <path class="edge-line" d="M100.51282051282051,390 Q174.12058311762462,334.26027261164256 214.41264659375528,251.1845869638607" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  <g class="edge edge-arrow" id="edge-A-G-0" data-from="A" data-to="G">
+    <path class="edge-line" d="M120,398.75 Q159.83281172643305,392.7161002737863 192.58826738302153,369.2610163756475" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  <g class="edge edge-arrow" id="edge-B-H-0" data-from="B" data-to="H">
+    <path class="edge-line" d="M280,463.75 Q319.8328117264331,457.7161002737863 352.5882673830215,434.2610163756475" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  <g class="edge edge-arrow" id="edge-C-H-0" data-from="C" data-to="H">
+    <path class="edge-line" d="M260.5128205128205,585 Q334.12058311762456,529.2602726116426 374.4126465937553,446.18458696386074" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  <g class="edge edge-arrow" id="edge-D-H-0" data-from="D" data-to="H">
+    <path class="edge-line" d="M252.30769230769232,715 Q339.76536012446235,591.6890993072258 384.1588354912865,447.1773654083243" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  <g class="edge edge-arrow" id="edge-E-H-0" data-from="E" data-to="H">
+    <path class="edge-line" d="M252.30769230769232,115 Q339.76536012446235,238.31090069277425 384.1588354912865,382.8226345916757" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  <g class="edge edge-arrow" id="edge-F-H-0" data-from="F" data-to="H">
+    <path class="edge-line" d="M260.5128205128205,245 Q334.12058311762456,300.73972738835744 374.4126465937553,383.81541303613926" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  <g class="edge edge-arrow" id="edge-G-H-0" data-from="G" data-to="H">
+    <path class="edge-line" d="M280,366.25 Q319.8328117264331,372.2838997262137 352.5882673830215,395.7389836243525" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  <g class="node node-rect" id="node-A">
+    <rect class="node-shape" x="40" y="390" width="80" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="80" y="415" text-anchor="middle" dominant-baseline="central">A</text>
+  </g>
+  <g class="node node-rect" id="node-E">
+    <rect class="node-shape" x="200" y="65" width="80" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="240" y="90" text-anchor="middle" dominant-baseline="central">E</text>
+  </g>
+  <g class="node node-rect" id="node-F">
+    <rect class="node-shape" x="200" y="195" width="80" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="240" y="220" text-anchor="middle" dominant-baseline="central">F</text>
+  </g>
+  <g class="node node-rect" id="node-G">
+    <rect class="node-shape" x="200" y="325" width="80" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="240" y="350" text-anchor="middle" dominant-baseline="central">G</text>
+  </g>
+  <g class="node node-rect" id="node-B">
+    <rect class="node-shape" x="200" y="455" width="80" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="240" y="480" text-anchor="middle" dominant-baseline="central">B</text>
+  </g>
+  <g class="node node-rect" id="node-C">
+    <rect class="node-shape" x="200" y="585" width="80" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="240" y="610" text-anchor="middle" dominant-baseline="central">C</text>
+  </g>
+  <g class="node node-rect" id="node-D">
+    <rect class="node-shape" x="200" y="715" width="80" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="240" y="740" text-anchor="middle" dominant-baseline="central">D</text>
+  </g>
+  <g class="node node-rect" id="node-H">
+    <rect class="node-shape" x="360" y="390" width="80" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="400" y="415" text-anchor="middle" dominant-baseline="central">H</text>
+  </g>
+</svg>

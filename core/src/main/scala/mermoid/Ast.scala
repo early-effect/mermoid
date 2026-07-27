@@ -38,6 +38,15 @@ enum EdgeStyle:
 
 case class Edge(from: String, to: String, style: EdgeStyle, label: Option[String], alias: Option[String] = None)
 
+/** A Mermaid `click` binding: tooltip and/or link and/or opaque callback name. */
+case class ClickBinding(
+    nodeId: String,
+    tooltip: Option[String] = None,
+    href: Option[String] = None,
+    linkTarget: Option[String] = None,
+    callbackName: Option[String] = None,
+)
+
 enum FlowStatement:
   case NodeSt(node: NodeDef)
   case EdgeSt(edge: Edge, fromNode: NodeDef, toNode: NodeDef)
@@ -45,6 +54,7 @@ enum FlowStatement:
   case StyleSt(nodeId: String, styles: Map[String, String])
   case ClassDefSt(className: String, styles: Map[String, String])
   case ClassSt(nodeIds: List[String], className: String)
+  case ClickSt(binding: ClickBinding)
 
 // -- State Diagram ------------------------------------------------------------
 

@@ -1,11 +1,8 @@
 version: 2
 updates:
-  - package-ecosystem: "maven"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
-
+  # Only github-actions. Dependabot has no sbt support — its maven ecosystem looks for a pom.xml and
+  # errors out on an sbt build — so Scala/library updates come from Scala Steward
+  # (.github/workflows/zipx-scala-steward.yml) instead.
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

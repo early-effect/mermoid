@@ -1,0 +1,160 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1185" height="382.77777777777777" viewBox="0 0 1185 382.77777777777777">
+  <defs>
+    <marker id="arrowhead" markerWidth="12" markerHeight="10.2" refX="12" refY="5.1" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon class="arrowhead" points="0 0, 12 5.1, 0 10.2"/>
+    </marker>
+  </defs>
+  <style>
+:root {
+  --mermoid-background: #ffffff;
+  --mermoid-edge-label-bg: #ffffff;
+  --mermoid-font-family: sans-serif;
+  --mermoid-font-size: 14px;
+  --mermoid-line: #333;
+  --mermoid-main-bkg: #ECECFF;
+  --mermoid-node-border: #9370DB;
+  --mermoid-note-bg: #ffffcc;
+  --mermoid-note-border: #333333;
+  --mermoid-note-text: #333333;
+  --mermoid-primary: #1f77b4;
+  --mermoid-primary-border: #1a5a8a;
+  --mermoid-primary-text: #333;
+  --mermoid-secondary: #ffffde;
+  --mermoid-secondary-border: #aaaa33;
+  --mermoid-secondary-text: #333;
+  --mermoid-tertiary: #f4f4f4;
+  --mermoid-tertiary-border: #cccccc;
+  --mermoid-tertiary-text: #333;
+  --mermoid-text: #333;
+}
+.diagram-bg {
+  fill: #ffffff;
+  stroke: none;
+}
+.node-shape {
+  fill: #ECECFF;
+  stroke: #9370DB;
+  stroke-width: 2;
+}
+.node-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+.edge-line {
+  stroke: #333;
+  stroke-width: 2;
+}
+.edge-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.edge-label-bg {
+  fill: #ffffff;
+}
+.note-rect {
+  fill: #ffffcc;
+  stroke: #333333;
+  stroke-width: 1;
+  stroke-dasharray: 4,2;
+}
+.note-text {
+  fill: #333333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.note-connector {
+  stroke: #333333;
+  stroke-width: 1;
+  stroke-dasharray: 4,2;
+}
+.subgraph-rect {
+  fill: none;
+  stroke: #9370DB;
+  stroke-width: 1;
+  stroke-dasharray: 6,3;
+}
+.subgraph-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+.edge-thick .edge-line {
+  stroke-width: 3;
+}
+.edge-dotted .edge-line {
+  stroke-dasharray: 5,5;
+}
+.edge-dotted-open .edge-line {
+  stroke-dasharray: 5,5;
+}
+.arrowhead {
+  fill: #333;
+}
+.start-end .node-shape {
+  fill: #333;
+  stroke: #333;
+}
+</style>
+  <rect class="diagram-bg" x="0" y="0" width="1185" height="382.77777777777777"/>
+  <g class="edge edge-arrow" id="edge-A-B-0" data-from="A" data-to="B">
+    <path class="edge-line" d="M147.5,159.62220365729138 Q195.969031076659,161.79587557491817 240.1450687157516,141.73473100076455" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  <g class="edge edge-arrow" id="edge-B-C-0" data-from="B" data-to="C">
+    <path class="edge-line" d="M338.5,125.1067939104749 Q386.35416938131846,129.69510611121038 431.0782229755956,112.06464479780293" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  <g class="edge edge-arrow" id="edge-C-D-0" data-from="C" data-to="D">
+    <path class="edge-line" d="M555,121.52243589743588 Q605.0462113273788,125.38580890353315 647.8876736117918,151.54222357646046" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  <g class="edge edge-arrow" id="edge-D-E-0" data-from="D" data-to="E">
+    <path class="edge-line" d="M754.5,173.38028169014083 Q797.1977947455906,166.1668035755671 838.5185883000914,179.11778665301523" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  <g class="edge edge-arrow" id="edge-E-F-0" data-from="E" data-to="F">
+    <path class="edge-line" d="M954,179.66282543747334 Q996.6977947455907,186.87630355204712 1038.0185883000916,173.92532047459895" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  <g class="edge edge-arrow" id="edge-A-D-0" data-from="A" data-to="D">
+    <path class="edge-line" d="M147.5,181.17608836907084 C171.79166666666666,186.22698722113927 235,211.21453324669702 293.25,211.4814814814815 C351.5,211.74842971626597 437.95582453568414,189.10279241486032 497,182.77777777777777 C556.0441754643158,176.45276314069523 622.4292106549125,175.07245767878476 647.515052785895,173.53139365898616" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="460.6" y="172.77777777777777" width="72.8" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="497" y="182.77777777777777" text-anchor="middle" dominant-baseline="central">fast path</text>
+  </g>
+  <g class="edge edge-arrow" id="edge-A-F-0" data-from="A" data-to="F">
+    <path class="edge-line" d="M134.80564024390242,195 C161.21303353658536,211.08024691358025 232.88427337398375,266.8518518518519 293.25,291.4814814814815 C353.6157266260163,316.11111111111114 428.375,336.358024691358 497,342.77777777777777 C565.625,349.1975308641975 637.7916666666666,343.24074074074076 705,330 C772.2083333333334,316.75925925925924 844.6196252261832,285.48130021909583 900.25,263.33333333333337 C955.8803747738168,241.18536644757089 1015.6935405357507,208.14905446007648 1038.7822486429009,197.1121986854251" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="675.8" y="320" width="58.4" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="705" y="330" text-anchor="middle" dominant-baseline="central">express</text>
+  </g>
+  <g class="edge edge-arrow" id="edge-B-E-0" data-from="B" data-to="E">
+    <path class="edge-line" d="M332.0458392101551,156.4814814814815 C359.5381993417959,174.19753086419755 434.8409732016925,247.19135802469134 497,262.77777777777777 C559.1590267983074,278.3641975308642 648.0118078415544,259.7511492170915 705,250 C761.9881921584456,240.2488507829085 816.607627458895,211.8924020626906 838.9291529506739,204.27088247522872" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="679.4" y="240" width="51.199999999999996" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="705" y="250" text-anchor="middle" dominant-baseline="central">bypass</text>
+  </g>
+  <g class="edge edge-arrow" id="edge-C-F-0" data-from="C" data-to="F">
+    <path class="edge-line" d="M555,85.27243589743588 C580,77.72702991452991 647.4583333333334,45.323183760683754 705,40 C762.5416666666666,34.676816239316246 843.2844529585437,36.517243196170696 900.25,53.33333333333334 C957.2155470414563,70.14942347049599 1022.3694018739478,126.30267290803543 1046.7932822487373,140.89654082297585" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="867.45" y="43.33333333333334" width="65.6" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="900.25" y="53.33333333333334" text-anchor="middle" dominant-baseline="central">shortcut</text>
+  </g>
+  <g class="node node-rect" id="node-A">
+    <rect class="node-shape" x="40" y="145" width="107.5" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="93.75" y="170" text-anchor="middle" dominant-baseline="central">Ingress</text>
+  </g>
+  <g class="node node-rect" id="node-B">
+    <rect class="node-shape" x="248" y="106.4814814814815" width="90.5" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="293.25" y="131.4814814814815" text-anchor="middle" dominant-baseline="central">Parse</text>
+  </g>
+  <g class="node node-rect" id="node-C">
+    <rect class="node-shape" x="439" y="77.77777777777777" width="116" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="497" y="102.77777777777777" text-anchor="middle" dominant-baseline="central">Validate</text>
+  </g>
+  <g class="node node-rect" id="node-D">
+    <rect class="node-shape" x="655.5" y="145" width="99" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="705" y="170" text-anchor="middle" dominant-baseline="central">Enrich</text>
+  </g>
+  <g class="node node-rect" id="node-E">
+    <rect class="node-shape" x="846.5" y="158.33333333333334" width="107.5" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="900.25" y="183.33333333333334" text-anchor="middle" dominant-baseline="central">Persist</text>
+  </g>
+  <g class="node node-rect" id="node-F">
+    <rect class="node-shape" x="1046" y="145" width="99" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="1095.5" y="170" text-anchor="middle" dominant-baseline="central">Notify</text>
+  </g>
+</svg>

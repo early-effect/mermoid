@@ -1,5 +1,6 @@
 package mermoid.docs
 
+import mermoid.ascent.MermoidAscent
 import specular.*
 import specular.ziotest.DocSpecSuite
 import zio.test.*
@@ -19,6 +20,10 @@ libraryDependencies += "rocks.earlyeffect" %% "mermoid" % "<version>"
 
 // Scala.js (or a cross-built project)
 libraryDependencies += "rocks.earlyeffect" %%% "mermoid" % "<version>"
+
+// Optional: hybrid HTML + SVG for Specular / ascent apps
+libraryDependencies += "rocks.earlyeffect" %% "mermoid-ascent" % "<version>"
+libraryDependencies += "rocks.earlyeffect" %%% "mermoid-ascent" % "<version>"
 ```
 
 Pre-1.0 on early-semver: pin the exact version and read the release notes before bumping the minor.
@@ -30,7 +35,7 @@ Pre-1.0 on early-semver: pin the exact version and read the release notes before
 than swallow. `SvgRenderer.render` turns a `Diagram` into the SVG document.
 """,
       exampleValue {
-        import mermoid.*
+        import _root_.mermoid.*
 
         val source = """flowchart LR
                        |    A[Start] --> B{Ready?}
@@ -46,7 +51,7 @@ than swallow. `SvgRenderer.render` turns a `Diagram` into the SVG document.
 That same diagram, rendered:
 """,
       example {
-        MermoidUi.diagram("""flowchart LR
+        MermoidAscent.svgDiagram("""flowchart LR
                             |    A[Start] --> B{Ready?}
                             |    B -->|yes| C([Ship it])
                             |    B -->|no| A
@@ -58,7 +63,7 @@ That same diagram, rendered:
 On the JVM, the whole job is one `Files.writeString`:
 
 ```scala
-import mermoid.*
+import _root_.mermoid.*
 import java.nio.file.{Files, Path}
 
 def renderToFile(mmd: Path, svg: Path): Either[String, Unit] =
@@ -77,7 +82,7 @@ The same artifact cross-builds for Scala.js, so a Scala.js app can render a diag
 mermaid.js:
 
 ```scala
-import mermoid.*
+import _root_.mermoid.*
 import org.scalajs.dom
 
 MermaidParser.parse(source).foreach { d =>
@@ -102,10 +107,37 @@ RenderConfig(
   theme             = css.ThemeName.Default,    // Default | Dark | Forest | Neutral
   customStylesheet  = None,                     // merged over the theme
   resolveVariables  = true,                     // false keeps var(--mermoid-*) in the output
+  responsive        = ResponsiveConfig(),       // spacing compress, direction flip, scale-to-fit
 )
 ```
 
+Pass an optional `Viewport(maxWidth)` (and optionally `maxHeight`) to `SvgRenderer.render` / `DiagramLayout.scene` when
+you want the layout to fit a host width. Narrow viewports prefer vertical flow; wider ones prefer horizontal. Details
+live on [Interactive](interactive.html).
+
 See [Theming](theming.html) for themes and [Custom CSS](custom-css.html) for `customStylesheet` and `resolveVariables`.
+"""
+    ),
+    section("Layout without painting")(
+      md"""
+`DiagramLayout.scene` returns geometry, edge routes, notes, and click interactions without serializing SVG. Use it when
+you paint yourself (or when you only need metrics):
+
+```scala
+import _root_.mermoid.*
+
+val scene: Either[String, DiagramScene] =
+  MermaidParser.parse(source).map(d => DiagramLayout.scene(d, RenderConfig(), Some(Viewport(640))))
+```
+
+`mermoid-ascent` consumes the same scene for hybrid HTML + SVG; see [Interactive](interactive.html).
+"""
+    ),
+    section("Next steps")(
+      md"""
+- [Flowcharts](flowcharts.html): shapes, edges, subgraphs, styling, clicks
+- [State diagrams](state-diagrams.html): transitions, notes, `[*]`
+- [Interactive](interactive.html): hybrid HTML + SVG with reflow
 """
     ),
   )

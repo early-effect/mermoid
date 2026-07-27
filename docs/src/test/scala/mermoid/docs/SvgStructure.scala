@@ -1,5 +1,6 @@
 package mermoid.docs
 
+import mermoid.ascent.MermoidAscent
 import specular.*
 import specular.ziotest.DocSpecSuite
 import zio.test.*
@@ -31,12 +32,41 @@ they are stable and change only with a version bump.
 </svg>
 ```
 
-Paint order is subgraph frames, then edges, then nodes, then notes — so a node covers the edges arriving at it, not the
+Paint order is subgraph frames, then edges, then nodes, then notes, so a node covers the edges arriving at it, not the
 other way round. The `viewBox` always starts at `0 0` and matches `width`/`height`, so the SVG scales cleanly.
 """,
       example {
-        MermoidUi.diagram(sample)
+        MermoidAscent.svgDiagram(sample)
       },
+    ),
+    section("Clicks in the SVG")(
+      md"""
+Flowchart `click` lines (see [Flowcharts](flowcharts.html)) affect the node group:
+
+- tooltip → a child `<title>…</title>` (native SVG hover)
+- `href` → the node group is wrapped in `<a href="…" target="…">`
+
+Callback names are **not** written as attributes; hosts that need them read `DiagramScene.interactions` (or use
+[Interactive](interactive.html)). State diagrams have no `click` statement.
+""",
+      exampleValue {
+        import _root_.mermoid.*
+        MermaidParser
+          .parse("""flowchart LR
+                    |  A[a] --> B[b]
+                    |  click A callback "tip"
+                    |  click B href "https://example.com" "go" _blank
+                    |""".stripMargin)
+          .map(SvgRenderer.render(_))
+          .map(svg =>
+            (
+              svg.contains("<title>tip</title>"),
+              svg.contains("""href="https://example.com""""),
+              svg.contains("""target="_blank""""),
+              !svg.contains("data-callback"),
+            )
+          )
+      }.assert(r => assertTrue(r == Right((true, true, true, true)))),
     ),
     section("Wrapper groups")(
       md"""
@@ -55,7 +85,7 @@ insert a sibling. Use `as <name>` to pin an id you intend to select. Node and su
 source and never shift.
 """,
       exampleValue {
-        import mermoid.*
+        import _root_.mermoid.*
         MermaidParser
           .parse(sample)
           .map(SvgRenderer.render(_))
@@ -115,7 +145,7 @@ does not decode entities inside a raw-text element. If you map `Raw` into a fram
 CSS contains none of those characters — mermoid's generated CSS never does, and this site's bridge asserts it.
 """,
       exampleValue {
-        import mermoid.*
+        import _root_.mermoid.*
         def summarize(node: SvgNode, depth: Int = 0): List[String] = node match
           case SvgNode.Element(tag, attrs, children) =>
             val cls = attrs.collectFirst { case ("class", v) => s" class=$v" }.getOrElse("")

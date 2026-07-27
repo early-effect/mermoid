@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="347.875" height="678" viewBox="0 0 347.875 678">
+  <defs>
+    <marker id="arrowhead" markerWidth="12" markerHeight="10.2" refX="12" refY="5.1" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon class="arrowhead" points="0 0, 12 5.1, 0 10.2"/>
+    </marker>
+  </defs>
+  <style>
+:root {
+  --mermoid-background: #ffffff;
+  --mermoid-edge-label-bg: #ffffff;
+  --mermoid-font-family: sans-serif;
+  --mermoid-font-size: 14px;
+  --mermoid-line: #333;
+  --mermoid-main-bkg: #ECECFF;
+  --mermoid-node-border: #9370DB;
+  --mermoid-note-bg: #ffffcc;
+  --mermoid-note-border: #333333;
+  --mermoid-note-text: #333333;
+  --mermoid-primary: #1f77b4;
+  --mermoid-primary-border: #1a5a8a;
+  --mermoid-primary-text: #333;
+  --mermoid-secondary: #ffffde;
+  --mermoid-secondary-border: #aaaa33;
+  --mermoid-secondary-text: #333;
+  --mermoid-tertiary: #f4f4f4;
+  --mermoid-tertiary-border: #cccccc;
+  --mermoid-tertiary-text: #333;
+  --mermoid-text: #333;
+}
+.diagram-bg {
+  fill: #ffffff;
+  stroke: none;
+}
+.node-shape {
+  fill: #ECECFF;
+  stroke: #9370DB;
+  stroke-width: 2;
+}
+.node-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+.edge-line {
+  stroke: #333;
+  stroke-width: 2;
+}
+.edge-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.edge-label-bg {
+  fill: #ffffff;
+}
+.note-rect {
+  fill: #ffffcc;
+  stroke: #333333;
+  stroke-width: 1;
+  stroke-dasharray: 4,2;
+}
+.note-text {
+  fill: #333333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.note-connector {
+  stroke: #333333;
+  stroke-width: 1;
+  stroke-dasharray: 4,2;
+}
+.subgraph-rect {
+  fill: none;
+  stroke: #9370DB;
+  stroke-width: 1;
+  stroke-dasharray: 6,3;
+}
+.subgraph-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+.edge-thick .edge-line {
+  stroke-width: 3;
+}
+.edge-dotted .edge-line {
+  stroke-dasharray: 5,5;
+}
+.edge-dotted-open .edge-line {
+  stroke-dasharray: 5,5;
+}
+.arrowhead {
+  fill: #333;
+}
+.start-end .node-shape {
+  fill: #333;
+  stroke: #333;
+}
+</style>
+  <rect class="diagram-bg" x="0" y="0" width="347.875" height="678"/>
+  <g class="edge edge-arrow" id="edge-[*]-Idle-0" data-from="[*]" data-to="Idle">
+    <path class="edge-line" d="M87.375,88 L87.375,192" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  <g class="edge edge-arrow" id="edge-Idle-Active-0" data-from="Idle" data-to="Active">
+    <path class="edge-line" d="M87.78365384615384,250 Q97.01225234688518,285.85930142114626 88.9605943901331,322.0010685728476" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="66.37212411814346" y="276.0005342864238" width="44" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="88.37212411814346" y="286.0005342864238" text-anchor="middle" dominant-baseline="central">start</text>
+  </g>
+  <g class="edge edge-arrow" id="edge-Active-Idle-0" data-from="Active" data-to="Idle">
+    <path class="edge-line" d="M89.09134615384616,330 Q79.86274765311482,294.14069857885374 87.9144056098669,257.9989314271524" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="66.50287588185654" y="283.9994657135762" width="44" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="88.50287588185654" y="293.9994657135762" text-anchor="middle" dominant-baseline="central">pause</text>
+  </g>
+  <g class="edge edge-arrow" id="edge-Active-Done-0" data-from="Active" data-to="Done">
+    <path class="edge-line" d="M89.27163461538461,380 Q80.30274688795849,415.9212434291958 88.61393925907008,452.00033374390705" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="63.342786937227345" y="406.0001668719535" width="51.199999999999996" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="88.94278693722734" y="416.0001668719535" text-anchor="middle" dominant-baseline="central">finish</text>
+  </g>
+  <g class="edge edge-arrow" id="edge-Done-[*]-end-0" data-from="Done" data-to="[*]-end">
+    <path class="edge-line" d="M88.10775862068965,510 Q75.20182997030409,561.898060844475 87.25603008870867,614.0005365366255" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  <g class="node node-circle start-end" id="node-[*]">
+    <circle class="node-shape" cx="87.375" cy="80" r="8"/>
+  </g>
+  <g class="node node-round" id="node-Idle">
+    <rect class="node-shape" x="46.375" y="200" width="82" height="50" rx="15" ry="15"/>
+    <text class="node-label" x="87.375" y="225" text-anchor="middle" dominant-baseline="central">Idle</text>
+  </g>
+  <g class="node node-round" id="node-Active">
+    <rect class="node-shape" x="40" y="330" width="99" height="50" rx="15" ry="15"/>
+    <text class="node-label" x="89.5" y="355" text-anchor="middle" dominant-baseline="central">Active</text>
+  </g>
+  <g class="node node-round" id="node-Done">
+    <rect class="node-shape" x="47.3125" y="460" width="82" height="50" rx="15" ry="15"/>
+    <text class="node-label" x="88.3125" y="485" text-anchor="middle" dominant-baseline="central">Done</text>
+  </g>
+  <g class="node node-circle start-end" id="node-[*]-end">
+    <circle class="node-shape" cx="87.125" cy="630" r="8"/>
+  </g>
+  <g class="note" id="note-Idle-0">
+    <line class="note-connector" x1="128.375" y1="225" x2="143.375" y2="225"/>
+    <rect class="note-rect" x="143.375" y="211" width="164.5" height="28" rx="3" ry="3"/>
+    <text class="note-text" x="153.375" y="229" text-anchor="start" dominant-baseline="central">Waiting for input</text>
+  </g>
+</svg>

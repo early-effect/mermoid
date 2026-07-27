@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="332.5" height="390" viewBox="0 0 332.5 390">
+  <defs>
+    <marker id="arrowhead" markerWidth="12" markerHeight="10.2" refX="12" refY="5.1" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon class="arrowhead" points="0 0, 12 5.1, 0 10.2"/>
+    </marker>
+  </defs>
+  <style>
+:root {
+  --mermoid-background: #ffffff;
+  --mermoid-edge-label-bg: #ffffff;
+  --mermoid-font-family: sans-serif;
+  --mermoid-font-size: 14px;
+  --mermoid-line: #333;
+  --mermoid-main-bkg: #ECECFF;
+  --mermoid-node-border: #9370DB;
+  --mermoid-note-bg: #ffffcc;
+  --mermoid-note-border: #333333;
+  --mermoid-note-text: #333333;
+  --mermoid-primary: #1f77b4;
+  --mermoid-primary-border: #1a5a8a;
+  --mermoid-primary-text: #333;
+  --mermoid-secondary: #ffffde;
+  --mermoid-secondary-border: #aaaa33;
+  --mermoid-secondary-text: #333;
+  --mermoid-tertiary: #f4f4f4;
+  --mermoid-tertiary-border: #cccccc;
+  --mermoid-tertiary-text: #333;
+  --mermoid-text: #333;
+}
+.diagram-bg {
+  fill: #ffffff;
+  stroke: none;
+}
+.node-shape {
+  fill: #ECECFF;
+  stroke: #9370DB;
+  stroke-width: 2;
+}
+.node-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+.edge-line {
+  stroke: #333;
+  stroke-width: 2;
+}
+.edge-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.edge-label-bg {
+  fill: #ffffff;
+}
+.note-rect {
+  fill: #ffffcc;
+  stroke: #333333;
+  stroke-width: 1;
+  stroke-dasharray: 4,2;
+}
+.note-text {
+  fill: #333333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.note-connector {
+  stroke: #333333;
+  stroke-width: 1;
+  stroke-dasharray: 4,2;
+}
+.subgraph-rect {
+  fill: none;
+  stroke: #9370DB;
+  stroke-width: 1;
+  stroke-dasharray: 6,3;
+}
+.subgraph-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+.edge-thick .edge-line {
+  stroke-width: 3;
+}
+.edge-dotted .edge-line {
+  stroke-dasharray: 5,5;
+}
+.edge-dotted-open .edge-line {
+  stroke-dasharray: 5,5;
+}
+.arrowhead {
+  fill: #333;
+}
+.start-end .node-shape {
+  fill: #333;
+  stroke: #333;
+}
+</style>
+  <rect class="diagram-bg" x="0" y="0" width="332.5" height="390"/>
+  <g class="edge edge-arrow" id="edge-A-B-0" data-from="A" data-to="B">
+    <path class="edge-line" d="M148.13942307692307,90 Q115.92612767174835,121.00873089297598 101.2952476025273,163.26006389980694" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  <g class="edge edge-arrow" id="edge-A-C-0" data-from="A" data-to="C">
+    <path class="edge-line" d="M180.11057692307693,90 Q212.32387232825164,121.00873089297598 226.9547523974727,163.26006389980694" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  <g class="edge edge-arrow" id="edge-B-D-0" data-from="B" data-to="D">
+    <path class="edge-line" d="M96.98557692307692,220 Q129.19887232825164,251.00873089297596 143.8297523974727,293.26006389980694" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  <g class="edge edge-arrow" id="edge-C-D-0" data-from="C" data-to="D">
+    <path class="edge-line" d="M231.26442307692307,220 Q199.05112767174836,251.008730892976 184.4202476025273,293.26006389980694" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  <g class="node node-rect" id="node-A">
+    <rect class="node-shape" x="118.875" y="40" width="90.5" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="164.125" y="65" text-anchor="middle" dominant-baseline="central">Start</text>
+  </g>
+  <g class="node node-rect" id="node-B">
+    <rect class="node-shape" x="40" y="170" width="82" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="81" y="195" text-anchor="middle" dominant-baseline="central">Left</text>
+  </g>
+  <g class="node node-rect" id="node-C">
+    <rect class="node-shape" x="202" y="170" width="90.5" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="247.25" y="195" text-anchor="middle" dominant-baseline="central">Right</text>
+  </g>
+  <g class="node node-rect" id="node-D">
+    <rect class="node-shape" x="124.125" y="300" width="80" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="164.125" y="325" text-anchor="middle" dominant-baseline="central">End</text>
+  </g>
+</svg>
