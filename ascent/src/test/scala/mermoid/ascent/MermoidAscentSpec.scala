@@ -43,9 +43,9 @@ object MermoidAscentSpec extends ZIOSpecDefault:
     },
     test("interactive rebuilds at different widths") {
       for
-        ui    <- MermoidAscent.diagramInteractive(flow, initialWidth = 800, showWidthControls = true)
-        html  <- Html.render(ui)
-        // scene at narrow vs wide should differ in direction or spacing — check controls present
+        ui   <- MermoidAscent.diagramInteractive(flow, initialWidth = 800, showWidthControls = true)
+        html <- Html.render(ui)
+      // scene at narrow vs wide should differ in direction or spacing — check controls present
       yield assertTrue(
         html.contains("Narrow"),
         html.contains("Wide"),

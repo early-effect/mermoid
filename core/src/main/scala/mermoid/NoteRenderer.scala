@@ -94,16 +94,17 @@ object NoteRenderer:
         NoteBox(pushX, belowY, noteW, noteH),
       )
       candidates.find(clear).getOrElse(candidates.head)
+    end if
   end placeNote
 
   private def noteId(note: StateNote): String =
     note.alias.getOrElse(s"${note.stateId}-${note.noteIndex}")
 
   private def connector(node: LayoutNode, box: NoteBox): SvgNode =
-    val nx = node.center.x
-    val ny = node.center.y
-    val cx = box.x + box.w / 2
-    val cy = box.y + box.h / 2
+    val nx               = node.center.x
+    val ny               = node.center.y
+    val cx               = box.x + box.w / 2
+    val cy               = box.y + box.h / 2
     val (x1, y1, x2, y2) =
       if Math.abs(cx - nx) >= Math.abs(cy - ny) then
         if cx >= nx then (nx + node.width / 2, ny, box.x, cy)
@@ -127,16 +128,16 @@ object NoteRenderer:
       selfLoopBottomExtents: Map[String, Double] = Map.empty,
   ): Option[SvgNode] =
     nodeMap.get(note.stateId).map { node =>
-      val lc           = config.layout
-      val lines        = note.text.split("\n")
-      val (noteW, noteH) = noteSize(config, note)
-      val box          = placeNote(config, note, node, nodeMap.values, selfLoopBottomExtents)
+      val lc                  = config.layout
+      val lines               = note.text.split("\n")
+      val (noteW, noteH)      = noteSize(config, note)
+      val box                 = placeNote(config, note, node, nodeMap.values, selfLoopBottomExtents)
       val (textAnchor, textX) = note.textAlign match
         case NoteTextAlign.Center => ("middle", box.x + noteW / 2)
         case NoteTextAlign.Right  => ("end", box.right - 10)
         case NoteTextAlign.Left   => ("start", box.x + 10)
       val lineHeight = lc.edgeLabelFontSize + 4
-      val rect = leaf("rect")(
+      val rect       = leaf("rect")(
         "class"  -> "note-rect",
         "x"      -> box.x.f,
         "y"      -> box.y.f,

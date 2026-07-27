@@ -106,12 +106,12 @@ object DiagramLayoutSpec extends ZIOSpecDefault:
           |    Waiting for input
           |  end note
           |""".stripMargin
-      val scene = DiagramLayout.scene(parse(src), viewport = Some(Viewport(900)))
-      val idle  = scene.nodeMap("Idle")
+      val scene  = DiagramLayout.scene(parse(src), viewport = Some(Viewport(900)))
+      val idle   = scene.nodeMap("Idle")
       val active = scene.nodeMap("Active")
-      val note  = scene.notes.head
-      val box   = NoteRenderer.placeNote(scene.config, note, idle, scene.visibleNodes)
-      val gap   = 10.0
+      val note   = scene.notes.head
+      val box    = NoteRenderer.placeNote(scene.config, note, idle, scene.visibleNodes)
+      val gap    = 10.0
       assertTrue(
         scene.direction == Direction.LR,
         !box.overlaps(active, gap),

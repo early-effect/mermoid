@@ -41,8 +41,8 @@ object MermoidAscent:
   /** Interactive diagram: selection + viewport-driven re-layout.
     *
     * Width starts at `initialWidth`. Use the built-in Narrow/Wide controls (and optional external [[width]] source) to
-    * reflow; edges/splines are recomputed from a fresh [[DiagramScene]] on every width change. Selection id is preserved
-    * across reflow.
+    * reflow; edges/splines are recomputed from a fresh [[DiagramScene]] on every width change. Selection id is
+    * preserved across reflow.
     */
   def diagramInteractive(
       mmd: String,
@@ -55,6 +55,7 @@ object MermoidAscent:
       selected <- sq(Option.empty[String])
       width    <- sq(initialWidth)
     yield interactiveRoot(d, config, selected, width, showWidthControls)
+  end diagramInteractive
 
   /** Same as [[diagramInteractive]] but accepts an external width source (e.g. host ResizeObserver). */
   def diagramResponsive(

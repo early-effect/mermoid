@@ -5,8 +5,8 @@ object CrossingMinimizer:
 
   /** Reorder nodes within each layer to reduce edge crossings.
     *
-    * Alternating forward/backward sweeps place each node at the median (here: mean barycenter) of its
-    * neighbors in the adjacent layer, then break ties by prior order. Runs `iterations` full round-trips.
+    * Alternating forward/backward sweeps place each node at the median (here: mean barycenter) of its neighbors in the
+    * adjacent layer, then break ties by prior order. Runs `iterations` full round-trips.
     */
   private[mermoid] def orderLayers(
       layers: List[List[String]],
@@ -55,6 +55,7 @@ object CrossingMinimizer:
         val pos  = next.zipWithIndex.toMap
         sortByBarycenter(layer, pos, adj) :: acc
     }
+  end sweepBackward
 
   /** Stable sort by mean neighbor position; nodes with no neighbors keep relative order via index. */
   private def sortByBarycenter(

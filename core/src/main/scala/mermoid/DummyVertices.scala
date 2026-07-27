@@ -32,13 +32,14 @@ object DummyVertices:
         val withNodes = dummyIds.zip(midLayers).foldLeft(acc) { case (a, (id, layerIdx)) =>
           if a.dummies.contains(id) then a
           else
-            val stub   = NodeDef(id, Some(""), NodeShape.Rect)
+            val stub    = NodeDef(id, Some(""), NodeShape.Rect)
             val updated = a.layers.zipWithIndex.map { case (layer, i) =>
               if i == layerIdx && !layer.contains(id) then layer :+ id else layer
             }
             a.copy(layers = updated, dummies = a.dummies.updated(id, stub))
         }
         withNodes.copy(routes = withNodes.routes.updated((edge.from, edge.to), dummyIds))
+      end if
     }
   end expand
 

@@ -399,7 +399,7 @@ object ParserSpec extends ZIOSpecDefault:
             |  click A callback "Tip A"
             |""".stripMargin
         MermaidParser.parse(input) match
-          case Left(err) => assertTrue(err.isEmpty)
+          case Left(err)                          => assertTrue(err.isEmpty)
           case Right(Diagram.Flowchart(_, stmts)) =>
             val click = stmts.collect { case FlowStatement.ClickSt(b) => b }.head
             assertTrue(
@@ -408,6 +408,7 @@ object ParserSpec extends ZIOSpecDefault:
               click.tooltip.contains("Tip A"),
             )
           case Right(other) => assertTrue(other.isInstanceOf[Diagram.Flowchart])
+        end match
       },
       test("parses call callback() form") {
         val input =

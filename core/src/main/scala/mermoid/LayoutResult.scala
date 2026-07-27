@@ -6,7 +6,7 @@ case class LayoutResult(
     /** Intermediate waypoint centers for each (from, to) pair, ordered from source toward target. */
     routes: Map[(String, String), List[Point]],
 ):
-  def visibleNodes: List[LayoutNode]               = nodes.filter(!_.dummy)
-  def nodeMap: Map[String, LayoutNode]             = nodes.map(n => n.id -> n).toMap
-  def visibleNodeMap: Map[String, LayoutNode]      = visibleNodes.map(n => n.id -> n).toMap
+  def visibleNodes: List[LayoutNode]          = nodes.filter(!_.dummy)
+  def nodeMap: Map[String, LayoutNode]        = nodes.map(n => n.id -> n).toMap
+  def visibleNodeMap: Map[String, LayoutNode] = visibleNodes.map(n => n.id -> n).toMap
 end LayoutResult

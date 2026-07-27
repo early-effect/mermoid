@@ -21,8 +21,8 @@ object LayoutMetrics:
 
   /** Count crossings among straight segments between consecutive layers.
     *
-    * `pos` maps node id → cross-axis position within its layer. Only edges whose endpoints both appear in
-    * `pos` are considered. Two edges (a→b) and (c→d) cross when the relative order of a,c differs from b,d.
+    * `pos` maps node id → cross-axis position within its layer. Only edges whose endpoints both appear in `pos` are
+    * considered. Two edges (a→b) and (c→d) cross when the relative order of a,c differs from b,d.
     */
   private[mermoid] def countLayerCrossings(
       upper: List[String],
@@ -50,7 +50,7 @@ object LayoutMetrics:
 
   /** Geometric edge-edge crossings from laid-out centers (straight center-to-center segments). */
   def edgeCrossings(nodes: List[LayoutNode], edges: List[Edge]): Int =
-    val pos = nodes.filter(!_.dummy).map(n => n.id -> n.center).toMap
+    val pos  = nodes.filter(!_.dummy).map(n => n.id -> n.center).toMap
     val segs = edges
       .filter(e => e.from != e.to)
       .flatMap(e => pos.get(e.from).zip(pos.get(e.to)).map((a, b) => (e.from, e.to, a, b)))
