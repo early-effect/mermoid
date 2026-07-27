@@ -27,6 +27,10 @@
   --mermoid-tertiary-text: #333;
   --mermoid-text: #333;
 }
+.diagram-bg {
+  fill: #ffffff;
+  stroke: none;
+}
 .node-shape {
   fill: #ECECFF;
   stroke: #9370DB;
@@ -93,6 +97,7 @@
   stroke: #333;
 }
 </style>
+  <rect class="diagram-bg" x="0" y="0" width="344.5" height="220.99175824422912"/>
   <g class="edge edge-arrow" id="edge-A-B-0" data-from="A" data-to="B">
     <path class="edge-line" d="M139,99.11656877728697 C145.2918491347047,90.93047398107248 164.16739653881888,49.705522925762324 176.75109480822832,50 C189.33479307763776,50.294477074237676 208.21034048175193,92.40285935226086 214.50218961645663,100.88343122271304" fill="none" marker-end="url(#arrowhead)"/>
     <rect class="edge-label-bg" x="154.75109480822832" y="40" width="44" height="20" rx="3" ry="3"/>
