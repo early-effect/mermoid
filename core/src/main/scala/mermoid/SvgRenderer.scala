@@ -115,7 +115,7 @@ object SvgRenderer:
       ShapeRenderer.nodeToSvg(
         n,
         config,
-        includeLabel = n.id != "[*]",
+        includeLabel = !n.cssClasses.contains("start-end"),
         interaction = interaction,
       )
     }

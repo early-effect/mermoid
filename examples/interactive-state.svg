@@ -1,7 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="350" height="518" viewBox="0 0 350 518">
+<svg xmlns="http://www.w3.org/2000/svg" width="347.875" height="678" viewBox="0 0 347.875 678">
   <defs>
-    <marker id="arrowhead" markerWidth="8" markerHeight="6.8" refX="8" refY="3.4" orient="auto" markerUnits="userSpaceOnUse">
-      <polygon class="arrowhead" points="0 0, 8 3.4, 0 6.8"/>
+    <marker id="arrowhead" markerWidth="12" markerHeight="10.2" refX="12" refY="5.1" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon class="arrowhead" points="0 0, 12 5.1, 0 10.2"/>
     </marker>
   </defs>
   <style>
@@ -94,44 +94,47 @@
 }
 </style>
   <g class="edge edge-arrow" id="edge-[*]-Idle-0" data-from="[*]" data-to="Idle">
-    <path class="edge-line" d="M93.9387308581982,463.3443506426135 C112.09477571516517,436.1202922021779 182.03145514303304,348.89072510710224 202.875,300 C223.71854485696696,251.10927489289776 232.60159329470054,204.87403960831577 219,170 C205.39840670529946,135.12596039168423 137.55453352649727,103.96313529175455 121.26544023179673,90.75576235010546" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M87.375,88 L87.375,192" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="edge edge-arrow" id="edge-Idle-Active-0" data-from="Idle" data-to="Active">
-    <path class="edge-line" d="M89.5,90 L89.5,168.8" fill="none" marker-end="url(#arrowhead)"/>
-    <rect class="edge-label-bg" x="67.5" y="119.4" width="44" height="20" rx="3" ry="3"/>
-    <text class="edge-label" x="89.5" y="129.4" text-anchor="middle" dominant-baseline="central">start</text>
+    <path class="edge-line" d="M87.78365384615384,250 Q97.01225234688518,285.85930142114626 88.9605943901331,322.0010685728476" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="66.37212411814346" y="276.0005342864238" width="44" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="88.37212411814346" y="286.0005342864238" text-anchor="middle" dominant-baseline="central">start</text>
   </g>
   <g class="edge edge-arrow" id="edge-Active-Idle-0" data-from="Active" data-to="Idle">
-    <path class="edge-line" d="M89.5,170 L89.5,91.2" fill="none" marker-end="url(#arrowhead)"/>
-    <rect class="edge-label-bg" x="67.5" y="120.6" width="44" height="20" rx="3" ry="3"/>
-    <text class="edge-label" x="89.5" y="130.6" text-anchor="middle" dominant-baseline="central">pause</text>
+    <path class="edge-line" d="M89.09134615384616,330 Q79.86274765311482,294.14069857885374 87.9144056098669,257.9989314271524" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="66.50287588185654" y="283.9994657135762" width="44" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="88.50287588185654" y="293.9994657135762" text-anchor="middle" dominant-baseline="central">pause</text>
   </g>
   <g class="edge edge-arrow" id="edge-Active-Done-0" data-from="Active" data-to="Done">
-    <path class="edge-line" d="M88.03365384615384,220 Q76.2663848654405,258.8463841663369 83.41161000955685,298.802058853457" fill="none" marker-end="url(#arrowhead)"/>
-    <rect class="edge-label-bg" x="60.12263192785535" y="249.40102942672854" width="51.199999999999996" height="20" rx="3" ry="3"/>
-    <text class="edge-label" x="85.72263192785535" y="259.40102942672854" text-anchor="middle" dominant-baseline="central">finish</text>
+    <path class="edge-line" d="M89.27163461538461,380 Q80.30274688795849,415.9212434291958 88.61393925907008,452.00033374390705" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="63.342786937227345" y="406.0001668719535" width="51.199999999999996" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="88.94278693722734" y="416.0001668719535" text-anchor="middle" dominant-baseline="central">finish</text>
   </g>
-  <g class="edge edge-arrow" id="edge-Done-[*]-0" data-from="Done" data-to="[*]">
-    <path class="edge-line" d="M83.1896551724138,350 Q99.40078809389016,404.70708073937 89.01687443116488,460.81269410084013" fill="none" marker-end="url(#arrowhead)"/>
-  </g>
-  <g class="node node-round" id="node-Idle">
-    <rect class="node-shape" x="48.5" y="40" width="82" height="50" rx="15" ry="15"/>
-    <text class="node-label" x="89.5" y="65" text-anchor="middle" dominant-baseline="central">Idle</text>
-  </g>
-  <g class="node node-round" id="node-Active">
-    <rect class="node-shape" x="40" y="170" width="99" height="50" rx="15" ry="15"/>
-    <text class="node-label" x="89.5" y="195" text-anchor="middle" dominant-baseline="central">Active</text>
-  </g>
-  <g class="node node-round" id="node-Done">
-    <rect class="node-shape" x="40.875" y="300" width="82" height="50" rx="15" ry="15"/>
-    <text class="node-label" x="81.875" y="325" text-anchor="middle" dominant-baseline="central">Done</text>
+  <g class="edge edge-arrow" id="edge-Done-[*]-end-0" data-from="Done" data-to="[*]-end">
+    <path class="edge-line" d="M88.10775862068965,510 Q75.20182997030409,561.898060844475 87.25603008870867,614.0005365366255" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="node node-circle start-end" id="node-[*]">
-    <circle class="node-shape" cx="89.5" cy="470" r="8"/>
+    <circle class="node-shape" cx="87.375" cy="80" r="8"/>
+  </g>
+  <g class="node node-round" id="node-Idle">
+    <rect class="node-shape" x="46.375" y="200" width="82" height="50" rx="15" ry="15"/>
+    <text class="node-label" x="87.375" y="225" text-anchor="middle" dominant-baseline="central">Idle</text>
+  </g>
+  <g class="node node-round" id="node-Active">
+    <rect class="node-shape" x="40" y="330" width="99" height="50" rx="15" ry="15"/>
+    <text class="node-label" x="89.5" y="355" text-anchor="middle" dominant-baseline="central">Active</text>
+  </g>
+  <g class="node node-round" id="node-Done">
+    <rect class="node-shape" x="47.3125" y="460" width="82" height="50" rx="15" ry="15"/>
+    <text class="node-label" x="88.3125" y="485" text-anchor="middle" dominant-baseline="central">Done</text>
+  </g>
+  <g class="node node-circle start-end" id="node-[*]-end">
+    <circle class="node-shape" cx="87.125" cy="630" r="8"/>
   </g>
   <g class="note" id="note-Idle-0">
-    <line class="note-connector" x1="130.5" y1="65" x2="145.5" y2="65"/>
-    <rect class="note-rect" x="145.5" y="51" width="164.5" height="28" rx="3" ry="3"/>
-    <text class="note-text" x="155.5" y="69" text-anchor="start" dominant-baseline="central">Waiting for input</text>
+    <line class="note-connector" x1="128.375" y1="225" x2="143.375" y2="225"/>
+    <rect class="note-rect" x="143.375" y="211" width="164.5" height="28" rx="3" ry="3"/>
+    <text class="note-text" x="153.375" y="229" text-anchor="start" dominant-baseline="central">Waiting for input</text>
   </g>
 </svg>

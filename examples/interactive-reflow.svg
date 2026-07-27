@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="974.5" height="234.21875" viewBox="0 0 974.5 234.21875">
   <defs>
-    <marker id="arrowhead" markerWidth="8" markerHeight="6.8" refX="8" refY="3.4" orient="auto" markerUnits="userSpaceOnUse">
-      <polygon class="arrowhead" points="0 0, 8 3.4, 0 6.8"/>
+    <marker id="arrowhead" markerWidth="12" markerHeight="10.2" refX="12" refY="5.1" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon class="arrowhead" points="0 0, 12 5.1, 0 10.2"/>
     </marker>
   </defs>
   <style>
@@ -94,22 +94,22 @@
 }
 </style>
   <g class="edge edge-arrow" id="edge-A-B-0" data-from="A" data-to="B">
-    <path class="edge-line" d="M120,90 L198.8,90" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M120,90 L192,90" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="edge edge-arrow" id="edge-B-C-0" data-from="B" data-to="C">
-    <path class="edge-line" d="M280,95.8623298033283 Q320.79241964562885,92.18013206944117 358.81268362662973,107.41297840594517" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M280,95.8623298033283 Q317.3100291049995,92.49447602522044 352.08455751086495,106.42691604972018" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="edge edge-arrow" id="edge-C-D-0" data-from="C" data-to="D">
-    <path class="edge-line" d="M450.5,114.00610902255639 Q489.9444427224672,123.27696020542993 529.3000132495403,113.6358082084138" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M450.5,114.00610902255639 Q486.540645718704,122.47694648231487 522.5000883302687,113.66776274280889" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="edge edge-arrow" id="edge-D-E-0" data-from="D" data-to="E">
-    <path class="edge-line" d="M612.5,107.50578703703704 Q653.2744526743486,111.26214489191327 691.3123649007545,96.10353517060844" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M612.5,107.50578703703704 Q649.7926474586209,110.94138261275518 684.5824326716968,97.0771943472661" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="edge edge-arrow" id="edge-E-F-0" data-from="E" data-to="F">
-    <path class="edge-line" d="M774.5,90 L853.3,90" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M774.5,90 L846.5,90" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="edge edge-dotted" id="edge-A-F-0" data-from="A" data-to="F">
-    <path class="edge-line" d="M120,110 C140,120 192.45833333333334,155.96354166666666 240,170 C287.5416666666667,184.03645833333334 350,190.3125 405.25,194.21875 C460.5,198.125 516.7916666666666,197.47395833333334 571.5,193.4375 C626.2083333333334,189.40104166666666 686.5124407117052,183.83795647865583 733.5,170 C780.4875592882948,156.16204352134417 833.4377964414743,120.34146760672084 853.4253557297692,110.40976112806501" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M120,110 C140,120 192.45833333333334,155.96354166666666 240,170 C287.5416666666667,184.03645833333334 350,190.3125 405.25,194.21875 C460.5,198.125 516.7916666666666,197.47395833333334 571.5,193.4375 C626.2083333333334,189.40104166666666 687.5273825224788,183.3336375664702 733.5,170 C779.4726174775212,156.6663624335298 828.3630873876064,122.86306216764899 847.3357048651277,113.43567460117879" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="node node-rect" id="node-A">
     <rect class="node-shape" x="40" y="65" width="80" height="50" rx="0" ry="0"/>
