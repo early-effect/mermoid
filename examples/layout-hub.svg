@@ -1,0 +1,172 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1342" height="326" viewBox="0 0 1342 326">
+  <defs>
+    <marker id="arrowhead" markerWidth="8" markerHeight="6.8" refX="8" refY="3.4" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon class="arrowhead" points="0 0, 8 3.4, 0 6.8"/>
+    </marker>
+  </defs>
+  <style>
+:root {
+  --mermoid-background: #ffffff;
+  --mermoid-edge-label-bg: #ffffff;
+  --mermoid-font-family: sans-serif;
+  --mermoid-font-size: 14px;
+  --mermoid-line: #333;
+  --mermoid-main-bkg: #ECECFF;
+  --mermoid-node-border: #9370DB;
+  --mermoid-note-bg: #ffffcc;
+  --mermoid-note-border: #333333;
+  --mermoid-note-text: #333333;
+  --mermoid-primary: #1f77b4;
+  --mermoid-primary-border: #1a5a8a;
+  --mermoid-primary-text: #333;
+  --mermoid-secondary: #ffffde;
+  --mermoid-secondary-border: #aaaa33;
+  --mermoid-secondary-text: #333;
+  --mermoid-tertiary: #f4f4f4;
+  --mermoid-tertiary-border: #cccccc;
+  --mermoid-tertiary-text: #333;
+  --mermoid-text: #333;
+}
+.node-shape {
+  fill: #ECECFF;
+  stroke: #9370DB;
+  stroke-width: 2;
+}
+.node-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+.edge-line {
+  stroke: #333;
+  stroke-width: 2;
+}
+.edge-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.edge-label-bg {
+  fill: #ffffff;
+}
+.note-rect {
+  fill: #ffffcc;
+  stroke: #333333;
+  stroke-width: 1;
+  stroke-dasharray: 4,2;
+}
+.note-text {
+  fill: #333333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.note-connector {
+  stroke: #333333;
+  stroke-width: 1;
+  stroke-dasharray: 4,2;
+}
+.subgraph-rect {
+  fill: none;
+  stroke: #9370DB;
+  stroke-width: 1;
+  stroke-dasharray: 6,3;
+}
+.subgraph-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+.edge-thick .edge-line {
+  stroke-width: 3;
+}
+.edge-dotted .edge-line {
+  stroke-dasharray: 5,5;
+}
+.edge-dotted-open .edge-line {
+  stroke-dasharray: 5,5;
+}
+.arrowhead {
+  fill: #333;
+}
+.start-end .node-shape {
+  fill: #333;
+  stroke: #333;
+}
+</style>
+  <g class="edge edge-arrow" id="edge-Hub-N-0" data-from="Hub" data-to="N">
+    <path class="edge-line" d="M616.3329496253377,93.46080666500559 Q447.40499656928546,128.34292520982524 294.63001151123984,208.4255042042396" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="447.8814805682888" y="140.94315543462258" width="15.2" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="455.4814805682888" y="150.94315543462258" text-anchor="middle" dominant-baseline="central">N</text>
+  </g>
+  <g class="edge edge-arrow" id="edge-Hub-NE-0" data-from="Hub" data-to="NE">
+    <path class="edge-line" d="M691.7314335403436,93.27926665861608 Q866.2673052622362,129.26274925376632 1024.8680569937897,210.5239520973289" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="847.0997452670665" y="141.90160937797248" width="22.4" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="858.2997452670666" y="151.90160937797248" text-anchor="middle" dominant-baseline="central">NE</text>
+  </g>
+  <g class="edge edge-arrow" id="edge-Hub-E-0" data-from="Hub" data-to="E">
+    <path class="edge-line" d="M615.2264090643758,89.82896973018445 Q363.7974265581116,128.80621743608663 124.16320772806873,214.31177426473783" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="362.0948083962223" y="142.07037199746114" width="15.2" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="369.6948083962223" y="152.07037199746114" text-anchor="middle" dominant-baseline="central">E</text>
+  </g>
+  <g class="edge edge-arrow" id="edge-Hub-SE-0" data-from="Hub" data-to="SE">
+    <path class="edge-line" d="M634.5845226163161,114.97197789607648 Q601.1956851092822,151.36667952559972 587.9617746663381,198.9508406631177" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="600.0731486413271" y="146.9614092795971" width="22.4" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="611.2731486413271" y="156.9614092795971" text-anchor="middle" dominant-baseline="central">SE</text>
+  </g>
+  <g class="edge edge-arrow" id="edge-Hub-S-0" data-from="Hub" data-to="S">
+    <path class="edge-line" d="M688.4863473778436,100.26553341352509 Q784.7245068242045,129.58646865525424 857.1723061303888,199.39203399759424" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="765.2293267541162" y="139.82878370555966" width="15.2" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="772.8293267541162" y="149.82878370555966" text-anchor="middle" dominant-baseline="central">S</text>
+  </g>
+  <g class="edge edge-arrow" id="edge-Hub-SW-0" data-from="Hub" data-to="SW">
+    <path class="edge-line" d="M619.7443486432169,100.65309541261355 Q525.1827025789302,130.6325377246039 454.52766954070347,200.26398302119748" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="525.9360090919602" y="140.4585392169055" width="22.4" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="537.1360090919602" y="150.4585392169055" text-anchor="middle" dominant-baseline="central">SW</text>
+  </g>
+  <g class="edge edge-arrow" id="edge-Hub-W-0" data-from="Hub" data-to="W">
+    <path class="edge-line" d="M673.4154773836839,114.97197789607648 Q706.8043148907178,151.36667952559972 720.0382253336619,198.9508406631177" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="689.1268513586729" y="146.9614092795971" width="15.2" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="696.7268513586729" y="156.9614092795971" text-anchor="middle" dominant-baseline="central">W</text>
+  </g>
+  <g class="edge edge-arrow" id="edge-Hub-NW-0" data-from="Hub" data-to="NW">
+    <path class="edge-line" d="M692.7735909356242,89.82896973018445 Q944.7025734418884,128.9329656878349 1184.8367922719312,214.56527076823434" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="927.6051916037777" y="142.1971202492094" width="22.4" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="938.8051916037778" y="152.1971202492094" text-anchor="middle" dominant-baseline="central">NW</text>
+  </g>
+  <g class="node node-circle" id="node-Hub">
+    <circle class="node-shape" cx="654" cy="80" r="40"/>
+    <text class="node-label" x="654" y="80" text-anchor="middle" dominant-baseline="central">Hub</text>
+  </g>
+  <g class="node node-rect" id="node-E">
+    <rect class="node-shape" x="41" y="200" width="82" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="82" y="225" text-anchor="middle" dominant-baseline="central">East</text>
+  </g>
+  <g class="node node-rect" id="node-N">
+    <rect class="node-shape" x="203" y="200" width="90.5" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="248.25" y="225" text-anchor="middle" dominant-baseline="central">North</text>
+  </g>
+  <g class="node node-rect" id="node-SW">
+    <rect class="node-shape" x="373.5" y="200" width="80" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="413.5" y="225" text-anchor="middle" dominant-baseline="central">SW</text>
+  </g>
+  <g class="node node-rect" id="node-SE">
+    <rect class="node-shape" x="533.5" y="200" width="80" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="573.5" y="225" text-anchor="middle" dominant-baseline="central">SE</text>
+  </g>
+  <g class="node node-rect" id="node-W">
+    <rect class="node-shape" x="693.5" y="200" width="82" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="734.5" y="225" text-anchor="middle" dominant-baseline="central">West</text>
+  </g>
+  <g class="node node-rect" id="node-S">
+    <rect class="node-shape" x="855.5" y="200" width="90.5" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="900.75" y="225" text-anchor="middle" dominant-baseline="central">South</text>
+  </g>
+  <g class="node node-rect" id="node-NE">
+    <rect class="node-shape" x="1026" y="200" width="80" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="1066" y="225" text-anchor="middle" dominant-baseline="central">NE</text>
+  </g>
+  <g class="node node-rect" id="node-NW">
+    <rect class="node-shape" x="1186" y="200" width="80" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="1226" y="225" text-anchor="middle" dominant-baseline="central">NW</text>
+  </g>
+</svg>

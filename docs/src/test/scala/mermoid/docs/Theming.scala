@@ -1,5 +1,6 @@
 package mermoid.docs
 
+import mermoid.ascent.MermoidAscent
 import _root_.mermoid.RenderConfig
 import _root_.mermoid.css.{CssValue, ThemeName}
 import specular.*
@@ -16,7 +17,7 @@ object Theming extends DocSpecSuite:
       |    B -.->|cold| D[[Compute]]
       |""".stripMargin
 
-  private def themed(theme: ThemeName) = MermoidUi.diagram(sample, RenderConfig(theme = theme))
+  private def themed(theme: ThemeName) = MermoidAscent.svgDiagram(sample, RenderConfig(theme = theme))
 
   def doc = page("Theming")(
     md"""
@@ -112,7 +113,7 @@ built yourself, and a whole stylesheet can be merged over any theme — see [Cus
         val mine = Theme.colors(ThemeName.Neutral).copy(nodeBorder = "#d97706", lineColor = "#92400e")
         // Theme.toStylesheet(ThemeColors) is the whole extension point: a palette in, a stylesheet out,
         // merged over the chosen theme by customStylesheet.
-        MermoidUi.diagram(
+        MermoidAscent.svgDiagram(
           sample,
           RenderConfig(theme = ThemeName.Neutral, customStylesheet = Some(Theme.toStylesheet(mine))),
         )

@@ -116,7 +116,7 @@ object SvgRendererSpec extends ZIOSpecDefault:
           "B" -> NodeDef("B", Some("End"), NodeShape.Rect),
         )
         val edges = List(Edge("A", "B", EdgeStyle.Arrow, None))
-        val laid  = Layout.layout(config.layout, Direction.TB, nodes, edges)
+        val laid  = Layout.layout(config.layout, Direction.TB, nodes, edges).visibleNodes
         assertTrue(
           laid.size == 2,
           laid.find(_.id == "A").get.center.y < laid
@@ -133,7 +133,7 @@ object SvgRendererSpec extends ZIOSpecDefault:
           "B" -> NodeDef("B", None, NodeShape.Rect),
         )
         val edges = List(Edge("A", "B", EdgeStyle.Arrow, None))
-        val laid  = Layout.layout(config.layout, Direction.LR, nodes, edges)
+        val laid  = Layout.layout(config.layout, Direction.LR, nodes, edges).visibleNodes
         assertTrue(
           laid
             .find(_.id == "A")
@@ -187,7 +187,8 @@ object SvgRendererSpec extends ZIOSpecDefault:
           svg.startsWith("<svg"),
           svg.endsWith("</svg>"),
           svg.contains("arrowhead"),
-          svg.contains("<line"),
+          svg.contains("<path"),
+          svg.contains("edge-line"),
           svg.contains("<rect"),
           svg.contains("<text"),
         )

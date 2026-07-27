@@ -1,5 +1,6 @@
 package mermoid.docs
 
+import mermoid.ascent.MermoidAscent
 import specular.*
 import specular.ziotest.DocSpecSuite
 import zio.test.*
@@ -18,13 +19,13 @@ Five directions: `TB` (top-to-bottom), `TD` (a synonym for `TB`), `BT`, `LR`, `R
 axis and where self-loops attach.
 """,
       example {
-        MermoidUi.diagram("""flowchart LR
+        MermoidAscent.svgDiagram("""flowchart LR
                             |    A[Read] --> B[Transform]
                             |    B --> C[Write]
                             |""".stripMargin)
       },
       example {
-        MermoidUi.diagram("""flowchart TD
+        MermoidAscent.svgDiagram("""flowchart TD
                             |    A[Read] --> B[Transform]
                             |    B --> C[Write]
                             |""".stripMargin)
@@ -55,7 +56,7 @@ Thirteen shapes. A bare id with no bracket syntax is a `Rect` labelled with the 
 | `A[\\text/]` | `TrapezoidAlt` | `node-trapezoid-alt` |
 """,
       example {
-        MermoidUi.diagram("""flowchart LR
+        MermoidAscent.svgDiagram("""flowchart LR
                             |    R[Rect]
                             |    O(Round)
                             |    S([Stadium])
@@ -64,7 +65,7 @@ Thirteen shapes. A bare id with no bracket syntax is a `Rect` labelled with the 
                             |""".stripMargin)
       },
       example {
-        MermoidUi.diagram("""flowchart LR
+        MermoidAscent.svgDiagram("""flowchart LR
                             |    C((Circle))
                             |    D(((Double)))
                             |    H{Rhombus}
@@ -72,7 +73,7 @@ Thirteen shapes. A bare id with no bracket syntax is a `Rect` labelled with the 
                             |""".stripMargin)
       },
       example {
-        MermoidUi.diagram("""flowchart LR
+        MermoidAscent.svgDiagram("""flowchart LR
                             |    P[/Parallelogram/]
                             |    Q[\ParallelogramAlt\]
                             |    T[/Trapezoid\]
@@ -104,7 +105,7 @@ Five edge styles. Each contributes a class to the edge group, and the dashing li
 | `A ==> B` | `Thick` | `edge-thick` | yes |
 """,
       example {
-        MermoidUi.diagram("""flowchart LR
+        MermoidAscent.svgDiagram("""flowchart LR
                             |    A1[Arrow] --> A2[ ]
                             |    B1[Open] --- B2[ ]
                             |    C1[Dotted] -.-> C2[ ]
@@ -119,7 +120,7 @@ Two spellings, both supported: `-->|label|` and `-- label -->`. Labels get a bac
 they cross an edge, and the layout widens the gap between layers to fit them.
 """,
       example {
-        MermoidUi.diagram("""flowchart TD
+        MermoidAscent.svgDiagram("""flowchart TD
                             |    Check{Valid?} -->|yes| Save[(Database)]
                             |    Check -- no --> Reject[/Error response/]
                             |""".stripMargin)
@@ -132,7 +133,7 @@ one node stack their labels rather than overlapping, and the layout reserves roo
 flowchart, above in a horizontal one.
 """,
       example {
-        MermoidUi.diagram("""flowchart TD
+        MermoidAscent.svgDiagram("""flowchart TD
                             |    Poll[Poll queue] -->|empty| Poll
                             |    Poll -->|error| Poll
                             |    Poll -->|message| Handle[Handle]
@@ -142,10 +143,11 @@ flowchart, above in a horizontal one.
     section("Cycles")(
       md"""
 Layering is longest-path, and it breaks cycles rather than diverging on them: a node already being resolved contributes
-nothing to its own depth. A graph with a back edge lays out fine.
+nothing to its own depth. Within each layer, a barycenter sweep reorders nodes to cut crossings, and long edges bend
+through invisible waypoints so they do not slice intermediate nodes. A graph with a back edge lays out fine.
 """,
       example {
-        MermoidUi.diagram("""flowchart TD
+        MermoidAscent.svgDiagram("""flowchart TD
                             |    A[Attempt] --> B{Succeeded?}
                             |    B -->|no| C[Back off]
                             |    C --> A
@@ -159,7 +161,7 @@ nothing to its own depth. A graph with a back edge lays out fine.
 is a `<g class="subgraph" id="subgraph-{id}">` rendered behind the edges and nodes.
 """,
       example {
-        MermoidUi.diagram("""flowchart TD
+        MermoidAscent.svgDiagram("""flowchart TD
                             |    subgraph ingest [Ingest]
                             |        direction LR
                             |        Fetch[Fetch] --> Parse[Parse]
@@ -179,7 +181,7 @@ Three statements, all of which end up as CSS rather than as baked-in attributes:
 `classDef` scales — one rule, however many nodes carry the class — so prefer it over `style`.
 """,
       example {
-        MermoidUi.diagram("""flowchart LR
+        MermoidAscent.svgDiagram("""flowchart LR
                             |    classDef hot fill:#ffdddd,stroke:#cc0000
                             |    A[Cold] --> B[Hot]
                             |    B --> C[Hot too]
@@ -203,7 +205,7 @@ Note where each landed: `classDef` in the `<style>` block, `class` in the class 
       md"""
 mermoid adds one thing Mermaid does not have: `as <name>` on an edge, which fixes that edge's element id.
 
-Without an alias an edge is `edge-{from}-{to}-{index}`, so inserting an earlier parallel edge renumbers it — and any CSS
+Without an alias an edge is `edge-{from}-{to}-{index}`, so inserting an earlier parallel edge renumbers it, and any CSS
 or test that selected `#edge-A-B-1` silently moves. An alias pins it:
 """,
       exampleValue {
@@ -217,6 +219,68 @@ or test that selected `#edge-A-B-1` silently moves. An alias pins it:
 The first edge is `#edge-happy` no matter how many siblings appear later; the unaliased one keeps its positional id.
 Notes in [state diagrams](state-diagrams.html) take `as` the same way.
 """,
+    ),
+    section("Clicks")(
+      md"""
+Mermaid `click` lines attach interactions to a node. mermoid stores them on the scene; painters decide how to surface
+them. The SVG painter emits `<title>` for tooltips and wraps `href` targets in an `<a>`. `mermoid-ascent` turns the same
+bindings into hover cards and links (callback **names** are stored; JavaScript is never executed).
+
+Supported forms:
+
+```
+click A callback "tooltip text"
+click A call myHandler() "tooltip"
+click A href "https://example.com" "Open docs" _blank
+click A "https://example.com"
+```
+
+Link targets: `_blank`, `_self`, `_parent`, `_top`.
+""",
+      example {
+        MermoidAscent.svgDiagram("""flowchart LR
+                            |    A[Parse] --> B[Layout]
+                            |    B --> C[Paint]
+                            |    click A callback "Mermaid → AST"
+                            |    click B callback "DiagramScene + routes"
+                            |    click C href "https://www.earlyeffect.rocks" "Open Early Effect" _blank
+                            |""".stripMargin)
+      },
+      exampleValue {
+        import _root_.mermoid.*
+        MermaidParser
+          .parse("""flowchart LR
+                    |  A[a] --> B[b]
+                    |  click A callback "tip"
+                    |  click B href "https://example.com" "go" _blank
+                    |""".stripMargin)
+          .map(SvgRenderer.render(_))
+          .map(svg => (svg.contains("<title>tip</title>"), svg.contains("href=\"https://example.com\"")))
+      }.assert(r => assertTrue(r == Right((true, true)))),
+      md"""
+Try the same source under hybrid selection and hover on [Interactive](interactive.html).
+""",
+    ),
+    section("Special cases")(
+      md"""
+| Case | Behaviour |
+|---|---|
+| Chained edges `A --> B --> C` | Not supported. One edge per statement. |
+| `%%` comments / `%%{init:…}%%` | Not supported. Strip before parse. |
+| Parallel edges (same endpoints twice) | Both render, offset so they do not overlap. Alias with `as` if you CSS-select one. |
+| Cycles / back-edges | Layering breaks cycles; barycenter cuts crossings; long edges use waypoints. |
+| `linkStyle` | Not implemented. |
+| Nested subgraphs | Supported; frames paint behind edges and nodes. |
+| Semicolon separators | OK as statement separators (in addition to newlines). |
+| `end` vs `endpoint` | Bare `end` closes a subgraph; ids like `endpoint` are fine. |
+""",
+      example {
+        MermoidAscent.svgDiagram("""flowchart TD
+                            |    A[Source] --> B[Sink]
+                            |    A --> B
+                            |    A -.-> B as dotted
+                            |""".stripMargin)
+      },
     ),
   )
 end Flowcharts

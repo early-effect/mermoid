@@ -114,6 +114,72 @@ object MermaidParser:
       FlowStatement.ClassSt(ids.toList, className)
     }
 
+  /** Mermaid `click` lines: callback and/or href, optional tooltip and link target. */
+  private[mermoid] def clickSt(using P[Any]): P[FlowStatement.ClickSt] =
+    P("click" ~ ws ~ identifier ~ ws ~ CharsWhile(c => c != '\n' && c != '\r', 1).!).map { case (id, rest) =>
+      FlowStatement.ClickSt(parseClickRest(id, rest.trim))
+    }
+
+  /** Interpret the remainder of a `click` line after `click <id>`. */
+  private[mermoid] def parseClickRest(nodeId: String, rest: String): ClickBinding =
+    def unquote(s: String): String =
+      if s.length >= 2 && s.head == '"' && s.last == '"' then s.substring(1, s.length - 1)
+      else s
+
+    val tokens = tokenizeClickRest(rest)
+    tokens match
+      case "href" :: url :: tip :: tgt :: Nil if isLinkTarget(tgt) =>
+        ClickBinding(nodeId, Some(unquote(tip)), Some(unquote(url)), Some(tgt), None)
+      case "href" :: url :: tgt :: Nil if isLinkTarget(tgt) =>
+        ClickBinding(nodeId, None, Some(unquote(url)), Some(tgt), None)
+      case "href" :: url :: tip :: Nil if tip.startsWith("\"") =>
+        ClickBinding(nodeId, Some(unquote(tip)), Some(unquote(url)), None, None)
+      case "href" :: url :: Nil =>
+        ClickBinding(nodeId, None, Some(unquote(url)), None, None)
+      case "call" :: cb :: tip :: Nil if cb.endsWith("()") && tip.startsWith("\"") =>
+        ClickBinding(nodeId, Some(unquote(tip)), None, None, Some(cb.dropRight(2)))
+      case "call" :: cb :: Nil if cb.endsWith("()") =>
+        ClickBinding(nodeId, None, None, None, Some(cb.dropRight(2)))
+      case "call" :: cb :: "()" :: tip :: Nil =>
+        ClickBinding(nodeId, Some(unquote(tip)), None, None, Some(cb))
+      case "call" :: cb :: "()" :: Nil =>
+        ClickBinding(nodeId, None, None, None, Some(cb))
+      case url :: tip :: tgt :: Nil if url.startsWith("\"") && isLinkTarget(tgt) =>
+        ClickBinding(nodeId, Some(unquote(tip)), Some(unquote(url)), Some(tgt), None)
+      case url :: tip :: Nil if url.startsWith("\"") =>
+        ClickBinding(nodeId, Some(unquote(tip)), Some(unquote(url)), None, None)
+      case url :: Nil if url.startsWith("\"") =>
+        ClickBinding(nodeId, None, Some(unquote(url)), None, None)
+      case cb :: tip :: Nil if tip.startsWith("\"") =>
+        ClickBinding(nodeId, Some(unquote(tip)), None, None, Some(cb))
+      case cb :: Nil =>
+        ClickBinding(nodeId, None, None, None, Some(cb))
+      case _ =>
+        ClickBinding(nodeId, None, None, None, tokens.headOption)
+    end match
+  end parseClickRest
+
+  private def isLinkTarget(s: String): Boolean =
+    s == "_blank" || s == "_self" || s == "_parent" || s == "_top"
+
+  /** Split click-rest into tokens; quoted strings stay as one token including quotes. */
+  private def tokenizeClickRest(rest: String): List[String] =
+    @annotation.tailrec
+    def loop(i: Int, acc: List[String]): List[String] =
+      if i >= rest.length then acc.reverse
+      else if rest.charAt(i).isWhitespace then loop(i + 1, acc)
+      else if rest.charAt(i) == '"' then
+        val end = rest.indexOf('"', i + 1)
+        if end < 0 then (rest.substring(i) :: acc).reverse
+        else loop(end + 1, rest.substring(i, end + 1) :: acc)
+      else if rest.startsWith("()", i) then loop(i + 2, "()" :: acc)
+      else
+        val end = rest.indexWhere(c => c.isWhitespace || c == '"', i)
+        val j   = if end < 0 then rest.length else end
+        loop(j, rest.substring(i, j) :: acc)
+    loop(0, Nil)
+  end tokenizeClickRest
+
   private[mermoid] def subgraphSt(using P[Any]): P[FlowStatement.SubgraphSt] =
     P(
       "subgraph" ~ ws ~ identifier ~ (ws ~ "[" ~ labelText ~ "]").? ~ nl ~
@@ -134,7 +200,8 @@ object MermaidParser:
     * list swallows the closing keyword and the enclosing `subgraphSt` can never match it.
     */
   private[mermoid] def flowStatement(using P[Any]): P[FlowStatement] =
-    P(!endKeyword ~ (subgraphSt | styleSt | classDefSt | classSt | edgeSt | nodeSt))
+    // `click` must precede `nodeSt`: otherwise `click A …` is swallowed as a bare node id.
+    P(!endKeyword ~ (subgraphSt | styleSt | classDefSt | classSt | clickSt | edgeSt | nodeSt))
 
   private[mermoid] def flowStatements(using P[Any]): P[List[FlowStatement]] =
     P(wsnl ~ flowStatement.rep(sep = sep) ~ wsnl).map(_.toList)

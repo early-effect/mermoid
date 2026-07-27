@@ -78,6 +78,30 @@ object StyleResolver:
       case _ => Nil
     }
 
+  /** Merge `click` bindings (later statements win per field when re-specified). */
+  private[mermoid] def collectInteractions(stmts: List[FlowStatement]): Map[String, NodeInteraction] =
+    stmts
+      .flatMap {
+        case FlowStatement.ClickSt(b)                 => List(b)
+        case FlowStatement.SubgraphSt(_, _, _, inner) =>
+          collectInteractions(inner).toList.map { case (id, i) =>
+            ClickBinding(id, i.tooltip, i.href, i.linkTarget, i.callbackName)
+          }
+        case _ => Nil
+      }
+      .foldLeft(Map.empty[String, NodeInteraction]) { (acc, b) =>
+        val prev = acc.getOrElse(b.nodeId, NodeInteraction())
+        acc.updated(
+          b.nodeId,
+          NodeInteraction(
+            tooltip = b.tooltip.orElse(prev.tooltip),
+            href = b.href.orElse(prev.href),
+            linkTarget = b.linkTarget.orElse(prev.linkTarget),
+            callbackName = b.callbackName.orElse(prev.callbackName),
+          ),
+        )
+      }
+
   // Keep backward compatibility for now
   private[mermoid] def collectStyleDefs(stmts: List[FlowStatement]): Map[String, Map[String, String]] =
     val (classDefs, nodeStyles, nodeClasses) = stmts.foldLeft(

@@ -1,0 +1,9 @@
+stateDiagram-v2
+  [*] --> Idle
+  Idle --> Active: start
+  Active --> Idle: pause
+  Active --> Done: finish
+  Done --> [*]
+  note right of Idle
+    Waiting for input
+  end note

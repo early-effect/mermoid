@@ -1,0 +1,10 @@
+flowchart LR
+    A[Ingress] --> B[Parse]
+    B --> C[Validate]
+    C --> D[Enrich]
+    D --> E[Persist]
+    E --> F[Notify]
+    A -->|fast path| D
+    A -->|express| F
+    B -->|bypass| E
+    C -->|shortcut| F

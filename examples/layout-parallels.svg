@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480.5" height="291" viewBox="0 0 480.5 291">
+  <defs>
+    <marker id="arrowhead" markerWidth="8" markerHeight="6.8" refX="8" refY="3.4" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon class="arrowhead" points="0 0, 8 3.4, 0 6.8"/>
+    </marker>
+  </defs>
+  <style>
+:root {
+  --mermoid-background: #ffffff;
+  --mermoid-edge-label-bg: #ffffff;
+  --mermoid-font-family: sans-serif;
+  --mermoid-font-size: 14px;
+  --mermoid-line: #333;
+  --mermoid-main-bkg: #ECECFF;
+  --mermoid-node-border: #9370DB;
+  --mermoid-note-bg: #ffffcc;
+  --mermoid-note-border: #333333;
+  --mermoid-note-text: #333333;
+  --mermoid-primary: #1f77b4;
+  --mermoid-primary-border: #1a5a8a;
+  --mermoid-primary-text: #333;
+  --mermoid-secondary: #ffffde;
+  --mermoid-secondary-border: #aaaa33;
+  --mermoid-secondary-text: #333;
+  --mermoid-tertiary: #f4f4f4;
+  --mermoid-tertiary-border: #cccccc;
+  --mermoid-tertiary-text: #333;
+  --mermoid-text: #333;
+}
+.node-shape {
+  fill: #ECECFF;
+  stroke: #9370DB;
+  stroke-width: 2;
+}
+.node-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+.edge-line {
+  stroke: #333;
+  stroke-width: 2;
+}
+.edge-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.edge-label-bg {
+  fill: #ffffff;
+}
+.note-rect {
+  fill: #ffffcc;
+  stroke: #333333;
+  stroke-width: 1;
+  stroke-dasharray: 4,2;
+}
+.note-text {
+  fill: #333333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.note-connector {
+  stroke: #333333;
+  stroke-width: 1;
+  stroke-dasharray: 4,2;
+}
+.subgraph-rect {
+  fill: none;
+  stroke: #9370DB;
+  stroke-width: 1;
+  stroke-dasharray: 6,3;
+}
+.subgraph-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+.edge-thick .edge-line {
+  stroke-width: 3;
+}
+.edge-dotted .edge-line {
+  stroke-dasharray: 5,5;
+}
+.edge-dotted-open .edge-line {
+  stroke-dasharray: 5,5;
+}
+.arrowhead {
+  fill: #333;
+}
+.start-end .node-shape {
+  fill: #333;
+  stroke: #333;
+}
+</style>
+  <g class="edge edge-arrow" id="edge-A-B-0" data-from="A" data-to="B">
+    <path class="edge-line" d="M139,78.62068965517241 C145.85836070353903,70.44785206409273 166.4334428141562,29.262672624187008 180.15016422123426,29.583664108694308 C193.86688562831233,29.904655593201607 214.44196773892946,72.05280948662923 221.3003284424685,80.54663856221622" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="158.15016422123426" y="19.583664108694308" width="44" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="180.15016422123426" y="29.583664108694308" text-anchor="middle" dominant-baseline="central">alpha</text>
+  </g>
+  <g class="edge edge-arrow" id="edge-A-B-1" data-from="A" data-to="B">
+    <path class="edge-line" d="M139,84.3103448275862 C145.8583401779922,80.22392579188235 166.43336071196887,59.63133535143745 180.15004106795328,59.791830613363075 C193.8667214239377,59.9523258752887 214.44174195791433,81.02640210151047 221.30008213590654,85.27331639913994" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="161.75004106795328" y="49.791830613363075" width="36.8" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="180.15004106795328" y="59.791830613363075" text-anchor="middle" dominant-baseline="central">beta</text>
+  </g>
+  <g class="edge edge-arrow" id="edge-A-B-2" data-from="A" data-to="B">
+    <path class="edge-line" d="M139,90 L221.3,90" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="158.15" y="80" width="44" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="180.15" y="90" text-anchor="middle" dominant-baseline="central">gamma</text>
+  </g>
+  <g class="edge edge-arrow" id="edge-A-B-3" data-from="A" data-to="B">
+    <path class="edge-line" d="M139,95.6896551724138 C145.8583401779922,99.77607420811765 166.43336071196887,120.36866464856254 180.15004106795328,120.20816938663692 C193.8667214239377,120.0476741247113 214.44174195791433,98.97359789848953 221.30008213590654,94.72668360086006" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="158.15004106795328" y="110.20816938663692" width="44" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="180.15004106795328" y="120.20816938663692" text-anchor="middle" dominant-baseline="central">delta</text>
+  </g>
+  <g class="edge edge-arrow" id="edge-A-B-4" data-from="A" data-to="B">
+    <path class="edge-line" d="M139,101.37931034482759 C145.85836070353903,109.55214793590727 166.4334428141562,150.73732737581298 180.15016422123426,150.4163358913057 C193.86688562831233,150.0953444067984 214.44196773892946,107.94719051337077 221.3003284424685,99.45336143778378" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="150.95016422123427" y="140.4163358913057" width="58.4" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="180.15016422123426" y="150.4163358913057" text-anchor="middle" dominant-baseline="central">epsilon</text>
+  </g>
+  <g class="node node-rect" id="node-A">
+    <rect class="node-shape" x="40" y="65" width="99" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="89.5" y="90" text-anchor="middle" dominant-baseline="central">Source</text>
+  </g>
+  <g class="node node-rect" id="node-B">
+    <rect class="node-shape" x="222.5" y="65" width="82" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="263.5" y="90" text-anchor="middle" dominant-baseline="central">Sink</text>
+  </g>
+</svg>

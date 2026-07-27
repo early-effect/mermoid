@@ -81,6 +81,7 @@ object EdgeRenderer:
       edge: LayoutEdge,
       nodeMap: Map[String, LayoutNode],
       selfLoopSide: SelfLoopSide = SelfLoopSide.Top,
+      waypoints: List[Point] = Nil,
   ): SvgNode =
     val from   = nodeMap(edge.from)
     val to     = nodeMap(edge.to)
@@ -91,7 +92,7 @@ object EdgeRenderer:
     val selfLoopClass = if edge.from == edge.to then " self-loop" else ""
     val children      =
       if edge.from == edge.to then renderSelfLoop(lc, edge, from, selfLoopSide, marker)
-      else renderStraightEdge(lc, edge, from, to, nodeMap, marker)
+      else renderRoutedEdge(lc, edge, from, to, nodeMap, marker, waypoints)
 
     SvgNode.Element(
       "g",
@@ -133,10 +134,14 @@ object EdgeRenderer:
           (cx + r * Math.cos(angle1), cy - r * Math.sin(angle1), cx + r * Math.cos(angle2), cy - r * Math.sin(angle2))
         case _ =>
           (cx + hw, cy + hh * 0.15, cx + hw * 0.3, cy + hh)
-      val apexX = cx + hw + loopSize
-      val apexY = cy + hh + loopSize * 0.5
-      val line  = Option.when(edge.selfLoopIndex == 0)(
-        curve(s"M${startX.f},${startY.f} C${apexX.f},${startY.f} ${apexX.f},${apexY.f} ${endX.f},${endY.f}", marker)
+      val apexX     = cx + hw + loopSize
+      val apexY     = cy + hh + loopSize * 0.5
+      val shortened = shortenPathEnd(Point(startX, startY), Point(endX, endY), hasArrow(edge.style), lc.arrowSize)
+      val line      = Option.when(edge.selfLoopIndex == 0)(
+        curve(
+          s"M${startX.f},${startY.f} C${apexX.f},${startY.f} ${apexX.f},${apexY.f} ${shortened.x.f},${shortened.y.f}",
+          marker,
+        )
       )
       val labelX     = apexX - loopSize * 0.2
       val labelBaseY = (startY + apexY) / 2 - (lc.edgeLabelFontSize + 12) * 0.5
@@ -151,9 +156,13 @@ object EdgeRenderer:
           (cx - r * Math.cos(angle1), cy - r * Math.sin(angle1), cx - r * Math.cos(angle2), cy - r * Math.sin(angle2))
         case _ =>
           (cx - hw * 0.25, cy - hh, cx + hw * 0.25, cy - hh)
-      val apexY = startY - loopSize
-      val line  = Option.when(edge.selfLoopIndex == 0)(
-        curve(s"M${startX.f},${startY.f} C${startX.f},${apexY.f} ${endX.f},${apexY.f} ${endX.f},${endY.f}", marker)
+      val apexY     = startY - loopSize
+      val shortened = shortenPathEnd(Point(startX, startY), Point(endX, endY), hasArrow(edge.style), lc.arrowSize)
+      val line      = Option.when(edge.selfLoopIndex == 0)(
+        curve(
+          s"M${startX.f},${startY.f} C${startX.f},${apexY.f} ${endX.f},${apexY.f} ${shortened.x.f},${shortened.y.f}",
+          marker,
+        )
       )
       val labelBaseY = apexY + loopSize * 0.35
       val label      = edge.label.map(lbl => edgeLabelSvg(lbl, cx, labelBaseY + labelYOffset, lc)).getOrElse(Nil)
@@ -161,86 +170,141 @@ object EdgeRenderer:
     end if
   end renderSelfLoop
 
-  private val parallelEdgeSpacing = 20.0
+  private def hasArrow(style: EdgeStyle): Boolean = style match
+    case EdgeStyle.Open | EdgeStyle.DottedOpen => false
+    case _                                     => true
 
-  private def renderStraightEdge(
+  /** Pull the path end back along the approach so the marker tip sits on the node boundary. */
+  private def shortenPathEnd(approachFrom: Point, end: Point, arrow: Boolean, arrowSize: Double): Point =
+    if !arrow then end
+    else
+      val dx   = end.x - approachFrom.x
+      val dy   = end.y - approachFrom.y
+      val dist = Math.sqrt(dx * dx + dy * dy)
+      if dist < 1e-6 then end
+      else
+        val t = Math.min(arrowSize * 0.15, dist * 0.25)
+        Point(end.x - dx / dist * t, end.y - dy / dist * t)
+
+  private def renderRoutedEdge(
       lc: LayoutConfig,
       edge: LayoutEdge,
       from: LayoutNode,
       to: LayoutNode,
       nodeMap: Map[String, LayoutNode],
       marker: List[(String, String)],
+      waypoints: List[Point],
   ): List[SvgNode] =
-    if edge.edgeCount > 1 then renderCurvedParallelEdge(lc, edge, from, to, nodeMap, marker)
-    else
-      val (x1, y1) = SvgUtil.connectionPoint(from, to.center)
-      val (x2, y2) = SvgUtil.connectionPoint(to, from.center)
+    val offset =
+      if edge.edgeCount > 1 then (edge.edgeIndex - (edge.edgeCount - 1) / 2.0) * lc.parallelEdgeSpacing
+      else 0.0
 
-      val line = SvgNode.Element(
-        "line",
-        List(
-          "class" -> "edge-line",
-          "x1"    -> x1.f,
-          "y1"    -> y1.f,
-          "x2"    -> x2.f,
-          "y2"    -> y2.f,
-        ) ++ marker,
-        Nil,
+    val rawMids     = waypoints.map(offsetPoint(_, from.center, to.center, offset))
+    val firstTarget =
+      rawMids.headOption.getOrElse(
+        Point(
+          to.center.x + perp(from.center, to.center)._1 * offset,
+          to.center.y + perp(from.center, to.center)._2 * offset,
+        )
+      )
+    val lastApproach =
+      rawMids.lastOption.getOrElse(
+        Point(
+          from.center.x + perp(from.center, to.center)._1 * offset,
+          from.center.y + perp(from.center, to.center)._2 * offset,
+        )
       )
 
-      val label = edge.label
-        .map { lbl =>
-          val (w, h)   = labelSize(lbl, lc)
-          val (mx, my) = findLabelPosition(x1, y1, x2, y2, w, h, nodeMap.values)
-          edgeLabelSvg(lbl, mx, my, lc)
-        }
-        .getOrElse(Nil)
+    val (x1, y1) = SvgUtil.connectionPoint(from, firstTarget)
+    val (x2, y2) = SvgUtil.connectionPoint(to, lastApproach)
+    val start    = Point(x1, y1)
+    val endRaw   = Point(x2, y2)
+    val approach = rawMids.lastOption.getOrElse(start)
+    val end      = shortenPathEnd(approach, endRaw, hasArrow(edge.style), lc.arrowSize)
 
-      line :: label
+    // Parallel edges need an explicit bow: offset endpoints alone stay collinear and look straight.
+    // Long spans already curve through dummy waypoints (3+ points → cubics).
+    val points =
+      if rawMids.nonEmpty then start :: rawMids ::: List(end)
+      else if Math.abs(offset) > 1e-6 then
+        val (nx, ny) = perp(from.center, to.center)
+        val mid      = Point((start.x + end.x) / 2 + nx * offset * 1.25, (start.y + end.y) / 2 + ny * offset * 1.25)
+        List(start, mid, end)
+      else List(start, end)
 
-  private def renderCurvedParallelEdge(
-      lc: LayoutConfig,
-      edge: LayoutEdge,
-      from: LayoutNode,
-      to: LayoutNode,
-      nodeMap: Map[String, LayoutNode],
-      marker: List[(String, String)],
-  ): List[SvgNode] =
-    // Offset each parallel edge perpendicular to the line between node centers
-    val dx   = to.center.x - from.center.x
-    val dy   = to.center.y - from.center.y
+    val d    = smoothPath(points)
+    val line = curve(d, marker)
+
+    val label = edge.label
+      .map { lbl =>
+        val (w, h)   = labelSize(lbl, lc)
+        val mid      = labelPointOnPath(points)
+        val visible  = nodeMap.values.filter(!_.dummy)
+        val (mx, my) =
+          if points.size <= 2 then findLabelPosition(start.x, start.y, end.x, end.y, w, h, visible)
+          else mid
+        edgeLabelSvg(lbl, mx, my, lc)
+      }
+      .getOrElse(Nil)
+
+    line :: label
+  end renderRoutedEdge
+
+  private def perp(a: Point, b: Point): (Double, Double) =
+    val dx   = b.x - a.x
+    val dy   = b.y - a.y
     val dist = Math.sqrt(dx * dx + dy * dy)
-    if dist == 0 then Nil
+    if dist < 1e-6 then (0.0, 0.0) else (-dy / dist, dx / dist)
+
+  private def offsetPoint(p: Point, from: Point, to: Point, offset: Double): Point =
+    if offset == 0.0 then p
     else
-      // Unit normal perpendicular to the edge direction
-      val nx = -dy / dist
-      val ny = dx / dist
+      val (nx, ny) = perp(from, to)
+      Point(p.x + nx * offset, p.y + ny * offset)
 
-      // Center the group of parallel edges: offset = (index - (count-1)/2) * spacing
-      val offset = (edge.edgeIndex - (edge.edgeCount - 1) / 2.0) * parallelEdgeSpacing
+  private def labelPointOnPath(points: List[Point]): (Double, Double) =
+    if points.size < 2 then (0.0, 0.0)
+    else
+      val mid = points.size / 2
+      val p   = points(mid)
+      (p.x, p.y)
 
-      // Offset the target points used for connection point calculation
-      val offsetFromTarget = Point(to.center.x + nx * offset, to.center.y + ny * offset)
-      val offsetToTarget   = Point(from.center.x + nx * offset, from.center.y + ny * offset)
-      val (x1, y1)         = SvgUtil.connectionPoint(from, offsetFromTarget)
-      val (x2, y2)         = SvgUtil.connectionPoint(to, offsetToTarget)
-
-      // Control point at midpoint offset perpendicular
-      val mx = (x1 + x2) / 2 + nx * offset * 2
-      val my = (y1 + y2) / 2 + ny * offset * 2
-
-      val line = curve(s"M${x1.f},${y1.f} Q${mx.f},${my.f} ${x2.f},${y2.f}", marker)
-
-      val label = edge.label
-        .map { lbl =>
-          // Label position at the quadratic bezier midpoint (t=0.5)
-          val labelX = (x1 + 2 * mx + x2) / 4
-          val labelY = (y1 + 2 * my + y2) / 4
-          edgeLabelSvg(lbl, labelX, labelY, lc)
+  /** Smooth cubic Bezier through waypoints.
+    *
+    * Two-point paths stay straight when axis-aligned (typical adjacent-layer hop). A diagonal pair gets a light
+    * perpendicular bow so the quadratic is not degenerate (a mid-chord control point is collinear with the ends).
+    */
+  private[mermoid] def smoothPath(points: List[Point]): String =
+    points match
+      case Nil           => ""
+      case p :: Nil      => s"M${p.x.f},${p.y.f}"
+      case a :: b :: Nil =>
+        if nearlyAxisAligned(a, b) then s"M${a.x.f},${a.y.f} L${b.x.f},${b.y.f}"
+        else
+          val (nx0, ny0) = perp(a, b)
+          // Bow "outward" horizontally so left-going and right-going fans mirror each other.
+          // A fixed CCW normal bows left edges out and right edges in (looks backward).
+          val dx       = b.x - a.x
+          val (nx, ny) = if Math.abs(dx) < 1e-6 || nx0 * dx > 0 then (nx0, ny0) else (-nx0, -ny0)
+          val dist     = Math.hypot(b.x - a.x, b.y - a.y)
+          val bow      = Math.min(24.0, dist * 0.12)
+          val mx       = (a.x + b.x) / 2 + nx * bow
+          val my       = (a.y + b.y) / 2 + ny * bow
+          s"M${a.x.f},${a.y.f} Q${mx.f},${my.f} ${b.x.f},${b.y.f}"
+      case pts =>
+        val padded = pts.head :: pts ::: List(pts.last)
+        val segs   = (0 until pts.size - 1).map { i =>
+          val p0 = padded(i)
+          val p1 = padded(i + 1)
+          val p2 = padded(i + 2)
+          val p3 = padded(i + 3)
+          val c1 = Point(p1.x + (p2.x - p0.x) / 6, p1.y + (p2.y - p0.y) / 6)
+          val c2 = Point(p2.x - (p3.x - p1.x) / 6, p2.y - (p3.y - p1.y) / 6)
+          s"C${c1.x.f},${c1.y.f} ${c2.x.f},${c2.y.f} ${p2.x.f},${p2.y.f}"
         }
-        .getOrElse(Nil)
+        s"M${pts.head.x.f},${pts.head.y.f} ${segs.mkString(" ")}"
+  end smoothPath
 
-      line :: label
-    end if
-  end renderCurvedParallelEdge
+  private def nearlyAxisAligned(a: Point, b: Point): Boolean =
+    Math.abs(a.x - b.x) < 1e-6 || Math.abs(a.y - b.y) < 1e-6
 end EdgeRenderer

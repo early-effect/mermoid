@@ -1,5 +1,6 @@
 package mermoid.docs
 
+import mermoid.ascent.MermoidAscent
 import specular.*
 import specular.ziotest.DocSpecSuite
 import zio.test.*
@@ -20,10 +21,12 @@ object StateDiagrams extends DocSpecSuite:
 
   def doc = page("State diagrams")(
     md"""
-`stateDiagram-v2` opens a state diagram. There is no direction keyword — state diagrams always lay out top-to-bottom.
+`stateDiagram-v2` opens a state diagram. There is no in-diagram `direction` keyword; the author default is top-to-bottom.
+With a `Viewport`, responsive layout may flip wide diagrams to horizontal so they use available width (same rules as
+flowcharts). Without a viewport, layout stays vertical.
 """,
     example {
-      MermoidUi.diagram(orderFsm)
+      MermoidAscent.svgDiagram(orderFsm)
     },
     section("Transitions")(
       md"""
@@ -31,7 +34,7 @@ object StateDiagrams extends DocSpecSuite:
 transition becomes a state, rendered as a `Round` node labelled with its own id.
 """,
       example {
-        MermoidUi.diagram("""stateDiagram-v2
+        MermoidAscent.svgDiagram("""stateDiagram-v2
                             |    Idle --> Running: start
                             |    Running --> Idle: stop
                             |""".stripMargin)
@@ -67,11 +70,14 @@ end note
 ```
 
 `right of` and `left of` are both supported. Note text is multi-line; each line is trimmed and blank lines dropped. A
-note renders as a dashed box joined to its state by a dashed connector, and the diagram's bounding box grows to hold it —
+note renders as a dashed box joined to its state by a dashed connector, and the diagram's bounding box grows to hold it,
 including shifting the whole diagram right when a `left of` note would otherwise fall outside the canvas.
+
+When the preferred side would overlap another node (common in horizontal / flipped layouts), the placer tries the other
+side and then a vertical offset before settling.
 """,
       example {
-        MermoidUi.diagram("""stateDiagram-v2
+        MermoidAscent.svgDiagram("""stateDiagram-v2
                             |    [*] --> Idle
                             |    Idle --> Running: start
                             |    Running --> Idle: finish
@@ -90,7 +96,7 @@ including shifting the whole diagram right when a `left of` note would otherwise
 `style <state> noteAlign: left | center | right` sets how that state's note text is aligned. The default is `left`.
 """,
       example {
-        MermoidUi.diagram("""stateDiagram-v2
+        MermoidAscent.svgDiagram("""stateDiagram-v2
                             |    [*] --> Ready
                             |    Ready --> Done: go
                             |    style Ready noteAlign: center
@@ -120,7 +126,7 @@ A state can transition to itself, and stacked self-transitions stack their label
 loops, and for notes pushed below them.
 """,
       example {
-        MermoidUi.diagram("""stateDiagram-v2
+        MermoidAscent.svgDiagram("""stateDiagram-v2
                             |    [*] --> Retrying
                             |    Retrying --> Retrying: attempt failed
                             |    Retrying --> Retrying: backoff elapsed
@@ -130,8 +136,9 @@ loops, and for notes pushed below them.
     ),
     section("Not yet implemented")(
       md"""
-Composite (nested) states, concurrency (`--`), `direction`, and `state X as "long name"` declarations are not implemented.
-A state diagram that needs nesting can be expressed as a [flowchart](flowcharts.html) with subgraphs today.
+Composite (nested) states, concurrency (`--`), an in-diagram `direction`, and `state X as "long name"` declarations are
+not implemented. `click` is flowchart-only; state diagrams have no click statement. A state diagram that needs nesting
+can be expressed as a [flowchart](flowcharts.html) with subgraphs today.
 """
     ),
   )

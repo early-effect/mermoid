@@ -11,7 +11,6 @@ object SubgraphRenderer:
   def subgraphToSvg(
       info: StyleResolver.SubgraphInfo,
       nodeMap: Map[String, LayoutNode],
-      config: RenderConfig,
   ): Option[SvgNode] =
     val memberNodes = info.nodeIds.flatMap(nodeMap.get)
     if memberNodes.isEmpty then None

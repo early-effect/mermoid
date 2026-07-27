@@ -1,5 +1,6 @@
 package mermoid.docs
 
+import mermoid.ascent.MermoidAscent
 import _root_.mermoid.RenderConfig
 import _root_.mermoid.css.{CssParser, Stylesheet, ThemeName}
 import specular.*
@@ -42,7 +43,7 @@ values, and `/* comments */`.
 """,
       example {
         val sheet = CssParser.parse(overrides).getOrElse(throw new AssertionError("bad css"))
-        MermoidUi.diagram(pipeline, RenderConfig(customStylesheet = Some(sheet), resolveVariables = false))
+        MermoidAscent.svgDiagram(pipeline, RenderConfig(customStylesheet = Some(sheet), resolveVariables = false))
       },
       md"""
 That is the same diagram as the Default theme renders — only the stylesheet changed. Note `resolveVariables = false`
@@ -92,7 +93,7 @@ over, or derived from application data.
             List(CssDeclaration("stroke", CssValue.Color(color)), CssDeclaration("stroke-width", CssValue.Number(3))),
           )
         }
-        MermoidUi.diagram(
+        MermoidAscent.svgDiagram(
           """flowchart LR
             |    A[Healthy] --> B[Degraded]
             |    B --> C[Down]

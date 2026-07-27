@@ -1,5 +1,6 @@
 package mermoid.docs
 
+import mermoid.ascent.MermoidAscent
 import specular.*
 import specular.ziotest.DocSpecSuite
 import zio.test.*
@@ -11,21 +12,32 @@ object Overview extends DocSpecSuite:
     """flowchart LR
       |    Source[".mmd source"] --> Parser[MermaidParser]
       |    Parser --> Ast[Diagram AST]
-      |    Ast --> Layout[Layout]
-      |    Layout --> Tree[SvgNode tree]
+      |    Ast --> Scene[DiagramScene]
+      |    Scene --> Tree[SvgNode tree]
       |    Tree --> Svg([SVG string])
       |""".stripMargin
 
   def doc = page("Overview")(
     md"""
-**mermoid** is a Scala 3 library that parses [Mermaid](https://mermaid.js.org) diagram syntax and renders SVG. It
-cross-builds for the JVM and Scala.js, and depends on nothing but [fastparse](https://github.com/com-lihaoyi/fastparse).
+**mermoid** is a Scala 3 library that parses [Mermaid](https://mermaid.js.org) flowchart and `stateDiagram-v2` syntax and
+renders SVG. It cross-builds for the JVM and Scala.js. Core depends on nothing but
+[fastparse](https://github.com/com-lihaoyi/fastparse).
+
+Two published artifacts:
+
+| Artifact | Use when |
+|---|---|
+| **`mermoid`** | You want a self-contained SVG string or `SvgNode` tree |
+| **`mermoid-ascent`** | You want hybrid HTML nodes + SVG edges, selection, tooltips, and viewport reflow |
 
 The diagram below is not a screenshot. It was parsed and rendered by mermoid while this page was being built, and the
 same call is asserted by the test suite.
+
+For hover, selection, tooltips, and **reactive reflow**, open [Interactive](interactive.html) (or run `sbt docsPreview`
+and click through that page).
 """,
     example {
-      MermoidUi.diagram(hello)
+      MermoidAscent.svgDiagram(hello)
     },
     section("Why not mermaid.js")(
       md"""
@@ -49,11 +61,16 @@ theme-object rebuild, and it composes with the rest of your site's CSS. See [The
     ),
     section("What you get back")(
       md"""
-`SvgRenderer.render` returns a `String` — the whole SVG document, ready to write to a file or inline in a page.
+Three layers, pick the one that matches your host:
 
-`SvgRenderer.renderTree` returns the `SvgNode` tree *before* serialization. That is the integration point: a UI
-framework can map it to its own element type, a post-processor can rewrite it, a different serializer can take it. This
-site does exactly that — its diagrams go through `SvgNode → ascent UI`, not through the string.
+| API | Returns | Typical host |
+|---|---|---|
+| `SvgRenderer.render` | SVG `String` | files, static pages, emails |
+| `SvgRenderer.renderTree` | `SvgNode` tree | frameworks that map trees to DOM |
+| `DiagramLayout.scene` | `DiagramScene` | custom painters, metrics, responsive hosts |
+
+This site maps inert SVG trees for structure docs, and uses **`mermoid-ascent`** for hybrid HTML nodes + SVG edges with
+selection and viewport reflow; see [Interactive](interactive.html).
 """,
       exampleValue {
         import _root_.mermoid.*

@@ -21,4 +21,10 @@ case class LayoutConfig(
     fontSize: Int = 14,
     edgeLabelFontSize: Int = 12,
     fontFamily: String = "sans-serif",
+    /** Forward/backward barycenter sweeps for crossing minimization. */
+    barycenterIterations: Int = 4,
+    /** Median-alignment sweeps for cross-axis coordinate assignment. */
+    coordinateIterations: Int = 4,
+    /** Perpendicular offset between parallel edges sharing the same endpoints. */
+    parallelEdgeSpacing: Double = 20.0,
 )
