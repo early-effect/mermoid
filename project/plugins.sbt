@@ -7,5 +7,5 @@ addSbtPlugin("com.github.sbt" % "sbt-pgp"      % "2.3.1")
 // `runReload` — restarts the forked docs server on rebuild, backing the `docsPreview` alias.
 addSbtPlugin("com.jamesward"     % "sbt-reload"    % "0.0.7")
 addSbtPlugin("rocks.earlyeffect" % "sbt-dynver-ci" % "0.2.2")
-addSbtPlugin("rocks.earlyeffect" % "sbt-specular"  % "0.10.1")
-addSbtPlugin("rocks.earlyeffect" % "sbt-zipx"      % "0.1.0")
+addSbtPlugin("rocks.earlyeffect" % "sbt-specular"  % "0.11.0")
+addSbtPlugin("rocks.earlyeffect" % "sbt-zipx"      % "0.1.4")
