@@ -47,18 +47,23 @@ pomIncludeRepository := { _ => false }
 usePgpKeyHex(sys.env.getOrElse("PGP_KEY_HEX", "MISSING_KEY_HEX"))
 
 // zipx CI: Aggregate verify gated on formatting + workflow-drift, then Central publish and Pages docs.
-zipxJavaVersion      := "25"
+val Fmt = CapabilityName("fmt")
+
+zipxJavaVersion      := JdkVersion("25")
 zipxWorkflowDispatch := true
 zipxScalaSteward     := true
 // sbt 2.x aliases `test` to `testQuick`, and the CI cache restores `target/` — so on a cache hit
 // `test` would skip unchanged suites. CI must run everything.
-val ciTestTask = "testFull"
-zipxTestTask := ciTestTask
+// Typed at its definition: SbtCommand's apply is inline and only accepts a literal.
+val ciTestTask: SbtCommand = SbtCommand("testFull")
+zipxTestTask := ciTestTask.text
 zipxCapabilities ++= Seq(
-  Capability.once("fmt", "scalafmtCheckAll; zipxWorkflowCheck"),
+  // Compound, so a literal SbtCommand rather than a spliced task key.
+  Capability.once(Fmt, SbtCommand("scalafmtCheckAll; zipxWorkflowCheck")),
   // Overriding the builtin `test` capability by name replaces its command too, and Capability.test's
-  // is the literal "test" — so the command has to be restated here or zipxTestTask is silently lost.
-  Capability.test.copy(command = _ => ciTestTask, needsCapabilities = List("fmt")),
+  // is ModuleNode.DefaultTestTask (`test`) — so the command has to be restated here or zipxTestTask
+  // is silently lost.
+  Capability.test.copy(command = _ => ciTestTask, needsCapabilities = List(Fmt)),
   ZipxCentral.release,
   ZipxDocs.pages(),
 )
