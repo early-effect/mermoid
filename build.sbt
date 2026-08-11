@@ -63,7 +63,7 @@ zipxCapabilities ++= Seq(
   // Overriding the builtin `test` capability by name replaces its command too, and Capability.test's
   // is ModuleNode.DefaultTestTask (`test`) — so the command has to be restated here or zipxTestTask
   // is silently lost.
-  Capability.test.copy(command = _ => ciTestTask, needsCapabilities = List(Fmt)),
+  Capability.test.copy(command = _ => Some(ciTestTask), needsCapabilities = List(Fmt)),
   ZipxCentral.release,
   ZipxDocs.pages(),
 )
