@@ -67,6 +67,78 @@ object ParserSpec extends ZIOSpecDefault:
         val result = fastparse.parse("[(hello)]", MermaidParser.nodeShape(using _))
         assertTrue(result.get.value == ("hello", NodeShape.Cylinder))
       },
+      test("parses rect with quoted slash") {
+        val result = fastparse.parse("""["a / b"]""", MermaidParser.nodeShape(using _))
+        assertTrue(result.get.value == ("a / b", NodeShape.Rect))
+      },
+      test("parses rect with unquoted slash") {
+        val result = fastparse.parse("[a / b]", MermaidParser.nodeShape(using _))
+        assertTrue(result.get.value == ("a / b", NodeShape.Rect))
+      },
+      test("parses round with quoted slash") {
+        val result = fastparse.parse("""("a / b")""", MermaidParser.nodeShape(using _))
+        assertTrue(result.get.value == ("a / b", NodeShape.Round))
+      },
+      test("parses round with unquoted slash") {
+        val result = fastparse.parse("(a / b)", MermaidParser.nodeShape(using _))
+        assertTrue(result.get.value == ("a / b", NodeShape.Round))
+      },
+      test("parses rhombus with quoted slash") {
+        val result = fastparse.parse("""{"a / b"}""", MermaidParser.nodeShape(using _))
+        assertTrue(result.get.value == ("a / b", NodeShape.Rhombus))
+      },
+      test("parses stadium with quoted slash") {
+        val result = fastparse.parse("""(["a / b"])""", MermaidParser.nodeShape(using _))
+        assertTrue(result.get.value == ("a / b", NodeShape.Stadium))
+      },
+      test("parses circle with quoted slash") {
+        val result = fastparse.parse("""(("a / b"))""", MermaidParser.nodeShape(using _))
+        assertTrue(result.get.value == ("a / b", NodeShape.Circle))
+      },
+      test("parses double circle with quoted slash") {
+        val result = fastparse.parse("""((("a / b")))""", MermaidParser.nodeShape(using _))
+        assertTrue(result.get.value == ("a / b", NodeShape.DoubleCircle))
+      },
+      test("parses hexagon with quoted slash") {
+        val result = fastparse.parse("""{{"a / b"}}""", MermaidParser.nodeShape(using _))
+        assertTrue(result.get.value == ("a / b", NodeShape.Hexagon))
+      },
+      test("parses subroutine with quoted slash") {
+        val result = fastparse.parse("""[["a / b"]]""", MermaidParser.nodeShape(using _))
+        assertTrue(result.get.value == ("a / b", NodeShape.Subroutine))
+      },
+      test("parses cylinder with quoted slash") {
+        val result = fastparse.parse("""[("a / b")]""", MermaidParser.nodeShape(using _))
+        assertTrue(result.get.value == ("a / b", NodeShape.Cylinder))
+      },
+      test("parses trapezoid with quoted slash") {
+        val result = fastparse.parse("""[/"a / b"\]""", MermaidParser.nodeShape(using _))
+        assertTrue(result.get.value == ("a / b", NodeShape.Trapezoid))
+      },
+      test("parses parallelogram with quoted slash") {
+        val result = fastparse.parse("""[/"a / b"/]""", MermaidParser.nodeShape(using _))
+        assertTrue(result.get.value == ("a / b", NodeShape.Parallelogram))
+      },
+      test("parses rect with quoted backslash") {
+        val result = fastparse.parse("""["a \ b"]""", MermaidParser.nodeShape(using _))
+        assertTrue(result.get.value == ("a \\ b", NodeShape.Rect))
+      },
+      test("parses rect with unquoted backslash") {
+        val result = fastparse.parse("""[a \ b]""", MermaidParser.nodeShape(using _))
+        assertTrue(result.get.value == ("a \\ b", NodeShape.Rect))
+      },
+      test("parses rect with quoted pipe") {
+        val result = fastparse.parse("""["a | b"]""", MermaidParser.nodeShape(using _))
+        assertTrue(result.get.value == ("a | b", NodeShape.Rect))
+      },
+      test("parses rect with unquoted pipe") {
+        val result = fastparse.parse("[a | b]", MermaidParser.nodeShape(using _))
+        assertTrue(result.get.value == ("a | b", NodeShape.Rect))
+      },
+      test("parses rect with quoted parens") {
+        val result = fastparse.parse("""["a (b)"]""", MermaidParser.nodeShape(using _))
+        assertTrue(result.get.value == ("a (b)", NodeShape.Rect))
+      },
     ),
     suite("nodeDef")(
       test("parses bare identifier as rect node") {
@@ -80,6 +152,14 @@ object ParserSpec extends ZIOSpecDefault:
       test("parses node with round shape") {
         val result = fastparse.parse("B(Round Node)", MermaidParser.nodeDef(using _))
         assertTrue(result.get.value == NodeDef("B", Some("Round Node"), NodeShape.Round))
+      },
+      test("parses node with quoted slash in label") {
+        val result = fastparse.parse("""A["a / b"]""", MermaidParser.nodeDef(using _))
+        assertTrue(result.get.value == NodeDef("A", Some("a / b"), NodeShape.Rect))
+      },
+      test("parses node with unquoted slash in label") {
+        val result = fastparse.parse("A[a / b]", MermaidParser.nodeDef(using _))
+        assertTrue(result.get.value == NodeDef("A", Some("a / b"), NodeShape.Rect))
       },
     ),
     suite("edgeStyle")(
@@ -209,6 +289,43 @@ object ParserSpec extends ZIOSpecDefault:
           result.isRight,
           result.toOption.get.asInstanceOf[Diagram.Flowchart].direction == Direction.TB,
         )
+      },
+      test("parses flowchart with unquoted slashes in node labels") {
+        val input =
+          """flowchart TD
+            |  Shell[zipx-shell · Script / Command / Word / ShTest] --> Steps2[Step.run]
+            |""".stripMargin
+        val result = MermaidParser.parse(input)
+        assertTrue(result.isRight)
+        val nodes = StyleResolver.collectNodes(result.toOption.get.asInstanceOf[Diagram.Flowchart].statements)
+        assertTrue(
+          nodes("Shell").label.contains("zipx-shell · Script / Command / Word / ShTest"),
+          nodes("Steps2").label.contains("Step.run"),
+        )
+      },
+      test("parses flowchart with quoted slashes and pipes in node labels") {
+        val input =
+          """flowchart LR
+            |  A["a / b"] --> B["c | d"]
+            |  C[a \ b] --> D(a / b)
+            |""".stripMargin
+        val result = MermaidParser.parse(input)
+        assertTrue(result.isRight)
+        val nodes = StyleResolver.collectNodes(result.toOption.get.asInstanceOf[Diagram.Flowchart].statements)
+        assertTrue(
+          nodes("A").label.contains("a / b"),
+          nodes("B").label.contains("c | d"),
+          nodes("C").label.contains("a \\ b"),
+          nodes("D").label.contains("a / b"),
+        )
+      },
+      test("parse failure after a valid header points past line 1") {
+        val input =
+          """flowchart LR
+            |  A[broken
+            |""".stripMargin
+        val err = MermaidParser.parse(input).swap.toOption.get
+        assertTrue(!err.contains("Position 1:1"))
       },
     ),
     suite("state diagram")(
@@ -375,6 +492,36 @@ object ParserSpec extends ZIOSpecDefault:
           outer.head.id == "outer",
           outer.head.statements.collect { case s: FlowStatement.SubgraphSt => s.id } == List("inner"),
         )
+      },
+      test("parses a subgraph with a slash in its label") {
+        val input =
+          """flowchart TD
+            |    subgraph s ["Script / Command"]
+            |        A[a] --> B[b]
+            |    end
+            |""".stripMargin
+        val result = MermaidParser.parse(input)
+        assertTrue(result.isRight)
+        val subs = result.toOption.get
+          .asInstanceOf[Diagram.Flowchart]
+          .statements
+          .collect { case s: FlowStatement.SubgraphSt => s }
+        assertTrue(subs.size == 1, subs.head.label.contains("Script / Command"))
+      },
+      test("parses a subgraph with an unquoted slash in its label") {
+        val input =
+          """flowchart TD
+            |    subgraph s [Script / Command]
+            |        A[a] --> B[b]
+            |    end
+            |""".stripMargin
+        val result = MermaidParser.parse(input)
+        assertTrue(result.isRight)
+        val subs = result.toOption.get
+          .asInstanceOf[Diagram.Flowchart]
+          .statements
+          .collect { case s: FlowStatement.SubgraphSt => s }
+        assertTrue(subs.size == 1, subs.head.label.contains("Script / Command"))
       },
       test("a subgraph's nodes and edges are collected for layout") {
         val input =
