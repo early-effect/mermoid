@@ -16,10 +16,18 @@ object MermaidParser:
     P(CharPred(c => c.isLetterOrDigit || c == '_').rep(1).!)
 
   private[mermoid] def quotedString(using P[Any]): P[String] =
-    P("\"" ~/ CharsWhile(_ != '"', 0).! ~ "\"")
+    P("\"" ~ CharsWhile(_ != '"', 0).! ~ "\"")
+
+  /** Unquoted label body up to (but not including) `end`, never crossing a newline. */
+  private[mermoid] def labelUntil(end: => P[Unit])(using P[Any]): P[String] =
+    P((!(end | "\n") ~ AnyChar).rep(1).!)
+
+  /** Quoted label, or unquoted text stopped at the shape's closer. */
+  private[mermoid] def labelOrQuoted(end: => P[Unit])(using P[Any]): P[String] =
+    P(quotedString | labelUntil(end))
 
   private[mermoid] def labelText(using P[Any]): P[String] =
-    P(CharsWhile(c => c != ']' && c != ')' && c != '}' && c != '/' && c != '\\' && c != '|' && c != '\n', 1).!)
+    labelUntil("]")
 
   // -- Direction --------------------------------------------------------------
 
@@ -36,19 +44,19 @@ object MermaidParser:
 
   private[mermoid] def nodeShape(using P[Any]): P[(String, NodeShape)] =
     P(
-      ("(((" ~ labelText ~ ")))").map(l => (l, NodeShape.DoubleCircle)) |
-        ("((" ~ labelText ~ "))").map(l => (l, NodeShape.Circle)) |
-        ("([" ~ labelText ~ "])").map(l => (l, NodeShape.Stadium)) |
-        ("[/" ~ labelText ~ "\\]").map(l => (l, NodeShape.Trapezoid)) |
-        ("[\\" ~ labelText ~ "/]").map(l => (l, NodeShape.TrapezoidAlt)) |
-        ("[/" ~ labelText ~ "/]").map(l => (l, NodeShape.Parallelogram)) |
-        ("[\\" ~ labelText ~ "\\]").map(l => (l, NodeShape.ParallelogramAlt)) |
-        ("[[" ~ labelText ~ "]]").map(l => (l, NodeShape.Subroutine)) |
-        ("[(" ~ labelText ~ ")]").map(l => (l, NodeShape.Cylinder)) |
-        ("{{" ~ labelText ~ "}}").map(l => (l, NodeShape.Hexagon)) |
-        ("{" ~ labelText ~ "}").map(l => (l, NodeShape.Rhombus)) |
-        ("(" ~ labelText ~ ")").map(l => (l, NodeShape.Round)) |
-        ("[" ~ labelText ~ "]").map(l => (l, NodeShape.Rect))
+      ("(((" ~ labelOrQuoted(")))") ~ ")))").map(l => (l, NodeShape.DoubleCircle)) |
+        ("((" ~ labelOrQuoted("))") ~ "))").map(l => (l, NodeShape.Circle)) |
+        ("([" ~ labelOrQuoted("])") ~ "])").map(l => (l, NodeShape.Stadium)) |
+        ("[/" ~ labelOrQuoted("\\]") ~ "\\]").map(l => (l, NodeShape.Trapezoid)) |
+        ("[\\" ~ labelOrQuoted("/]") ~ "/]").map(l => (l, NodeShape.TrapezoidAlt)) |
+        ("[/" ~ labelOrQuoted("/]") ~ "/]").map(l => (l, NodeShape.Parallelogram)) |
+        ("[\\" ~ labelOrQuoted("\\]") ~ "\\]").map(l => (l, NodeShape.ParallelogramAlt)) |
+        ("[[" ~ labelOrQuoted("]]") ~ "]]").map(l => (l, NodeShape.Subroutine)) |
+        ("[(" ~ labelOrQuoted(")]") ~ ")]").map(l => (l, NodeShape.Cylinder)) |
+        ("{{" ~ labelOrQuoted("}}") ~ "}}").map(l => (l, NodeShape.Hexagon)) |
+        ("{" ~ labelOrQuoted("}") ~ "}").map(l => (l, NodeShape.Rhombus)) |
+        ("(" ~ labelOrQuoted(")") ~ ")").map(l => (l, NodeShape.Round)) |
+        ("[" ~ labelOrQuoted("]") ~ "]").map(l => (l, NodeShape.Rect))
     )
 
   // -- Node definition --------------------------------------------------------
@@ -182,7 +190,7 @@ object MermaidParser:
 
   private[mermoid] def subgraphSt(using P[Any]): P[FlowStatement.SubgraphSt] =
     P(
-      "subgraph" ~ ws ~ identifier ~ (ws ~ "[" ~ labelText ~ "]").? ~ nl ~
+      "subgraph" ~ ws ~ identifier ~ (ws ~ "[" ~ labelOrQuoted("]") ~ "]").? ~ nl ~
         ("direction" ~ ws ~ direction ~ nl).? ~
         flowStatements ~
         wsnl ~ endKeyword
@@ -263,7 +271,7 @@ object MermaidParser:
     P(("flowchart" | "graph") ~ ws ~ direction.? ~ nl).map(_.getOrElse(Direction.TB))
 
   private[mermoid] def flowchart(using P[Any]): P[Diagram.Flowchart] =
-    P(wsnl ~ flowchartHeader ~ flowStatements ~ wsnl ~ End).map { case (dir, stmts) =>
+    P(wsnl ~ flowchartHeader ~/ flowStatements ~ wsnl ~ End).map { case (dir, stmts) =>
       Diagram.Flowchart(dir, stmts)
     }
 
