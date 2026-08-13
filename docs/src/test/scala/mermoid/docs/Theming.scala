@@ -2,7 +2,7 @@ package mermoid.docs
 
 import mermoid.ascent.MermoidAscent
 import _root_.mermoid.RenderConfig
-import _root_.mermoid.css.{CssValue, ThemeName}
+import _root_.mermoid.css.{CssValue, ThemeName, ThemeVar}
 import specular.*
 import specular.ziotest.DocSpecSuite
 import zio.test.*
@@ -21,8 +21,8 @@ object Theming extends DocSpecSuite:
 
   def doc = page("Theming")(
     md"""
-`RenderConfig(theme = …)` picks one of four palettes. Each is a `ThemeColors` record turned into a stylesheet: twenty
-CSS custom properties on `:root`, plus the rules that consume them.
+`RenderConfig(theme = …)` picks one of ${ThemeName.values.size} palettes (`ThemeName`). Each is a `ThemeColors` record
+turned into a stylesheet: one CSS custom property per `ThemeVar` on `:root`, plus the rules that consume them.
 """,
     section("Default")(example(themed(ThemeName.Default))),
     section("Dark")(example(themed(ThemeName.Dark))),
@@ -31,31 +31,18 @@ CSS custom properties on `:root`, plus the rules that consume them.
     section("The variables")(
       md"""
 Every colour and font in the output comes from one of these, so overriding one variable in your own stylesheet restyles
-everything that uses it:
+everything that uses it. The table is `ThemeVar`: each member carries its CSS name and description.
 
-| Variable | Used by |
-|---|---|
-| `--mermoid-main-bkg` | node fill |
-| `--mermoid-node-border` | node stroke, subgraph frame |
-| `--mermoid-line` | edge stroke, arrowheads, `[*]` markers |
-| `--mermoid-text` | node, edge and subgraph labels |
-| `--mermoid-font-family` | all text |
-| `--mermoid-font-size` | node and subgraph labels |
-| `--mermoid-edge-label-bg` | the rect behind an edge label |
-| `--mermoid-note-bg` | note fill |
-| `--mermoid-note-border` | note stroke and connector |
-| `--mermoid-note-text` | note text |
-| `--mermoid-background` | available for a page/container background |
-| `--mermoid-primary*`, `--mermoid-secondary*`, `--mermoid-tertiary*` | palette slots for your own rules |
+${ThemeVar.markdownTable}
 
-The `primary`/`secondary`/`tertiary` triples (colour, border, text) are not consumed by the built-in rules — they are
-there so a custom stylesheet can pick theme-consistent colours without hardcoding hexes.
+The `primary`/`secondary`/`tertiary` triples (colour, border, text) are not consumed by the built-in rules; they exist
+so a custom stylesheet can pick theme-consistent colours without hardcoding hexes.
 """,
       exampleValue {
         import _root_.mermoid.css.*
         val sheet = Theme.toStylesheet(ThemeName.Dark)
-        (sheet.variables.size, sheet.variables.get("--mermoid-node-border"))
-      }.assert(r => assertTrue(r == ((20, Some(CssValue.Color("#81B1DB")))))),
+        (sheet.variables.size, sheet.get(ThemeVar.NodeBorder))
+      }.assert(r => assertTrue(r == ((ThemeVar.values.size, Some(CssValue.Color("#81B1DB")))))),
     ),
     section("resolveVariables")(
       md"""
@@ -106,7 +93,7 @@ built yourself, and a whole stylesheet can be merged over any theme — see [Cus
         import _root_.mermoid.css.*
         val mine  = Theme.colors(ThemeName.Neutral).copy(nodeBorder = "#d97706", lineColor = "#92400e")
         val sheet = Theme.toStylesheet(mine)
-        sheet.variables.get("--mermoid-node-border")
+        sheet.get(ThemeVar.NodeBorder)
       }.assert(v => assertTrue(v == Some(CssValue.Color("#d97706")))),
       example {
         import _root_.mermoid.css.*

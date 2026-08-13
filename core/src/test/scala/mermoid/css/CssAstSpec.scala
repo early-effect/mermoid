@@ -60,10 +60,32 @@ object CssAstSpec extends ZIOSpecDefault:
         assertTrue(s == CssSelector.PseudoClass(base, "hover"))
       },
     ),
+    suite("CssProperty")(
+      test("parse is cssName for known properties") {
+        assertTrue(
+          CssProperty.parse(CssProperty.Fill.cssName) == CssProperty.Fill,
+          CssProperty.parse(CssProperty.StrokeWidth.cssName) == CssProperty.StrokeWidth,
+          CssProperty.parse(CssProperty.BackgroundColor.cssName) == CssProperty.BackgroundColor,
+          CssProperty.Fill.description.nonEmpty,
+        )
+      },
+      test("unknown names stay Custom") {
+        assertTrue(CssProperty.parse("opacity") == CssProperty.Custom("opacity"))
+      },
+      test("fill and stroke declare HTML twins") {
+        assertTrue(
+          CssProperty.Fill.htmlTwins == List(CssProperty.Background, CssProperty.BackgroundColor),
+          CssProperty.Stroke.htmlTwins == List(CssProperty.BorderColor),
+          CssProperty.Fill.isSvgPaint,
+          CssProperty.Background.isHtmlBox,
+          CssProperty.FontSize.htmlTwins.isEmpty,
+        )
+      },
+    ),
     suite("CssDeclaration")(
       test("holds property and value") {
         val d = CssDeclaration("fill", CssValue.Color("#f9f9f9"))
-        assertTrue(d.property == "fill", d.value == CssValue.Color("#f9f9f9"))
+        assertTrue(d.property == CssProperty.Fill, d.value == CssValue.Color("#f9f9f9"))
       }
     ),
     suite("CssRule")(
@@ -100,6 +122,15 @@ object CssAstSpec extends ZIOSpecDefault:
         val over     = Stylesheet(rules = List(overRule))
         val merged   = Stylesheet.merge(base, over)
         assertTrue(merged.rules == List(baseRule, overRule))
+      },
+    ),
+    suite("PaintClass")(
+      test("selector is a class of cssName") {
+        assertTrue(PaintClass.NodeShape.selector == CssSelector.Class("node-shape"))
+      },
+      test("markdown table lists every SVG class") {
+        val table = PaintClass.markdownTable
+        assertTrue(PaintClass.values.filter(_.inSvg).forall(c => table.contains(c.cssName)))
       },
     ),
   )

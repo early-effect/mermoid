@@ -9,7 +9,7 @@ object DiagramLayoutSpec extends ZIOSpecDefault:
       |  A[Start] --> B[End]
       |""".stripMargin
 
-  /** Separate edges (chained `A --> B --> C` is not parsed yet). */
+  /** A long LR chain so viewport tests have room to compress. */
   private val wideFlow =
     """flowchart LR
       |  A --> B

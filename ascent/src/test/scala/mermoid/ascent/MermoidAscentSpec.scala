@@ -2,6 +2,7 @@ package mermoid.ascent
 
 import ascent.html.Html
 import mermoid.*
+import zio.*
 import zio.test.*
 
 object MermoidAscentSpec extends ZIOSpecDefault:
@@ -58,11 +59,65 @@ object MermoidAscentSpec extends ZIOSpecDefault:
       for html <- Html.render(ui)
       yield assertTrue(html.contains("<svg"), html.contains("node-A") || html.contains("""id="node-A""""))
     },
-    test("css hybrid block is entity-safe") {
-      assertTrue(SvgBridge.cssIsEntitySafe(MermoidAscent.diagram(flow).toString) || true)
+    test("static hybrid CSS-fits the parent column") {
+      val ui = MermoidAscent.diagram(flow)
+      for html <- Html.render(ui)
+      yield assertTrue(
+        html.contains("mermoid-fit"),
+        html.contains("--mermoid-scene-width"),
+      )
+    },
+    test("diagramControlled paints the host-selected node") {
+      import _root_.ascent.squawk.sq
+      for
+        selected <- sq(Option.empty[String])
+        width    <- sq(640.0)
+        _        <- selected.set(Some("A"))
+        html     <- Html.render(
+          MermoidAscent.diagramControlled(flow, selected, _ => ZIO.unit, width)
+        )
+      yield assertTrue(
+        html.contains("is-selected"),
+        html.contains("mermoid-node"),
+        !html.contains("Narrow"),
+      )
+      end for
+    },
+    test("embedded style is not HTML-escaped") {
       val ui = MermoidAscent.diagram(flow)
       for html <- Html.render(ui)
       yield assertTrue(!html.contains("&lt;style"), html.contains("<style"))
+    },
+    test("class and classDef paint the hybrid node-shape") {
+      val src =
+        """flowchart LR
+          |  classDef warn fill:#4a4030,stroke:#e0c070
+          |  A[Tired] --> B[Zipx]
+          |  class A warn
+          |""".stripMargin
+      val ui = MermoidAscent.diagram(src)
+      for html <- Html.render(ui)
+      yield assertTrue(
+        html.contains("node-shape"),
+        html.contains("class=\"mermoid-node"),
+        html.contains("warn"),
+        html.contains("background: #4a4030") || html.contains("background:#4a4030"),
+        html.contains("border-color: #e0c070") || html.contains("border-color:#e0c070"),
+      )
+    },
+    test("subgraph frames land in the hybrid SVG layer") {
+      val src =
+        """flowchart LR
+          |  subgraph g [Group]
+          |    A --> B
+          |  end
+          |""".stripMargin
+      val ui = MermoidAscent.diagram(src)
+      for html <- Html.render(ui)
+      yield assertTrue(
+        html.contains("subgraph-rect"),
+        html.contains("subgraph-g") || html.contains("id=\"subgraph-g\""),
+      )
     },
   )
 end MermoidAscentSpec

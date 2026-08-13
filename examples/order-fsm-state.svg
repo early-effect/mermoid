@@ -22,6 +22,7 @@
   --mermoid-secondary: #ffffde;
   --mermoid-secondary-border: #aaaa33;
   --mermoid-secondary-text: #333;
+  --mermoid-selection: #333;
   --mermoid-tertiary: #f4f4f4;
   --mermoid-tertiary-border: #cccccc;
   --mermoid-tertiary-text: #333;

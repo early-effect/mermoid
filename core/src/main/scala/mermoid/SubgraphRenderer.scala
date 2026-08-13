@@ -1,6 +1,7 @@
 package mermoid
 
 import mermoid.SvgNode.{leaf, textElem}
+import mermoid.css.{PaintClass, WrapperClass}
 
 object SubgraphRenderer:
 
@@ -23,7 +24,7 @@ object SubgraphRenderer:
       val h     = maxY - minY
       val label = info.label.getOrElse(info.id)
       val rect  = leaf("rect")(
-        "class"  -> "subgraph-rect",
+        "class"  -> PaintClass.SubgraphRect.cssName,
         "x"      -> minX.f,
         "y"      -> minY.f,
         "width"  -> w.f,
@@ -32,11 +33,17 @@ object SubgraphRenderer:
         "ry"     -> "5",
       )
       val labelSvg = textElem("text")(
-        "class" -> "subgraph-label",
+        "class" -> PaintClass.SubgraphLabel.cssName,
         "x"     -> (minX + 8).f,
         "y"     -> (minY + labelHeight - 4).f,
       )(label)
-      Some(SvgNode.Element("g", List("class" -> "subgraph", "id" -> s"subgraph-${info.id}"), List(rect, labelSvg)))
+      Some(
+        SvgNode.Element(
+          "g",
+          List("class" -> WrapperClass.Subgraph.cssName, "id" -> s"subgraph-${info.id}"),
+          List(rect, labelSvg),
+        )
+      )
     end if
   end subgraphToSvg
 end SubgraphRenderer

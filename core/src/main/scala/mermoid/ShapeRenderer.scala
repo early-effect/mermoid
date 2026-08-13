@@ -1,27 +1,13 @@
 package mermoid
 
 import mermoid.SvgNode.{leaf, textElem}
+import mermoid.css.{PaintClass, WrapperClass}
 
 object ShapeRenderer:
 
-  private[mermoid] def shapeCssClass(shape: NodeShape): String = shape match
-    case NodeShape.Rect             => "rect"
-    case NodeShape.Round            => "round"
-    case NodeShape.Stadium          => "stadium"
-    case NodeShape.Subroutine       => "subroutine"
-    case NodeShape.Cylinder         => "cylinder"
-    case NodeShape.Circle           => "circle"
-    case NodeShape.DoubleCircle     => "double-circle"
-    case NodeShape.Rhombus          => "rhombus"
-    case NodeShape.Hexagon          => "hexagon"
-    case NodeShape.Parallelogram    => "parallelogram"
-    case NodeShape.ParallelogramAlt => "parallelogram-alt"
-    case NodeShape.Trapezoid        => "trapezoid"
-    case NodeShape.TrapezoidAlt     => "trapezoid-alt"
-
-  private[mermoid] def inlineStyle(styles: Map[String, String]): Option[String] =
+  private[mermoid] def inlineStyle(styles: Map[css.CssProperty, String]): Option[String] =
     if styles.isEmpty then None
-    else Some(styles.map((k, v) => s"$k: $v").mkString("; "))
+    else Some(styles.map((k, v) => s"${k.cssName}: $v").mkString("; "))
 
   def nodeToSvg(
       node: LayoutNode,
@@ -29,12 +15,11 @@ object ShapeRenderer:
       includeLabel: Boolean = true,
       interaction: Option[NodeInteraction] = None,
   ): SvgNode =
-    val shapeClass  = shapeCssClass(node.shape)
     val userClasses = node.cssClasses.map(c => s" $c").mkString
     val titleChild  = interaction.flatMap(_.tooltip).map(t => SvgNode.elem("title")()(SvgNode.Text(t))).toList
     val children    = titleChild ++ shapeToSvg(node, config) ++ Option.when(includeLabel)(labelToSvg(node))
     val attrs       = List(
-      "class" -> s"node node-$shapeClass$userClasses",
+      "class" -> s"${WrapperClass.Node.cssName} ${node.shape.wrapperClass}$userClasses",
       "id"    -> s"node-${node.id}",
     ) ++ inlineStyle(node.styles).map("style" -> _)
     val group = SvgNode.Element("g", attrs, children)
@@ -55,7 +40,7 @@ object ShapeRenderer:
 
     def box(rx: Double, ry: Double): SvgNode =
       leaf("rect")(
-        "class"  -> "node-shape",
+        "class"  -> PaintClass.NodeShape.cssName,
         "x"      -> (cx - hw).f,
         "y"      -> (cy - hh).f,
         "width"  -> node.width.f,
@@ -65,7 +50,7 @@ object ShapeRenderer:
       )
 
     def polygon(points: String): SvgNode =
-      leaf("polygon")("class" -> "node-shape", "points" -> points)
+      leaf("polygon")("class" -> PaintClass.NodeShape.cssName, "points" -> points)
 
     node.shape match
       case NodeShape.Rect       => List(box(0, 0))
@@ -75,7 +60,7 @@ object ShapeRenderer:
         val inset                       = lc.subroutineInset
         def divider(x: Double): SvgNode =
           leaf("line")(
-            "class" -> "node-shape",
+            "class" -> PaintClass.NodeShape.cssName,
             "x1"    -> x.f,
             "y1"    -> (cy - hh).f,
             "x2"    -> x.f,
@@ -83,7 +68,7 @@ object ShapeRenderer:
           )
         List(
           leaf("rect")(
-            "class"  -> "node-shape",
+            "class"  -> PaintClass.NodeShape.cssName,
             "x"      -> (cx - hw).f,
             "y"      -> (cy - hh).f,
             "width"  -> node.width.f,
@@ -96,25 +81,25 @@ object ShapeRenderer:
         val ry = lc.cylinderRy
         List(
           leaf("path")(
-            "class" -> "node-shape",
+            "class" -> PaintClass.NodeShape.cssName,
             "d" -> (s"M${(cx - hw).f},${(cy - hh + ry).f} A${hw.f},${ry.f} 0 0,1 ${(cx + hw).f},${(cy - hh + ry).f} " +
               s"V${(cy + hh - ry).f} A${hw.f},${ry.f} 0 0,1 ${(cx - hw).f},${(cy + hh - ry).f} Z"),
           ),
           leaf("path")(
-            "class" -> "node-shape",
+            "class" -> PaintClass.NodeShape.cssName,
             "d"     -> s"M${(cx - hw).f},${(cy - hh + ry).f} A${hw.f},${ry.f} 0 0,0 ${(cx + hw).f},${(cy - hh + ry).f}",
             "fill"  -> "none",
           ),
         )
       case NodeShape.Circle =>
         val r = Math.max(hw, hh)
-        List(leaf("circle")("class" -> "node-shape", "cx" -> cx.f, "cy" -> cy.f, "r" -> r.f))
+        List(leaf("circle")("class" -> PaintClass.NodeShape.cssName, "cx" -> cx.f, "cy" -> cy.f, "r" -> r.f))
       case NodeShape.DoubleCircle =>
         val r = Math.max(hw, hh)
         List(
-          leaf("circle")("class" -> "node-shape", "cx" -> cx.f, "cy" -> cy.f, "r" -> r.f),
+          leaf("circle")("class" -> PaintClass.NodeShape.cssName, "cx" -> cx.f, "cy" -> cy.f, "r" -> r.f),
           leaf("circle")(
-            "class" -> "node-shape",
+            "class" -> PaintClass.NodeShape.cssName,
             "cx"    -> cx.f,
             "cy"    -> cy.f,
             "r"     -> (r - lc.doubleCircleGap).f,
@@ -168,7 +153,7 @@ object ShapeRenderer:
 
   def labelToSvg(node: LayoutNode): SvgNode =
     textElem("text")(
-      "class"             -> "node-label",
+      "class"             -> PaintClass.NodeLabel.cssName,
       "x"                 -> node.center.x.f,
       "y"                 -> node.center.y.f,
       "text-anchor"       -> "middle",

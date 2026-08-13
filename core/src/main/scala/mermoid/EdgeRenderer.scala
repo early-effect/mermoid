@@ -1,6 +1,7 @@
 package mermoid
 
 import mermoid.SvgNode.{leaf, textElem}
+import mermoid.css.{PaintClass, WrapperClass}
 import scala.util.boundary, boundary.break
 
 object EdgeRenderer:
@@ -201,7 +202,7 @@ object EdgeRenderer:
     val (w, h) = labelSize(lbl, lc)
     List(
       leaf("rect")(
-        "class"  -> "edge-label-bg",
+        "class"  -> PaintClass.EdgeLabelBg.cssName,
         "x"      -> (mx - w / 2).f,
         "y"      -> (my - h / 2).f,
         "width"  -> w.f,
@@ -210,7 +211,7 @@ object EdgeRenderer:
         "ry"     -> "3",
       ),
       textElem("text")(
-        "class"             -> "edge-label",
+        "class"             -> PaintClass.EdgeLabel.cssName,
         "x"                 -> mx.f,
         "y"                 -> my.f,
         "text-anchor"       -> "middle",
@@ -219,20 +220,12 @@ object EdgeRenderer:
     )
   end edgeLabelSvg
 
-  private[mermoid] def edgeStyleCssClass(style: EdgeStyle): String = style match
-    case EdgeStyle.Arrow      => "arrow"
-    case EdgeStyle.Open       => "open"
-    case EdgeStyle.Dotted     => "dotted"
-    case EdgeStyle.Thick      => "thick"
-    case EdgeStyle.DottedOpen => "dotted-open"
-
   private def edgeId(edge: LayoutEdge): String =
     edge.alias.getOrElse(s"${edge.from}-${edge.to}-${edge.edgeIndex}")
 
   /** `marker-end` attribute, present only for the arrow-headed edge styles. */
-  private def markerAttr(style: EdgeStyle): List[(String, String)] = style match
-    case EdgeStyle.Open | EdgeStyle.DottedOpen => Nil
-    case _                                     => List("marker-end" -> "url(#arrowhead)")
+  private def markerAttr(style: EdgeStyle): List[(String, String)] =
+    if style.arrowhead then List("marker-end" -> s"url(#${PaintClass.Arrowhead.cssName})") else Nil
 
   def edgeToSvg(
       config: RenderConfig,
@@ -246,8 +239,7 @@ object EdgeRenderer:
     val lc     = config.layout
     val marker = markerAttr(edge.style)
 
-    val styleClass    = edgeStyleCssClass(edge.style)
-    val selfLoopClass = if edge.from == edge.to then " self-loop" else ""
+    val selfLoopClass = if edge.from == edge.to then s" ${PaintClass.SelfLoop.cssName}" else ""
     val children      =
       if edge.from == edge.to then renderSelfLoop(lc, edge, from, selfLoopSide, marker)
       else renderRoutedEdge(lc, edge, from, to, nodeMap, marker, waypoints)
@@ -255,7 +247,7 @@ object EdgeRenderer:
     SvgNode.Element(
       "g",
       List(
-        "class"     -> s"edge edge-$styleClass$selfLoopClass",
+        "class"     -> s"${WrapperClass.Edge.cssName} ${edge.style.wrapperClass}$selfLoopClass",
         "id"        -> s"edge-${edgeId(edge)}",
         "data-from" -> edge.from,
         "data-to"   -> edge.to,
@@ -265,7 +257,7 @@ object EdgeRenderer:
   end edgeToSvg
 
   private def curve(d: String, marker: List[(String, String)]): SvgNode =
-    SvgNode.Element("path", List("class" -> "edge-line", "d" -> d, "fill" -> "none") ++ marker, Nil)
+    SvgNode.Element("path", List("class" -> PaintClass.EdgeLine.cssName, "d" -> d, "fill" -> "none") ++ marker, Nil)
 
   private def renderSelfLoop(
       lc: LayoutConfig,

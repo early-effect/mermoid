@@ -1,6 +1,7 @@
 package mermoid.docs
 
 import mermoid.ascent.MermoidAscent
+import mermoid.css.{PaintClass, WrapperClass}
 import specular.*
 import specular.ziotest.DocSpecSuite
 import zio.test.*
@@ -70,12 +71,7 @@ Callback names are **not** written as attributes; hosts that need them read `Dia
     ),
     section("Wrapper groups")(
       md"""
-| Element | Class | Id |
-|---|---|---|
-| node | `node node-{shape}` + any `class` names | `node-{nodeId}` |
-| edge | `edge edge-{style}` (+ ` self-loop`) | `edge-{alias}` or `edge-{from}-{to}-{index}` |
-| note | `note` | `note-{alias}` or `note-{stateId}-{index}` |
-| subgraph | `subgraph` | `subgraph-{id}` |
+${WrapperClass.markdownTable}
 
 Edges also carry `data-from` and `data-to` with the endpoint node ids, which is how you find every edge touching a node
 without parsing its id: `[data-from="A"], [data-to="A"]`.
@@ -104,23 +100,10 @@ source and never shift.
     ),
     section("Inner parts")(
       md"""
-Inside a wrapper, the pieces carry their own classes — these are what you actually style, since the wrapper is a `<g>`
+Inside a wrapper, the pieces carry their own classes (`PaintClass`) — these are what you actually style, since the wrapper is a `<g>`
 with no paint of its own:
 
-| Class | Element | What it is |
-|---|---|---|
-| `node-shape` | `rect`/`circle`/`polygon`/`path` | the node outline |
-| `node-label` | `text` | the node's text |
-| `edge-line` | `path` | the edge itself |
-| `edge-label` | `text` | the edge's label |
-| `edge-label-bg` | `rect` | the plate behind an edge label |
-| `note-rect` | `rect` | a note's box |
-| `note-text` | `text` | a note's text |
-| `note-connector` | `path` | the dashed line to its state |
-| `subgraph-rect` | `rect` | a subgraph frame |
-| `subgraph-label` | `text` | a subgraph's title |
-| `arrowhead` | `polygon` | the shared marker |
-| `start-end` | on a node wrapper | `[*]` in a state diagram |
+${PaintClass.markdownTable}
 
 So `.node-circle .node-shape { fill: … }` fills only circles, and `.edge-dotted .edge-line { stroke-dasharray: … }` is
 exactly how the built-in themes implement dashing — the dash pattern is CSS, not geometry.

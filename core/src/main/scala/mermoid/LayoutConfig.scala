@@ -29,4 +29,7 @@ case class LayoutConfig(
     coordinateIterations: Int = 4,
     /** Perpendicular offset between parallel edges sharing the same endpoints. */
     parallelEdgeSpacing: Double = 20.0,
+    /** When set, node labels wrap to this width (character-estimate) instead of growing the node. */
+    maxLabelWidth: Option[Double] = None,
+    lineHeight: Double = 18.0,
 )

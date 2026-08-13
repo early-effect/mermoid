@@ -4,6 +4,7 @@ import mermoid.ascent.MermoidAscent
 import specular.*
 import specular.ziotest.DocSpecSuite
 import zio.test.*
+import _root_.mermoid.{EdgeStyle, NodeShape}
 
 /** Every flowchart construct mermoid implements, rendered live. */
 object Flowcharts extends DocSpecSuite:
@@ -31,29 +32,20 @@ axis and where self-loops attach.
                             |""".stripMargin)
       },
       md"""
-One edge per statement — mermoid does not implement Mermaid's chained `A --> B --> C` shorthand yet. Write the second
-edge on its own line, referring to `B` by id.
+Chained `A --> B --> C` is one hop per pair, same as writing each edge on its own line. `%%` comments are ignored.
 """,
+      example {
+        MermoidAscent.svgDiagram("""flowchart LR
+                            |    %% pipeline sketch
+                            |    A[Read] --> B[Transform] --> C[Write]
+                            |""".stripMargin)
+      },
     ),
     section("Node shapes")(
       md"""
-Thirteen shapes. A bare id with no bracket syntax is a `Rect` labelled with the id itself.
+${NodeShape.values.size} shapes (`NodeShape`). A bare id with no bracket syntax is a `Rect` labelled with the id itself.
 
-| Syntax | `NodeShape` | CSS class |
-|---|---|---|
-| `A[text]` | `Rect` | `node-rect` |
-| `A(text)` | `Round` | `node-round` |
-| `A([text])` | `Stadium` | `node-stadium` |
-| `A[[text]]` | `Subroutine` | `node-subroutine` |
-| `A[(text)]` | `Cylinder` | `node-cylinder` |
-| `A((text))` | `Circle` | `node-circle` |
-| `A(((text)))` | `DoubleCircle` | `node-double-circle` |
-| `A{text}` | `Rhombus` | `node-rhombus` |
-| `A{{text}}` | `Hexagon` | `node-hexagon` |
-| `A[/text/]` | `Parallelogram` | `node-parallelogram` |
-| `A[\\text\\]` | `ParallelogramAlt` | `node-parallelogram-alt` |
-| `A[/text\\]` | `Trapezoid` | `node-trapezoid` |
-| `A[\\text/]` | `TrapezoidAlt` | `node-trapezoid-alt` |
+${NodeShape.markdownTable}
 """,
       example {
         MermoidAscent.svgDiagram("""flowchart LR
@@ -94,15 +86,9 @@ node without touching the diagram source. See [SVG structure](svg-structure.html
     ),
     section("Edge styles")(
       md"""
-Five edge styles. Each contributes a class to the edge group, and the dashing lives in CSS rather than in the geometry.
+${EdgeStyle.values.size} edge styles (`EdgeStyle`). Each contributes a class to the edge group, and the dashing lives in CSS rather than in the geometry.
 
-| Syntax | `EdgeStyle` | CSS class | Arrowhead |
-|---|---|---|---|
-| `A --> B` | `Arrow` | `edge-arrow` | yes |
-| `A --- B` | `Open` | `edge-open` | no |
-| `A -.-> B` | `Dotted` | `edge-dotted` | yes |
-| `A -.- B` | `DottedOpen` | `edge-dotted-open` | no |
-| `A ==> B` | `Thick` | `edge-thick` | yes |
+${EdgeStyle.markdownTable}
 """,
       example {
         MermoidAscent.svgDiagram("""flowchart LR
@@ -265,8 +251,8 @@ Try the same source under hybrid selection and hover on [Interactive](interactiv
       md"""
 | Case | Behaviour |
 |---|---|
-| Chained edges `A --> B --> C` | Not supported. One edge per statement. |
-| `%%` comments / `%%{init:…}%%` | Not supported. Strip before parse. |
+| Chained edges `A --> B --> C` | One hop per pair, same as writing each edge on its own line. |
+| `%%` comments / `%%{init:…}%%` | Comments are ignored. Init directives are skipped; they do not pick a theme. |
 | Parallel edges (same endpoints twice) | Both render, offset so they do not overlap. Alias with `as` if you CSS-select one. |
 | Cycles / back-edges | Layering breaks cycles; barycenter cuts crossings; long edges use waypoints. |
 | `linkStyle` | Not implemented. |

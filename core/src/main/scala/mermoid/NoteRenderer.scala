@@ -1,6 +1,7 @@
 package mermoid
 
 import mermoid.SvgNode.{leaf, textElem}
+import mermoid.css.{PaintClass, WrapperClass}
 
 object NoteRenderer:
 
@@ -112,7 +113,7 @@ object NoteRenderer:
       else if cy >= ny then (nx, ny + node.height / 2, cx, box.y)
       else (nx, ny - node.height / 2, cx, box.bottom)
     leaf("line")(
-      "class" -> "note-connector",
+      "class" -> PaintClass.NoteConnector.cssName,
       "x1"    -> x1.f,
       "y1"    -> y1.f,
       "x2"    -> x2.f,
@@ -138,7 +139,7 @@ object NoteRenderer:
         case NoteTextAlign.Left   => ("start", box.x + 10)
       val lineHeight = lc.edgeLabelFontSize + 4
       val rect       = leaf("rect")(
-        "class"  -> "note-rect",
+        "class"  -> PaintClass.NoteRect.cssName,
         "x"      -> box.x.f,
         "y"      -> box.y.f,
         "width"  -> noteW.f,
@@ -149,7 +150,7 @@ object NoteRenderer:
       val textSvg = lines.toList.zipWithIndex.map { case (line, i) =>
         val ty = box.y + 10 + i * lineHeight + lineHeight / 2
         textElem("text")(
-          "class"             -> "note-text",
+          "class"             -> PaintClass.NoteText.cssName,
           "x"                 -> textX.f,
           "y"                 -> ty.f,
           "text-anchor"       -> textAnchor,
@@ -158,7 +159,7 @@ object NoteRenderer:
       }
       SvgNode.Element(
         "g",
-        List("class" -> "note", "id" -> s"note-${noteId(note)}"),
+        List("class" -> WrapperClass.Note.cssName, "id" -> s"note-${noteId(note)}"),
         connector(node, box) :: rect :: textSvg,
       )
     }

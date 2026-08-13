@@ -2,15 +2,20 @@ package mermoid
 
 import fastparse.*
 import fastparse.NoWhitespace.*
+import mermoid.css.CssProperty
 
 object MermaidParser:
 
   // -- Helpers ----------------------------------------------------------------
 
-  private[mermoid] def ws(using P[Any]): P[Unit]   = P(CharsWhileIn(" \t", 0))
-  private[mermoid] def nl(using P[Any]): P[Unit]   = P(ws ~ ("\r\n" | "\n") ~ ws)
-  private[mermoid] def wsnl(using P[Any]): P[Unit] = P(CharsWhileIn(" \t\r\n", 0))
-  private[mermoid] def sep(using P[Any]): P[Unit]  = P((ws ~ (";" | nl) ~ wsnl).rep(1))
+  private[mermoid] def ws(using P[Any]): P[Unit]             = P(CharsWhileIn(" \t", 0))
+  private[mermoid] def nl(using P[Any]): P[Unit]             = P(ws ~ ("\r\n" | "\n") ~ ws)
+  private[mermoid] def mermaidComment(using P[Any]): P[Unit] =
+    P("%%{" ~ (!"}%%" ~ AnyChar).rep ~ "}%%") |
+      P("%%" ~ CharsWhile(c => c != '\n' && c != '\r', 0))
+  private[mermoid] def wsnl(using P[Any]): P[Unit] =
+    P((CharsWhileIn(" \t\r\n", 1) | mermaidComment).rep)
+  private[mermoid] def sep(using P[Any]): P[Unit] = P((ws ~ (";" | nl | mermaidComment) ~ wsnl).rep(1))
 
   private[mermoid] def identifier(using P[Any]): P[String] =
     P(CharPred(c => c.isLetterOrDigit || c == '_').rep(1).!)
@@ -95,16 +100,31 @@ object MermaidParser:
       FlowStatement.EdgeSt(Edge(fromDef.id, toDef.id, style, label, alias), fromDef, toDef)
     }
 
+  /** `A --> B --> C` becomes one [[FlowStatement.EdgeSt]] per hop. Alias applies to the last hop. */
+  private[mermoid] def edgeChain(using P[Any]): P[List[FlowStatement.EdgeSt]] =
+    P(nodeDef ~ (ws ~ edgeStyle ~ ws ~ nodeDef).rep(1) ~ asAlias.?).map { case (first, hops, alias) =>
+      val hopList = hops.toList
+      hopList.zipWithIndex
+        .foldLeft((Vector.empty[FlowStatement.EdgeSt], first)) { case ((acc, from), ((style, label, to), i)) =>
+          val hopAlias                 = if i == hopList.length - 1 then alias else None
+          val st: FlowStatement.EdgeSt =
+            FlowStatement.EdgeSt(Edge(from.id, to.id, style, label, hopAlias), from, to)
+          (acc :+ st, to)
+        }
+        ._1
+        .toList
+    }
+
   private[mermoid] def nodeSt(using P[Any]): P[FlowStatement.NodeSt] =
     P(nodeDef).map(FlowStatement.NodeSt(_))
 
-  private[mermoid] def styleProperty(using P[Any]): P[(String, String)] =
+  private[mermoid] def styleProperty(using P[Any]): P[(CssProperty, String)] =
     P(
       CharPred(c => c.isLetter || c == '-' || c == '_').rep(1).! ~ ws ~ ":" ~ ws ~
         CharsWhile(c => c != ',' && c != ';' && c != '\n', 1).!
-    )
+    ).map { case (name, value) => CssProperty.parse(name) -> value.trim }
 
-  private[mermoid] def styleProperties(using P[Any]): P[Map[String, String]] =
+  private[mermoid] def styleProperties(using P[Any]): P[Map[CssProperty, String]] =
     P(styleProperty.rep(sep = ws ~ "," ~ ws)).map(_.toMap)
 
   private[mermoid] def styleSt(using P[Any]): P[FlowStatement.StyleSt] =
@@ -207,12 +227,22 @@ object MermaidParser:
     * Without the guard `nodeSt` accepts `end` as a node id — `end` is a perfectly good identifier — so the statement
     * list swallows the closing keyword and the enclosing `subgraphSt` can never match it.
     */
-  private[mermoid] def flowStatement(using P[Any]): P[FlowStatement] =
+  private[mermoid] def flowStatement(using P[Any]): P[List[FlowStatement]] =
     // `click` must precede `nodeSt`: otherwise `click A …` is swallowed as a bare node id.
-    P(!endKeyword ~ (subgraphSt | styleSt | classDefSt | classSt | clickSt | edgeSt | nodeSt))
+    P(
+      !endKeyword ~ (
+        subgraphSt.map(s => List[FlowStatement](s)) |
+          styleSt.map(s => List(s)) |
+          classDefSt.map(s => List(s)) |
+          classSt.map(s => List(s)) |
+          clickSt.map(s => List(s)) |
+          edgeChain |
+          nodeSt.map(s => List(s))
+      )
+    )
 
   private[mermoid] def flowStatements(using P[Any]): P[List[FlowStatement]] =
-    P(wsnl ~ flowStatement.rep(sep = sep) ~ wsnl).map(_.toList)
+    P(wsnl ~ flowStatement.rep(sep = sep) ~ wsnl).map(_.toList.flatten)
 
   // -- State Diagram -----------------------------------------------------------
 

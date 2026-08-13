@@ -1,5 +1,7 @@
 package mermoid
 
+import mermoid.css.PaintClass
+
 /** Builds a paint-ready [[DiagramScene]] from a parsed [[Diagram]]. */
 object DiagramLayout:
 
@@ -169,7 +171,8 @@ object DiagramLayout:
     val cfg         = config.copy(layout = lc)
     val laid        = Layout.layout(lc, dir, nodeDefs, edges)
     val layoutNodes = laid.nodes.map { n =>
-      if n.id == "[*]" || n.id == endId then n.copy(width = 16, height = 16, cssClasses = List("start-end"))
+      if n.id == "[*]" || n.id == endId then
+        n.copy(width = 16, height = 16, cssClasses = List(PaintClass.StartEnd.cssName))
       else n
     }
     val routes      = laid.routes

@@ -2,7 +2,7 @@ package mermoid.docs
 
 import mermoid.ascent.MermoidAscent
 import _root_.mermoid.RenderConfig
-import _root_.mermoid.css.{CssParser, Stylesheet, ThemeName}
+import _root_.mermoid.css.{CssParser, PaintClass, Stylesheet, ThemeName}
 import specular.*
 import specular.ziotest.DocSpecSuite
 import zio.test.*
@@ -89,7 +89,7 @@ over, or derived from application data.
         val statusColors = List("ok" -> "#16a34a", "warn" -> "#ca8a04", "fail" -> "#dc2626")
         val rules        = statusColors.map { (name, color) =>
           CssRule(
-            CssSelector.Descendant(CssSelector.Class(name), CssSelector.Class("node-shape")),
+            CssSelector.Descendant(CssSelector.Class(name), PaintClass.NodeShape.selector),
             List(CssDeclaration("stroke", CssValue.Color(color)), CssDeclaration("stroke-width", CssValue.Number(3))),
           )
         }
@@ -128,6 +128,19 @@ from the outside, prefer `class` + `classDef`, or strip `style` statements befor
             svg.indexOf(".node-shape {") < svg.indexOf(".hot {")
           }
       }.assert(r => assertTrue(r == Right(true))),
+      md"""
+The same `classDef` / `class` source paints hybrid HTML: `fill` becomes `background` on the inner `.node-shape`, `stroke`
+becomes `border-color`. Hosts can keep writing SVG paint properties.
+""",
+      example {
+        MermoidAscent.diagram(
+          """flowchart LR
+            |  classDef warn fill:#4a4030,stroke:#e0c070
+            |  A[Tired] --> B[Zipx]
+            |  class A warn
+            |""".stripMargin
+        )
+      },
     ),
     section("Styling a diagram already on the page")(
       md"""
