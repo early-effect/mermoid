@@ -248,6 +248,16 @@ object ParserSpec extends ZIOSpecDefault:
         val edge   = result.get.value.edge
         assertTrue(edge.alias.isEmpty)
       },
+      test("parses a chained edge into one hop per pair") {
+        val result = fastparse.parse("A --> B --> C", MermaidParser.edgeChain(using _))
+        val hops   = result.get.value.map(_.edge).map(e => (e.from, e.to, e.style))
+        assertTrue(hops == List(("A", "B", EdgeStyle.Arrow), ("B", "C", EdgeStyle.Arrow)))
+      },
+      test("chained edge alias lands on the last hop") {
+        val result = fastparse.parse("A --> B --> C as last", MermaidParser.edgeChain(using _))
+        val hops   = result.get.value.map(_.edge)
+        assertTrue(hops.head.alias.isEmpty, hops.last.alias.contains("last"))
+      },
     ),
     suite("full diagram")(
       test("parses simple flowchart") {
@@ -270,6 +280,26 @@ object ParserSpec extends ZIOSpecDefault:
           result.isRight,
           result.toOption.get.asInstanceOf[Diagram.Flowchart].statements.size == 3,
         )
+      },
+      test("parses chained edges in a flowchart") {
+        val result = MermaidParser.parse("flowchart LR\n  A --> B --> C\n")
+        val edges  = result.toOption.get.asInstanceOf[Diagram.Flowchart].statements.collect {
+          case FlowStatement.EdgeSt(e, _, _) => (e.from, e.to)
+        }
+        assertTrue(edges == List(("A", "B"), ("B", "C")))
+      },
+      test("ignores %% comments and init directives") {
+        val input =
+          """%% a comment
+            |%%{init: {'theme': 'dark'}}%%
+            |flowchart LR
+            |  A --> B
+            |  %% another
+            |  B --> C
+            |""".stripMargin
+        val result = MermaidParser.parse(input)
+        val n      = result.toOption.get.asInstanceOf[Diagram.Flowchart].statements.size
+        assertTrue(result.isRight, n == 2)
       },
       test("parses graph keyword as alias for flowchart") {
         val input =

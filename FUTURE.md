@@ -31,7 +31,6 @@ None of these parse today; the README says so explicitly.
 
 ## Syntax Gaps in Supported Diagram Types
 
-- Flowchart: chained edges on one line (`A --> B --> C`)
 - State diagrams: composite states, concurrency (`--`), an in-diagram `direction`, `state X as "…"`
 
 ## Mermaid Compatibility

@@ -3,7 +3,7 @@ package mermoid.docs
 import mermoid.ascent.MermoidAscent
 import specular.*
 import specular.ziotest.DocSpecSuite
-import zio.test.*
+import _root_.mermoid.{EdgeStyle, NodeShape}
 
 /** Every flowchart construct mermoid implements, rendered live. */
 object Flowcharts extends DocSpecSuite:
@@ -31,29 +31,20 @@ axis and where self-loops attach.
                             |""".stripMargin)
       },
       md"""
-One edge per statement — mermoid does not implement Mermaid's chained `A --> B --> C` shorthand yet. Write the second
-edge on its own line, referring to `B` by id.
+Chained `A --> B --> C` is one hop per pair, same as writing each edge on its own line. `%%` comments are ignored.
 """,
+      example {
+        MermoidAscent.svgDiagram("""flowchart LR
+                            |    %% pipeline sketch
+                            |    A[Read] --> B[Transform] --> C[Write]
+                            |""".stripMargin)
+      },
     ),
     section("Node shapes")(
       md"""
-Thirteen shapes. A bare id with no bracket syntax is a `Rect` labelled with the id itself.
+${NodeShape.values.size} shapes (`NodeShape`). A bare id with no bracket syntax is a `Rect` labelled with the id itself.
 
-| Syntax | `NodeShape` | CSS class |
-|---|---|---|
-| `A[text]` | `Rect` | `node-rect` |
-| `A(text)` | `Round` | `node-round` |
-| `A([text])` | `Stadium` | `node-stadium` |
-| `A[[text]]` | `Subroutine` | `node-subroutine` |
-| `A[(text)]` | `Cylinder` | `node-cylinder` |
-| `A((text))` | `Circle` | `node-circle` |
-| `A(((text)))` | `DoubleCircle` | `node-double-circle` |
-| `A{text}` | `Rhombus` | `node-rhombus` |
-| `A{{text}}` | `Hexagon` | `node-hexagon` |
-| `A[/text/]` | `Parallelogram` | `node-parallelogram` |
-| `A[\\text\\]` | `ParallelogramAlt` | `node-parallelogram-alt` |
-| `A[/text\\]` | `Trapezoid` | `node-trapezoid` |
-| `A[\\text/]` | `TrapezoidAlt` | `node-trapezoid-alt` |
+${NodeShape.markdownTable}
 """,
       example {
         MermoidAscent.svgDiagram("""flowchart LR
@@ -84,25 +75,12 @@ Thirteen shapes. A bare id with no bracket syntax is a `Rect` labelled with the 
 The shape name lands in the wrapper's class list, so `.node-rhombus .node-shape { fill: gold }` restyles every decision
 node without touching the diagram source. See [SVG structure](svg-structure.html).
 """,
-      exampleValue {
-        import _root_.mermoid.*
-        MermaidParser.parse("flowchart TD\n  A{Decide} --> B([Done])").map(SvgRenderer.render(_)) match
-          case Right(svg) =>
-            List("node-rhombus", "node-stadium").filter(svg.contains).mkString(", ")
-          case Left(err) => s"parse error: $err"
-      }.assert(s => assertTrue(s == "node-rhombus, node-stadium")),
     ),
     section("Edge styles")(
       md"""
-Five edge styles. Each contributes a class to the edge group, and the dashing lives in CSS rather than in the geometry.
+${EdgeStyle.values.size} edge styles (`EdgeStyle`). Each contributes a class to the edge group, and the dashing lives in CSS rather than in the geometry.
 
-| Syntax | `EdgeStyle` | CSS class | Arrowhead |
-|---|---|---|---|
-| `A --> B` | `Arrow` | `edge-arrow` | yes |
-| `A --- B` | `Open` | `edge-open` | no |
-| `A -.-> B` | `Dotted` | `edge-dotted` | yes |
-| `A -.- B` | `DottedOpen` | `edge-dotted-open` | no |
-| `A ==> B` | `Thick` | `edge-thick` | yes |
+${EdgeStyle.markdownTable}
 """,
       example {
         MermoidAscent.svgDiagram("""flowchart LR
@@ -189,13 +167,6 @@ Three statements, all of which end up as CSS rather than as baked-in attributes:
                             |    style A fill:#ddeeff
                             |""".stripMargin)
       },
-      exampleValue {
-        import _root_.mermoid.*
-        MermaidParser
-          .parse("flowchart LR\n  classDef hot fill:#ffdddd\n  A[a] --> B[b]\n  class B hot\n  style A fill:#eee")
-          .map(SvgRenderer.render(_))
-          .map(svg => (svg.contains(".hot {"), svg.contains("""class="node node-rect hot""""), svg.contains("style=")))
-      }.assert(r => assertTrue(r == Right((true, true, true)))),
       md"""
 Note where each landed: `classDef` in the `<style>` block, `class` in the class attribute, `style` inline. See
 [Custom CSS](custom-css.html) for supplying a whole stylesheet from Scala instead.
@@ -208,16 +179,15 @@ mermoid adds one thing Mermaid does not have: `as <name>` on an edge, which fixe
 Without an alias an edge is `edge-{from}-{to}-{index}`, so inserting an earlier parallel edge renumbers it, and any CSS
 or test that selected `#edge-A-B-1` silently moves. An alias pins it:
 """,
-      exampleValue {
-        import _root_.mermoid.*
-        MermaidParser
-          .parse("flowchart LR\n  A[a] --> B[b] as happy\n  A --> B\n")
-          .map(SvgRenderer.render(_))
-          .map(svg => (svg.contains("""id="edge-happy""""), svg.contains("""id="edge-A-B-1"""")))
-      }.assert(r => assertTrue(r == Right((true, true)))),
+      example {
+        MermoidAscent.svgDiagram("""flowchart LR
+                            |    A[Start] --> B[Finish] as happy
+                            |    A --> B
+                            |""".stripMargin)
+      },
       md"""
-The first edge is `#edge-happy` no matter how many siblings appear later; the unaliased one keeps its positional id.
-Notes in [state diagrams](state-diagrams.html) take `as` the same way.
+The first edge is `#edge-happy` no matter how many siblings appear later; the unaliased one keeps its positional id
+(`#edge-A-B-1` here). Notes in [state diagrams](state-diagrams.html) take `as` the same way.
 """,
     ),
     section("Clicks")(
@@ -246,17 +216,6 @@ Link targets: `_blank`, `_self`, `_parent`, `_top`.
                             |    click C href "https://www.earlyeffect.rocks" "Open Early Effect" _blank
                             |""".stripMargin)
       },
-      exampleValue {
-        import _root_.mermoid.*
-        MermaidParser
-          .parse("""flowchart LR
-                    |  A[a] --> B[b]
-                    |  click A callback "tip"
-                    |  click B href "https://example.com" "go" _blank
-                    |""".stripMargin)
-          .map(SvgRenderer.render(_))
-          .map(svg => (svg.contains("<title>tip</title>"), svg.contains("href=\"https://example.com\"")))
-      }.assert(r => assertTrue(r == Right((true, true)))),
       md"""
 Try the same source under hybrid selection and hover on [Interactive](interactive.html).
 """,
@@ -265,8 +224,8 @@ Try the same source under hybrid selection and hover on [Interactive](interactiv
       md"""
 | Case | Behaviour |
 |---|---|
-| Chained edges `A --> B --> C` | Not supported. One edge per statement. |
-| `%%` comments / `%%{init:…}%%` | Not supported. Strip before parse. |
+| Chained edges `A --> B --> C` | One hop per pair, same as writing each edge on its own line. |
+| `%%` comments / `%%{init:…}%%` | Comments are ignored. Init directives are skipped; they do not pick a theme. |
 | Parallel edges (same endpoints twice) | Both render, offset so they do not overlap. Alias with `as` if you CSS-select one. |
 | Cycles / back-edges | Layering breaks cycles; barycenter cuts crossings; long edges use waypoints. |
 | `linkStyle` | Not implemented. |

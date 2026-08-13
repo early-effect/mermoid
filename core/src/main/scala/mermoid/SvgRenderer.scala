@@ -37,7 +37,7 @@ object SvgRenderer:
     val h  = lc.arrowSize * 0.85
     SvgNode.elem("defs")()(
       SvgNode.elem("marker")(
-        "id"           -> "arrowhead",
+        "id"           -> PaintClass.Arrowhead.cssName,
         "markerWidth"  -> w.f,
         "markerHeight" -> h.f,
         "refX"         -> w.f,
@@ -46,7 +46,7 @@ object SvgRenderer:
         "markerUnits"  -> "userSpaceOnUse",
       )(
         SvgNode.leaf("polygon")(
-          "class"  -> "arrowhead",
+          "class"  -> PaintClass.Arrowhead.cssName,
           "points" -> s"0 0, ${w.f} ${(h / 2).f}, 0 ${h.f}",
         )
       )
@@ -115,7 +115,7 @@ object SvgRenderer:
       ShapeRenderer.nodeToSvg(
         n,
         config,
-        includeLabel = !n.cssClasses.contains("start-end"),
+        includeLabel = !n.cssClasses.contains(PaintClass.StartEnd.cssName),
         interaction = interaction,
       )
     }
@@ -129,7 +129,7 @@ object SvgRenderer:
 
     // Opaque canvas so dark hosts (docs panels, dark mode) do not swallow #333 edges.
     val background = SvgNode.leaf("rect")(
-      "class"  -> "diagram-bg",
+      "class"  -> PaintClass.DiagramBg.cssName,
       "x"      -> "0",
       "y"      -> "0",
       "width"  -> scene.width.f,

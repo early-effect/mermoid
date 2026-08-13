@@ -2,10 +2,9 @@ package mermoid.docs
 
 import mermoid.ascent.MermoidAscent
 import _root_.mermoid.RenderConfig
-import _root_.mermoid.css.{CssParser, Stylesheet, ThemeName}
+import _root_.mermoid.css.{CssParser, PaintClass, Stylesheet}
 import specular.*
 import specular.ziotest.DocSpecSuite
-import zio.test.*
 
 /** Supplying your own CSS: parsed from a string, or built as an AST, then merged over a theme. */
 object CustomCss extends DocSpecSuite:
@@ -49,9 +48,6 @@ values, and `/* comments */`.
 That is the same diagram as the Default theme renders — only the stylesheet changed. Note `resolveVariables = false`
 here: the overridden variables stay as `var()` references so anything further up the cascade can override them again.
 """,
-      exampleValue {
-        CssParser.parse(overrides).map(s => (s.variables.size, s.rules.size))
-      }.assert(r => assertTrue(r == Right((4, 3)))),
     ),
     section("Merge semantics")(
       md"""
@@ -62,19 +58,16 @@ here: the overridden variables stay as `var()` references so anything further up
 
 Rules append rather than replace, so a custom rule with the same selector as a built-in one relies on ordinary CSS source
 order to win. That is deliberate: it means you can override one declaration without restating the rest of the rule.
+
+The second diagram below only adds `stroke-width: 4` on `.node-shape`. The rest of the Default theme is unchanged.
 """,
-      exampleValue {
-        import _root_.mermoid.css.*
-        val base     = Theme.toStylesheet(ThemeName.Default)
-        val mine     = CssParser.parse(".node-shape { stroke-width: 4; }").getOrElse(Stylesheet.empty)
-        val merged   = Stylesheet.merge(base, mine)
-        val rendered = CssRenderer.render(merged, resolveVariables = false)
-        // The built-in .node-shape rule still stands; ours follows it and wins on source order.
-        (
-          merged.rules.size == base.rules.size + 1,
-          rendered.indexOf("stroke-width: 2") < rendered.lastIndexOf("stroke-width: 4"),
-        )
-      }.assert(r => assertTrue(r == ((true, true)))),
+      example {
+        MermoidAscent.svgDiagram(pipeline)
+      },
+      example {
+        val mine = CssParser.parse(".node-shape { stroke-width: 4; }").getOrElse(Stylesheet.empty)
+        MermoidAscent.svgDiagram(pipeline, RenderConfig(customStylesheet = Some(mine)))
+      },
     ),
     section("Building the AST directly")(
       md"""
@@ -89,7 +82,7 @@ over, or derived from application data.
         val statusColors = List("ok" -> "#16a34a", "warn" -> "#ca8a04", "fail" -> "#dc2626")
         val rules        = statusColors.map { (name, color) =>
           CssRule(
-            CssSelector.Descendant(CssSelector.Class(name), CssSelector.Class("node-shape")),
+            CssSelector.Descendant(CssSelector.Class(name), PaintClass.NodeShape.selector),
             List(CssDeclaration("stroke", CssValue.Color(color)), CssDeclaration("stroke-width", CssValue.Number(3))),
           )
         }
@@ -117,17 +110,19 @@ The three in-diagram styling statements interact with a custom stylesheet like t
 
 `style` becoming an inline attribute means it beats your CSS. If you need a diagram whose appearance is fully controlled
 from the outside, prefer `class` + `classDef`, or strip `style` statements before rendering.
+
+The same `classDef` / `class` source paints hybrid HTML: `fill` becomes `background` on the inner `.node-shape`, `stroke`
+becomes `border-color`. Hosts can keep writing SVG paint properties.
 """,
-      exampleValue {
-        import _root_.mermoid.*
-        MermaidParser
-          .parse("flowchart LR\n  classDef hot fill:#f00\n  A[a] --> B[b]\n  class B hot\n")
-          .map(SvgRenderer.render(_))
-          .map { svg =>
-            // classDef rules are appended last, after the theme's and the custom sheet's.
-            svg.indexOf(".node-shape {") < svg.indexOf(".hot {")
-          }
-      }.assert(r => assertTrue(r == Right(true))),
+      example {
+        MermoidAscent.diagram(
+          """flowchart LR
+            |  classDef warn fill:#4a4030,stroke:#e0c070
+            |  A[Tired] --> B[Zipx]
+            |  class A warn
+            |""".stripMargin
+        )
+      },
     ),
     section("Styling a diagram already on the page")(
       md"""

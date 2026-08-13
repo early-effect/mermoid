@@ -1,6 +1,7 @@
 package mermoid.docs
 
 import mermoid.ascent.MermoidAscent
+import mermoid.css.{PaintClass, WrapperClass}
 import specular.*
 import specular.ziotest.DocSpecSuite
 import zio.test.*
@@ -48,34 +49,20 @@ Flowchart `click` lines (see [Flowcharts](flowcharts.html)) affect the node grou
 
 Callback names are **not** written as attributes; hosts that need them read `DiagramScene.interactions` (or use
 [Interactive](interactive.html)). State diagrams have no `click` statement.
+
+Hover the first node for the native SVG tooltip; the second is a link.
 """,
-      exampleValue {
-        import _root_.mermoid.*
-        MermaidParser
-          .parse("""flowchart LR
-                    |  A[a] --> B[b]
-                    |  click A callback "tip"
-                    |  click B href "https://example.com" "go" _blank
-                    |""".stripMargin)
-          .map(SvgRenderer.render(_))
-          .map(svg =>
-            (
-              svg.contains("<title>tip</title>"),
-              svg.contains("""href="https://example.com""""),
-              svg.contains("""target="_blank""""),
-              !svg.contains("data-callback"),
-            )
-          )
-      }.assert(r => assertTrue(r == Right((true, true, true, true)))),
+      example {
+        MermoidAscent.svgDiagram("""flowchart LR
+                            |  A[Hover for tip] --> B[Opens example.com]
+                            |  click A callback "tip"
+                            |  click B href "https://example.com" "go" _blank
+                            |""".stripMargin)
+      },
     ),
     section("Wrapper groups")(
       md"""
-| Element | Class | Id |
-|---|---|---|
-| node | `node node-{shape}` + any `class` names | `node-{nodeId}` |
-| edge | `edge edge-{style}` (+ ` self-loop`) | `edge-{alias}` or `edge-{from}-{to}-{index}` |
-| note | `note` | `note-{alias}` or `note-{stateId}-{index}` |
-| subgraph | `subgraph` | `subgraph-{id}` |
+${WrapperClass.markdownTable}
 
 Edges also carry `data-from` and `data-to` with the endpoint node ids, which is how you find every edge touching a node
 without parsing its id: `[data-from="A"], [data-to="A"]`.
@@ -84,43 +71,16 @@ without parsing its id: `[data-from="A"], [data-to="A"]`.
 insert a sibling. Use `as <name>` to pin an id you intend to select. Node and subgraph ids come straight from the diagram
 source and never shift.
 """,
-      exampleValue {
-        import _root_.mermoid.*
-        MermaidParser
-          .parse(sample)
-          .map(SvgRenderer.render(_))
-          .map { svg =>
-            List(
-              """id="node-A"""",
-              """class="node node-circle"""",
-              """id="edge-A-B-0"""",
-              """class="edge edge-arrow"""",
-              """id="edge-main"""",
-              """class="edge edge-thick"""",
-              """data-from="A"""",
-            ).filterNot(svg.contains)
-          }
-      }.assert(missing => assertTrue(missing == Right(Nil))),
+      example {
+        MermoidAscent.svgDiagram(sample)
+      },
     ),
     section("Inner parts")(
       md"""
-Inside a wrapper, the pieces carry their own classes — these are what you actually style, since the wrapper is a `<g>`
+Inside a wrapper, the pieces carry their own classes (`PaintClass`) — these are what you actually style, since the wrapper is a `<g>`
 with no paint of its own:
 
-| Class | Element | What it is |
-|---|---|---|
-| `node-shape` | `rect`/`circle`/`polygon`/`path` | the node outline |
-| `node-label` | `text` | the node's text |
-| `edge-line` | `path` | the edge itself |
-| `edge-label` | `text` | the edge's label |
-| `edge-label-bg` | `rect` | the plate behind an edge label |
-| `note-rect` | `rect` | a note's box |
-| `note-text` | `text` | a note's text |
-| `note-connector` | `path` | the dashed line to its state |
-| `subgraph-rect` | `rect` | a subgraph frame |
-| `subgraph-label` | `text` | a subgraph's title |
-| `arrowhead` | `polygon` | the shared marker |
-| `start-end` | on a node wrapper | `[*]` in a state diagram |
+${PaintClass.markdownTable}
 
 So `.node-circle .node-shape { fill: … }` fills only circles, and `.edge-dotted .edge-line { stroke-dasharray: … }` is
 exactly how the built-in themes implement dashing — the dash pattern is CSS, not geometry.

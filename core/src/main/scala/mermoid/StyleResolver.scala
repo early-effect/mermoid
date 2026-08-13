@@ -53,8 +53,8 @@ object StyleResolver:
     }
 
   /** Collect inline style overrides from `style A fill:#f00` */
-  private[mermoid] def collectInlineStyles(stmts: List[FlowStatement]): Map[String, Map[String, String]] =
-    stmts.foldLeft(Map.empty[String, Map[String, String]]) { (acc, stmt) =>
+  private[mermoid] def collectInlineStyles(stmts: List[FlowStatement]): Map[String, Map[css.CssProperty, String]] =
+    stmts.foldLeft(Map.empty[String, Map[css.CssProperty, String]]) { (acc, stmt) =>
       stmt match
         case FlowStatement.StyleSt(id, styles) =>
           acc + (id -> (acc.getOrElse(id, Map.empty) ++ styles))
@@ -103,9 +103,13 @@ object StyleResolver:
       }
 
   // Keep backward compatibility for now
-  private[mermoid] def collectStyleDefs(stmts: List[FlowStatement]): Map[String, Map[String, String]] =
+  private[mermoid] def collectStyleDefs(stmts: List[FlowStatement]): Map[String, Map[css.CssProperty, String]] =
     val (classDefs, nodeStyles, nodeClasses) = stmts.foldLeft(
-      (Map.empty[String, Map[String, String]], Map.empty[String, Map[String, String]], Map.empty[String, String])
+      (
+        Map.empty[String, Map[css.CssProperty, String]],
+        Map.empty[String, Map[css.CssProperty, String]],
+        Map.empty[String, String],
+      )
     ) { case ((cds, ns, ncs), stmt) =>
       stmt match
         case FlowStatement.ClassDefSt(name, styles) => (cds + (name -> styles), ns, ncs)
@@ -113,7 +117,7 @@ object StyleResolver:
         case FlowStatement.ClassSt(ids, className)  => (cds, ns, ids.foldLeft(ncs)((m, id) => m + (id -> className)))
         case _                                      => (cds, ns, ncs)
     }
-    val withClasses = nodeClasses.foldLeft(Map.empty[String, Map[String, String]]) { case (acc, (id, cls)) =>
+    val withClasses = nodeClasses.foldLeft(Map.empty[String, Map[css.CssProperty, String]]) { case (acc, (id, cls)) =>
       classDefs.get(cls) match
         case Some(s) => acc + (id -> (acc.getOrElse(id, Map.empty) ++ s))
         case None    => acc

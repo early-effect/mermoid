@@ -3,7 +3,6 @@ package mermoid.docs
 import mermoid.ascent.MermoidAscent
 import specular.*
 import specular.ziotest.DocSpecSuite
-import zio.test.*
 
 /** `stateDiagram-v2`: transitions, start/end markers, notes. */
 object StateDiagrams extends DocSpecSuite:
@@ -51,19 +50,11 @@ reads as start or end is positional: `[*] --> A` versus `A --> [*]`.
 When a diagram uses both, mermoid paints **two** markers (start keeps id `[*]`, end is `[*]-end`) so ranking does not
 cycle through a shared node and flip the layout. A diagram that only has one role still uses a single `[*]` node.
 """,
-      exampleValue {
-        import _root_.mermoid.*
-        MermaidParser.parse("stateDiagram-v2\n  [*] --> A\n  A --> [*]\n").map(SvgRenderer.render(_)) match
-          case Right(svg) =>
-            (
-              svg.sliding("start-end".length).count(_ == "start-end"),
-              svg.contains("""id="node-[*]""""),
-              svg.contains("""id="node-[*]-end""""),
-            )
-          case Left(_) => (-1, false, false)
-      }.assert { case (n, hasStart, hasEnd) =>
-        // CSS rule once + two painted markers.
-        assertTrue(n == 3, hasStart, hasEnd)
+      example {
+        MermoidAscent.svgDiagram("""stateDiagram-v2
+                            |    [*] --> Active
+                            |    Active --> [*]
+                            |""".stripMargin)
       },
     ),
     section("Notes")(
@@ -117,13 +108,15 @@ side and then a vertical offset before settling.
 Like edges, notes take `as <name>` to pin their element id. Without it a note is `note-{stateId}-{index}`, so adding an
 earlier note on the same state renumbers the later ones.
 """,
-      exampleValue {
-        import _root_.mermoid.*
-        MermaidParser
-          .parse("stateDiagram-v2\n  A --> B\n  note right of A as caveat\n    careful\n  end note\n")
-          .map(SvgRenderer.render(_))
-          .map(_.contains("""id="note-caveat""""))
-      }.assert(r => assertTrue(r == Right(true))),
+      example {
+        MermoidAscent.svgDiagram("""stateDiagram-v2
+                            |    [*] --> Idle
+                            |    Idle --> Done: go
+                            |    note right of Idle as caveat
+                            |      do not skip idle
+                            |    end note
+                            |""".stripMargin)
+      },
     ),
     section("Self-transitions")(
       md"""

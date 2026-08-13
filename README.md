@@ -134,8 +134,8 @@ Documented so adopters are not surprised:
 
 | Case | Behaviour |
 |---|---|
-| Chained edges `A --> B --> C` | **Not supported.** Write one edge per statement. |
-| Mermaid `%%` comments / `%%{init:…}%%` | **Not supported.** Strip them before parse. |
+| Chained edges `A --> B --> C` | One hop per pair, same as writing each edge on its own line. |
+| Mermaid `%%` comments | Ignored. `%%{init:…}%%` is skipped too; it does not pick a theme. |
 | Parallel edges `A --> B` twice | Both render; offset so they do not sit on top of each other. Use `as` if you CSS-select one. |
 | Cycles / back-edges | Layering breaks cycles; barycenter ordering cuts crossings; long edges route through waypoints. |
 | Self-loops | Attach right (vertical flow) or top (horizontal); stacked labels get room in the bbox. |

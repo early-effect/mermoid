@@ -9,7 +9,7 @@ object DiagramLayoutSpec extends ZIOSpecDefault:
       |  A[Start] --> B[End]
       |""".stripMargin
 
-  /** Separate edges (chained `A --> B --> C` is not parsed yet). */
+  /** A long LR chain so viewport tests have room to compress. */
   private val wideFlow =
     """flowchart LR
       |  A --> B
@@ -142,6 +142,19 @@ object DiagramLayoutSpec extends ZIOSpecDefault:
           |""".stripMargin
       val svg = SvgSerializer.render(SvgRenderer.renderTree(parse(src)))
       assertTrue(svg.contains("<title>Tip</title>"), svg.contains("node-A"))
+    },
+    test("SVG paint wraps href clicks and omits callback attributes") {
+      val src =
+        """flowchart LR
+          |  A --> B
+          |  click B href "https://example.com" "go" _blank
+          |""".stripMargin
+      val svg = SvgSerializer.render(SvgRenderer.renderTree(parse(src)))
+      assertTrue(
+        svg.contains("""href="https://example.com""""),
+        svg.contains("""target="_blank""""),
+        !svg.contains("data-callback"),
+      )
     },
   )
 end DiagramLayoutSpec

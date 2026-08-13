@@ -35,8 +35,9 @@ object MermoidAscent:
       onSelect: String => UIO[Unit] = _ => ZIO.unit,
       containerWidth: Option[Double] = None,
   ): UI[Any] =
-    val scale = containerWidth.map(scene.fitScale).getOrElse(1.0)
-    HybridPainter.paint(scene, selected, onSelect, scale)
+    val scale  = containerWidth.map(scene.fitScale).getOrElse(1.0)
+    val cssFit = containerWidth.isEmpty
+    HybridPainter.paint(scene, selected, onSelect, scale, cssFit)
 
   /** Interactive diagram: selection + viewport-driven re-layout.
     *
@@ -54,7 +55,7 @@ object MermoidAscent:
     for
       selected <- sq(Option.empty[String])
       width    <- sq(initialWidth)
-    yield interactiveRoot(d, config, selected, width, showWidthControls)
+    yield interactiveRoot(d, config, selected, width, showWidthControls, toggleSelect(selected))
   end diagramInteractive
 
   /** Same as [[diagramInteractive]] but accepts an external width source (e.g. host ResizeObserver). */
@@ -66,7 +67,28 @@ object MermoidAscent:
   ): UIO[UI[Any]] =
     val d = parseOrThrow(mmd)
     for selected <- sq(Option.empty[String])
-    yield interactiveRoot(d, config, selected, width, showWidthControls)
+    yield interactiveRoot(d, config, selected, width, showWidthControls, toggleSelect(selected))
+
+  /** Host-driven selection and width. Mechanoid live FSMs use this instead of reimplementing chrome.
+    *
+    * `selected` is the highlighted node id (typically the live state name). `onSelect` fires on click; the host decides
+    * whether that click is a transition. Width controls are off unless `showWidthControls` is true.
+    */
+  def diagramControlled(
+      mmd: String,
+      selected: Source[Option[String]],
+      onSelect: String => UIO[Unit],
+      width: Source[Double],
+      config: RenderConfig = RenderConfig(),
+      showWidthControls: Boolean = false,
+  ): UI[Any] =
+    interactiveRoot(parseOrThrow(mmd), config, selected, width, showWidthControls, onSelect)
+
+  private def toggleSelect(selected: Source[Option[String]]): String => UIO[Unit] = id =>
+    selected.get.flatMap {
+      case Some(`id`) => selected.set(None)
+      case _          => selected.set(Some(id))
+    }
 
   private def interactiveRoot(
       diagram: Diagram,
@@ -74,17 +96,13 @@ object MermoidAscent:
       selected: Source[Option[String]],
       width: Source[Double],
       showWidthControls: Boolean,
+      onSelect: String => UIO[Unit],
   ): UI[Any] =
-    val onSelect: String => UIO[Unit] = id =>
-      selected.get.flatMap {
-        case Some(`id`) => selected.set(None)
-        case _          => selected.set(Some(id))
-      }
 
     val body = _root_.ascent.squawk.Squawk.zipWith(width, selected) { (w, sel) =>
       val scene = DiagramLayout.scene(diagram, config, Some(Viewport(w)))
       val scale = scene.fitScale(w)
-      HybridPainter.paint(scene, sel, onSelect, scale)
+      HybridPainter.paint(scene, sel, onSelect, scale, cssFit = false)
     }
 
     val controls: UI[Any] =
@@ -92,7 +110,7 @@ object MermoidAscent:
       else
         UI.Element(
           "div",
-          Vector(Attr.StaticAttr("class", AttrValue.Str("mermoid-controls"))),
+          Vector(Attr.StaticAttr("class", AttrValue.Str(HybridClass.Controls.cssName))),
           Vector(
             UI.Element(
               "button",
@@ -120,7 +138,7 @@ object MermoidAscent:
             ),
             UI.Element(
               "span",
-              Vector(Attr.StaticAttr("class", AttrValue.Str("mermoid-width-label"))),
+              Vector(Attr.StaticAttr("class", AttrValue.Str(HybridClass.WidthLabel.cssName))),
               Vector(UI.ReactiveText(width.map(w => s"viewport ${w.toInt}px"))),
             ),
           ),
@@ -128,7 +146,7 @@ object MermoidAscent:
 
     UI.Element(
       "div",
-      Vector(Attr.StaticAttr("class", AttrValue.Str("mermoid-ascent"))),
+      Vector(Attr.StaticAttr("class", AttrValue.Str(HybridClass.Ascent.cssName))),
       Vector(controls, UI.ReactiveChild(body)),
     )
   end interactiveRoot

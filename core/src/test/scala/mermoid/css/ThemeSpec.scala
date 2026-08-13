@@ -7,7 +7,7 @@ object ThemeSpec extends ZIOSpecDefault:
   def spec = suite("Theme")(
     suite("colors")(
       test("each ThemeName produces a ThemeColors") {
-        val names          = List(ThemeName.Default, ThemeName.Dark, ThemeName.Forest, ThemeName.Neutral)
+        val names          = ThemeName.values.toList
         val allHaveContent = names.forall { name =>
           val tc = Theme.colors(name)
           tc.primaryColor.nonEmpty && tc.fontFamily.nonEmpty
@@ -32,31 +32,35 @@ object ThemeSpec extends ZIOSpecDefault:
         val ss = Theme.toStylesheet(ThemeName.Neutral)
         assertTrue(ss.variables.nonEmpty, ss.rules.nonEmpty)
       },
-      test("stylesheet has expected CSS variable names") {
+      test("stylesheet variables are exactly ThemeVar") {
         val ss = Theme.toStylesheet(ThemeName.Default)
         assertTrue(
-          ss.variables.contains("--mermoid-primary"),
-          ss.variables.contains("--mermoid-text"),
-          ss.variables.contains("--mermoid-font-family"),
-          ss.variables.contains("--mermoid-note-bg"),
+          ss.variables.keySet == ThemeVar.values.map(_.cssName).toSet,
+          ss.get(ThemeVar.NoteBg).contains(CssValue.Color("#ffffcc")),
+          ThemeVar.MainBkg.description == "node fill",
+          ThemeVar.Selection.cssName == "--mermoid-selection",
+          ThemeVar.Line.cssVar == "var(--mermoid-line)",
+          ThemeVar.Selection.cssVar(ThemeVar.Line.cssVar("#333")) ==
+            "var(--mermoid-selection, var(--mermoid-line, #333))",
         )
       },
-      test("stylesheet has rules for node-shape, edge-line, note-rect") {
+      test("stylesheet has a rule per inner PaintClass") {
         val ss            = Theme.toStylesheet(ThemeName.Default)
         val selectorNames = ss.rules.map(_.selector).collect { case CssSelector.Class(name) =>
           name
         }
-        assertTrue(
-          selectorNames.contains("diagram-bg"),
-          selectorNames.contains("node-shape"),
-          selectorNames.contains("edge-line"),
-          selectorNames.contains("note-rect"),
-          selectorNames.contains("node-label"),
-          selectorNames.contains("edge-label"),
-          selectorNames.contains("edge-label-bg"),
-          selectorNames.contains("note-text"),
-          selectorNames.contains("note-connector"),
-        )
+        val expected = List(
+          PaintClass.DiagramBg,
+          PaintClass.NodeShape,
+          PaintClass.EdgeLine,
+          PaintClass.NoteRect,
+          PaintClass.NodeLabel,
+          PaintClass.EdgeLabel,
+          PaintClass.EdgeLabelBg,
+          PaintClass.NoteText,
+          PaintClass.NoteConnector,
+        ).map(_.cssName)
+        assertTrue(expected.forall(selectorNames.contains))
       },
     ),
     suite("render round-trip")(
@@ -79,9 +83,11 @@ object ThemeSpec extends ZIOSpecDefault:
       },
       test("Dark theme renders with dark colors") {
         val css = CssRenderer.render(Theme.toStylesheet(ThemeName.Dark), resolveVariables = true)
+        val ss  = Theme.toStylesheet(ThemeName.Dark)
         assertTrue(
           css.contains("fill: #1f2020;"),
           css.contains("stroke: #81B1DB;"),
+          ss.get(ThemeVar.NodeBorder).contains(CssValue.Color("#81B1DB")),
         )
       },
     ),

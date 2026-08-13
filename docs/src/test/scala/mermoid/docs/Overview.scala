@@ -3,7 +3,6 @@ package mermoid.docs
 import mermoid.ascent.MermoidAscent
 import specular.*
 import specular.ziotest.DocSpecSuite
-import zio.test.*
 
 /** What mermoid is and why the SVG-with-CSS shape matters. */
 object Overview extends DocSpecSuite:
@@ -70,19 +69,9 @@ Three layers, pick the one that matches your host:
 | `DiagramLayout.scene` | `DiagramScene` | custom painters, metrics, responsive hosts |
 
 This site maps inert SVG trees for structure docs, and uses **`mermoid-ascent`** for hybrid HTML nodes + SVG edges with
-selection and viewport reflow; see [Interactive](interactive.html).
-""",
-      exampleValue {
-        import _root_.mermoid.*
-        MermaidParser
-          .parse("flowchart TD\n  A[Hello] --> B((World))")
-          .map(SvgRenderer.renderTree(_))
-          .map {
-            case SvgNode.Element(tag, attrs, children) =>
-              s"<$tag> with ${attrs.size} attributes and ${children.size} children"
-            case other => other.toString
-          }
-      }.assert(r => assertTrue(r == Right("<svg> with 4 attributes and 6 children"))),
+selection and viewport reflow; see [Interactive](interactive.html). The [SvgNode tree](svg-structure.html) page shows the
+element tree `renderTree` returns.
+"""
     ),
     section("Status")(
       md"""

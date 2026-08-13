@@ -89,23 +89,23 @@ object SvgRendererSpec extends ZIOSpecDefault:
       test("applies classDef styles via class statement") {
         val stmts = List(
           FlowStatement
-            .ClassDefSt("highlight", Map("fill" -> "#ff0", "stroke" -> "#f00")),
+            .ClassDefSt("highlight", Map(CssProperty.Fill -> "#ff0", CssProperty.Stroke -> "#f00")),
           FlowStatement.ClassSt(List("A", "B"), "highlight"),
         )
         val styles = StyleResolver.collectStyleDefs(stmts)
         assertTrue(
-          styles("A")("fill") == "#ff0",
-          styles("B")("stroke") == "#f00",
+          styles("A")(CssProperty.Fill) == "#ff0",
+          styles("B")(CssProperty.Stroke) == "#f00",
         )
       },
       test("direct style overrides class style") {
         val stmts = List(
-          FlowStatement.ClassDefSt("cls", Map("fill" -> "#aaa")),
+          FlowStatement.ClassDefSt("cls", Map(CssProperty.Fill -> "#aaa")),
           FlowStatement.ClassSt(List("A"), "cls"),
-          FlowStatement.StyleSt("A", Map("fill" -> "#bbb")),
+          FlowStatement.StyleSt("A", Map(CssProperty.Fill -> "#bbb")),
         )
         val styles = StyleResolver.collectStyleDefs(stmts)
-        assertTrue(styles("A")("fill") == "#bbb")
+        assertTrue(styles("A")(CssProperty.Fill) == "#bbb")
       },
     ),
     suite("layout")(
@@ -423,7 +423,7 @@ object SvgRendererSpec extends ZIOSpecDefault:
         val diagram = Diagram.Flowchart(
           Direction.TD,
           List(
-            FlowStatement.ClassDefSt("highlight", Map("fill" -> "#ff0", "stroke" -> "#f00")),
+            FlowStatement.ClassDefSt("highlight", Map(CssProperty.Fill -> "#ff0", CssProperty.Stroke -> "#f00")),
             FlowStatement.NodeSt(NodeDef("A", Some("Hi"), NodeShape.Rect)),
           ),
         )
@@ -432,6 +432,7 @@ object SvgRendererSpec extends ZIOSpecDefault:
           svg.contains(".highlight"),
           svg.contains("fill: #ff0"),
           svg.contains("stroke: #f00"),
+          svg.indexOf(".node-shape {") < svg.indexOf(".highlight {"),
         )
       },
       test("class statement adds CSS classes to node <g>") {
@@ -450,7 +451,7 @@ object SvgRendererSpec extends ZIOSpecDefault:
           Direction.TD,
           List(
             FlowStatement.NodeSt(NodeDef("A", Some("Hi"), NodeShape.Rect)),
-            FlowStatement.StyleSt("A", Map("fill" -> "#f00")),
+            FlowStatement.StyleSt("A", Map(CssProperty.Fill -> "#f00")),
           ),
         )
         val svg = SvgRenderer.render(diagram)
@@ -506,6 +507,19 @@ object SvgRendererSpec extends ZIOSpecDefault:
         assertTrue(
           svg.contains("start-end"),
           svg.contains("""class="node node-circle start-end""""),
+        )
+      },
+      test("[*] start and end are two markers with distinct ids") {
+        val diagram = Diagram.StateDiagram(
+          List(
+            StateStatement.TransitionSt(StateTransition("[*]", "A", None)),
+            StateStatement.TransitionSt(StateTransition("A", "[*]", None)),
+          )
+        )
+        val svg = SvgRenderer.render(diagram)
+        assertTrue(
+          svg.contains("""id="node-[*]""""),
+          svg.contains("""id="node-[*]-end""""),
         )
       },
       test("no inline fill or stroke on node shapes") {

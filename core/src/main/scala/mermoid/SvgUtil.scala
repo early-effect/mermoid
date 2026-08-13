@@ -6,12 +6,31 @@ object SvgUtil:
     s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;")
 
   def estimateTextWidth(text: String, config: LayoutConfig): Double =
-    text.length * config.charWidthEstimate
+    text.linesIterator.map(_.length * config.charWidthEstimate).maxOption.getOrElse(0.0)
+
+  def wrapLabel(text: String, maxWidth: Double, config: LayoutConfig): String =
+    val maxChars = Math.max(4, (maxWidth / config.charWidthEstimate).toInt)
+    val words    = text.split("\\s+").toList
+    val lines    = words
+      .foldLeft(List.empty[String]) { (acc, word) =>
+        acc match
+          case Nil         => List(word)
+          case cur :: rest =>
+            if cur.length + 1 + word.length <= maxChars then s"$cur $word" :: rest
+            else word :: acc
+      }
+      .reverse
+    lines.mkString("\n")
+  end wrapLabel
 
   def computeNodeSize(label: String, shape: NodeShape, config: LayoutConfig): (Double, Double) =
-    val textW = estimateTextWidth(label, config)
+    val wrapped =
+      config.maxLabelWidth.map(w => wrapLabel(label, w, config)).getOrElse(label)
+    val lines = wrapped.linesIterator.toList
+    val textW = lines.map(l => l.length * config.charWidthEstimate).maxOption.getOrElse(0.0)
+    val textH = Math.max(1, lines.size) * config.lineHeight
     val baseW = Math.max(config.minNodeWidth, textW + config.nodePaddingH * 2)
-    val baseH = config.nodeHeight
+    val baseH = Math.max(config.nodeHeight, textH + 16.0)
     shape match
       case NodeShape.Circle | NodeShape.DoubleCircle =>
         val diameter = Math.max(baseW, baseH)

@@ -1,5 +1,7 @@
 package mermoid.css
 
+import mermoid.EdgeStyle
+
 case class ThemeColors(
     primaryColor: String,
     primaryBorderColor: String,
@@ -38,145 +40,124 @@ object Theme:
     toStylesheet(colors(name))
 
   def toStylesheet(tc: ThemeColors): Stylesheet =
-    val vars: Map[String, CssValue] = Map(
-      "--mermoid-primary"          -> CssValue.Color(tc.primaryColor),
-      "--mermoid-primary-border"   -> CssValue.Color(tc.primaryBorderColor),
-      "--mermoid-primary-text"     -> CssValue.Color(tc.primaryTextColor),
-      "--mermoid-secondary"        -> CssValue.Color(tc.secondaryColor),
-      "--mermoid-secondary-border" -> CssValue.Color(tc.secondaryBorderColor),
-      "--mermoid-secondary-text"   -> CssValue.Color(tc.secondaryTextColor),
-      "--mermoid-tertiary"         -> CssValue.Color(tc.tertiaryColor),
-      "--mermoid-tertiary-border"  -> CssValue.Color(tc.tertiaryBorderColor),
-      "--mermoid-tertiary-text"    -> CssValue.Color(tc.tertiaryTextColor),
-      "--mermoid-line"             -> CssValue.Color(tc.lineColor),
-      "--mermoid-text"             -> CssValue.Color(tc.textColor),
-      "--mermoid-main-bkg"         -> CssValue.Color(tc.mainBkg),
-      "--mermoid-node-border"      -> CssValue.Color(tc.nodeBorder),
-      "--mermoid-background"       -> CssValue.Color(tc.background),
-      "--mermoid-font-family"      -> CssValue.Str(tc.fontFamily),
-      "--mermoid-font-size"        -> CssValue.Str(tc.fontSize),
-      "--mermoid-edge-label-bg"    -> CssValue.Color(tc.edgeLabelBackground),
-      "--mermoid-note-bg"          -> CssValue.Color(tc.noteBackground),
-      "--mermoid-note-border"      -> CssValue.Color(tc.noteBorderColor),
-      "--mermoid-note-text"        -> CssValue.Color(tc.noteTextColor),
-    )
+    val vars = ThemeVar.values.map(v => v.cssName -> v.value(tc)).toMap
 
     val rules = List(
       CssRule(
-        CssSelector.Class("diagram-bg"),
+        PaintClass.DiagramBg.selector,
         List(
-          CssDeclaration("fill", CssValue.Var("--mermoid-background", None)),
-          CssDeclaration("stroke", CssValue.Str("none")),
+          CssDeclaration(CssProperty.Fill, ThemeVar.Background.asVar),
+          CssDeclaration(CssProperty.Stroke, CssValue.Str("none")),
         ),
       ),
       CssRule(
-        CssSelector.Class("node-shape"),
+        PaintClass.NodeShape.selector,
         List(
-          CssDeclaration("fill", CssValue.Var("--mermoid-main-bkg", None)),
-          CssDeclaration("stroke", CssValue.Var("--mermoid-node-border", None)),
-          CssDeclaration("stroke-width", CssValue.Str("2")),
+          CssDeclaration(CssProperty.Fill, ThemeVar.MainBkg.asVar),
+          CssDeclaration(CssProperty.Stroke, ThemeVar.NodeBorder.asVar),
+          CssDeclaration(CssProperty.StrokeWidth, CssValue.Str("2")),
         ),
       ),
       CssRule(
-        CssSelector.Class("node-label"),
+        PaintClass.NodeLabel.selector,
         List(
-          CssDeclaration("fill", CssValue.Var("--mermoid-text", None)),
-          CssDeclaration("font-family", CssValue.Var("--mermoid-font-family", None)),
-          CssDeclaration("font-size", CssValue.Var("--mermoid-font-size", None)),
+          CssDeclaration(CssProperty.Fill, ThemeVar.Text.asVar),
+          CssDeclaration(CssProperty.FontFamily, ThemeVar.FontFamily.asVar),
+          CssDeclaration(CssProperty.FontSize, ThemeVar.FontSize.asVar),
         ),
       ),
       CssRule(
-        CssSelector.Class("edge-line"),
+        PaintClass.EdgeLine.selector,
         List(
-          CssDeclaration("stroke", CssValue.Var("--mermoid-line", None)),
-          CssDeclaration("stroke-width", CssValue.Str("2")),
+          CssDeclaration(CssProperty.Stroke, ThemeVar.Line.asVar),
+          CssDeclaration(CssProperty.StrokeWidth, CssValue.Str("2")),
         ),
       ),
       CssRule(
-        CssSelector.Class("edge-label"),
+        PaintClass.EdgeLabel.selector,
         List(
-          CssDeclaration("fill", CssValue.Var("--mermoid-text", None)),
-          CssDeclaration("font-family", CssValue.Var("--mermoid-font-family", None)),
-          CssDeclaration("font-size", CssValue.Str("12px")),
+          CssDeclaration(CssProperty.Fill, ThemeVar.Text.asVar),
+          CssDeclaration(CssProperty.FontFamily, ThemeVar.FontFamily.asVar),
+          CssDeclaration(CssProperty.FontSize, CssValue.Str("12px")),
         ),
       ),
       CssRule(
-        CssSelector.Class("edge-label-bg"),
+        PaintClass.EdgeLabelBg.selector,
         List(
-          CssDeclaration("fill", CssValue.Var("--mermoid-edge-label-bg", None))
+          CssDeclaration(CssProperty.Fill, ThemeVar.EdgeLabelBg.asVar)
         ),
       ),
       CssRule(
-        CssSelector.Class("note-rect"),
+        PaintClass.NoteRect.selector,
         List(
-          CssDeclaration("fill", CssValue.Var("--mermoid-note-bg", None)),
-          CssDeclaration("stroke", CssValue.Var("--mermoid-note-border", None)),
-          CssDeclaration("stroke-width", CssValue.Str("1")),
-          CssDeclaration("stroke-dasharray", CssValue.Str("4,2")),
+          CssDeclaration(CssProperty.Fill, ThemeVar.NoteBg.asVar),
+          CssDeclaration(CssProperty.Stroke, ThemeVar.NoteBorder.asVar),
+          CssDeclaration(CssProperty.StrokeWidth, CssValue.Str("1")),
+          CssDeclaration(CssProperty.StrokeDasharray, CssValue.Str("4,2")),
         ),
       ),
       CssRule(
-        CssSelector.Class("note-text"),
+        PaintClass.NoteText.selector,
         List(
-          CssDeclaration("fill", CssValue.Var("--mermoid-note-text", None)),
-          CssDeclaration("font-family", CssValue.Var("--mermoid-font-family", None)),
-          CssDeclaration("font-size", CssValue.Str("12px")),
+          CssDeclaration(CssProperty.Fill, ThemeVar.NoteText.asVar),
+          CssDeclaration(CssProperty.FontFamily, ThemeVar.FontFamily.asVar),
+          CssDeclaration(CssProperty.FontSize, CssValue.Str("12px")),
         ),
       ),
       CssRule(
-        CssSelector.Class("note-connector"),
+        PaintClass.NoteConnector.selector,
         List(
-          CssDeclaration("stroke", CssValue.Var("--mermoid-note-border", None)),
-          CssDeclaration("stroke-width", CssValue.Str("1")),
-          CssDeclaration("stroke-dasharray", CssValue.Str("4,2")),
+          CssDeclaration(CssProperty.Stroke, ThemeVar.NoteBorder.asVar),
+          CssDeclaration(CssProperty.StrokeWidth, CssValue.Str("1")),
+          CssDeclaration(CssProperty.StrokeDasharray, CssValue.Str("4,2")),
         ),
       ),
       CssRule(
-        CssSelector.Class("subgraph-rect"),
+        PaintClass.SubgraphRect.selector,
         List(
-          CssDeclaration("fill", CssValue.Str("none")),
-          CssDeclaration("stroke", CssValue.Var("--mermoid-node-border", None)),
-          CssDeclaration("stroke-width", CssValue.Str("1")),
-          CssDeclaration("stroke-dasharray", CssValue.Str("6,3")),
+          CssDeclaration(CssProperty.Fill, CssValue.Str("none")),
+          CssDeclaration(CssProperty.Stroke, ThemeVar.NodeBorder.asVar),
+          CssDeclaration(CssProperty.StrokeWidth, CssValue.Str("1")),
+          CssDeclaration(CssProperty.StrokeDasharray, CssValue.Str("6,3")),
         ),
       ),
       CssRule(
-        CssSelector.Class("subgraph-label"),
+        PaintClass.SubgraphLabel.selector,
         List(
-          CssDeclaration("fill", CssValue.Var("--mermoid-text", None)),
-          CssDeclaration("font-family", CssValue.Var("--mermoid-font-family", None)),
-          CssDeclaration("font-size", CssValue.Var("--mermoid-font-size", None)),
+          CssDeclaration(CssProperty.Fill, ThemeVar.Text.asVar),
+          CssDeclaration(CssProperty.FontFamily, ThemeVar.FontFamily.asVar),
+          CssDeclaration(CssProperty.FontSize, ThemeVar.FontSize.asVar),
         ),
       ),
       CssRule(
-        CssSelector.Descendant(CssSelector.Class("edge-thick"), CssSelector.Class("edge-line")),
+        CssSelector.Descendant(CssSelector.Class(EdgeStyle.Thick.wrapperClass), PaintClass.EdgeLine.selector),
         List(
-          CssDeclaration("stroke-width", CssValue.Str("3"))
+          CssDeclaration(CssProperty.StrokeWidth, CssValue.Str("3"))
         ),
       ),
       CssRule(
-        CssSelector.Descendant(CssSelector.Class("edge-dotted"), CssSelector.Class("edge-line")),
+        CssSelector.Descendant(CssSelector.Class(EdgeStyle.Dotted.wrapperClass), PaintClass.EdgeLine.selector),
         List(
-          CssDeclaration("stroke-dasharray", CssValue.Str("5,5"))
+          CssDeclaration(CssProperty.StrokeDasharray, CssValue.Str("5,5"))
         ),
       ),
       CssRule(
-        CssSelector.Descendant(CssSelector.Class("edge-dotted-open"), CssSelector.Class("edge-line")),
+        CssSelector.Descendant(CssSelector.Class(EdgeStyle.DottedOpen.wrapperClass), PaintClass.EdgeLine.selector),
         List(
-          CssDeclaration("stroke-dasharray", CssValue.Str("5,5"))
+          CssDeclaration(CssProperty.StrokeDasharray, CssValue.Str("5,5"))
         ),
       ),
       CssRule(
-        CssSelector.Class("arrowhead"),
+        PaintClass.Arrowhead.selector,
         List(
-          CssDeclaration("fill", CssValue.Var("--mermoid-line", None))
+          CssDeclaration(CssProperty.Fill, ThemeVar.Line.asVar)
         ),
       ),
       CssRule(
-        CssSelector.Descendant(CssSelector.Class("start-end"), CssSelector.Class("node-shape")),
+        CssSelector.Descendant(PaintClass.StartEnd.selector, PaintClass.NodeShape.selector),
         List(
-          CssDeclaration("fill", CssValue.Var("--mermoid-line", None)),
-          CssDeclaration("stroke", CssValue.Var("--mermoid-line", None)),
+          CssDeclaration(CssProperty.Fill, ThemeVar.Line.asVar),
+          CssDeclaration(CssProperty.Stroke, ThemeVar.Line.asVar),
         ),
       ),
     )

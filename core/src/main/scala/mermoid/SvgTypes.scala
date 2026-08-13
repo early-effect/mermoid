@@ -12,7 +12,7 @@ case class LayoutNode(
     center: Point,
     width: Double,
     height: Double,
-    styles: Map[String, String] = Map.empty,
+    styles: Map[css.CssProperty, String] = Map.empty,
     cssClasses: List[String] = Nil,
     /** Invisible routing waypoint; never painted as a node. */
     dummy: Boolean = false,

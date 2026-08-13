@@ -20,7 +20,7 @@ object CssRenderer:
     case other => other
 
   private[css] def renderDeclaration(decl: CssDeclaration): String =
-    s"  ${decl.property}: ${renderValue(decl.value)};"
+    s"  ${decl.property.cssName}: ${renderValue(decl.value)};"
 
   private[css] def renderSelector(selector: CssSelector): String = selector match
     case CssSelector.Element(name)             => name
