@@ -432,6 +432,7 @@ object SvgRendererSpec extends ZIOSpecDefault:
           svg.contains(".highlight"),
           svg.contains("fill: #ff0"),
           svg.contains("stroke: #f00"),
+          svg.indexOf(".node-shape {") < svg.indexOf(".highlight {"),
         )
       },
       test("class statement adds CSS classes to node <g>") {
@@ -506,6 +507,19 @@ object SvgRendererSpec extends ZIOSpecDefault:
         assertTrue(
           svg.contains("start-end"),
           svg.contains("""class="node node-circle start-end""""),
+        )
+      },
+      test("[*] start and end are two markers with distinct ids") {
+        val diagram = Diagram.StateDiagram(
+          List(
+            StateStatement.TransitionSt(StateTransition("[*]", "A", None)),
+            StateStatement.TransitionSt(StateTransition("A", "[*]", None)),
+          )
+        )
+        val svg = SvgRenderer.render(diagram)
+        assertTrue(
+          svg.contains("""id="node-[*]""""),
+          svg.contains("""id="node-[*]-end""""),
         )
       },
       test("no inline fill or stroke on node shapes") {

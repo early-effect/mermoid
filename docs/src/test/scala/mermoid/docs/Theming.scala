@@ -2,10 +2,9 @@ package mermoid.docs
 
 import mermoid.ascent.MermoidAscent
 import _root_.mermoid.RenderConfig
-import _root_.mermoid.css.{CssValue, ThemeName, ThemeVar}
+import _root_.mermoid.css.{ThemeName, ThemeVar}
 import specular.*
 import specular.ziotest.DocSpecSuite
-import zio.test.*
 
 /** The four built-in themes, and the CSS custom properties behind them. */
 object Theming extends DocSpecSuite:
@@ -37,12 +36,7 @@ ${ThemeVar.markdownTable}
 
 The `primary`/`secondary`/`tertiary` triples (colour, border, text) are not consumed by the built-in rules; they exist
 so a custom stylesheet can pick theme-consistent colours without hardcoding hexes.
-""",
-      exampleValue {
-        import _root_.mermoid.css.*
-        val sheet = Theme.toStylesheet(ThemeName.Dark)
-        (sheet.variables.size, sheet.get(ThemeVar.NodeBorder))
-      }.assert(r => assertTrue(r == ((ThemeVar.values.size, Some(CssValue.Color("#81B1DB")))))),
+"""
     ),
     section("resolveVariables")(
       md"""
@@ -53,24 +47,15 @@ to `true`.
   strip `<style>` or don't cascade (some email clients, some image pipelines). The `:root` block is still emitted.
 - **`false`** — `fill: var(--mermoid-main-bkg)`. Overridable: set the variable anywhere up the cascade and the diagram
   follows. This is what you want when the diagram is inline in a page you control.
+
+```css
+/* resolveVariables = true  (Dark) */
+.node-shape { fill: #1f2020; }
+
+/* resolveVariables = false */
+.node-shape { fill: var(--mermoid-main-bkg); }
+```
 """,
-      exampleValue {
-        import _root_.mermoid.*
-        val diagram  = MermaidParser.parse(sample).getOrElse(throw new AssertionError("unparseable"))
-        val resolved = SvgRenderer.render(diagram, RenderConfig(theme = ThemeName.Dark))
-        val varForm  = SvgRenderer.render(diagram, RenderConfig(theme = ThemeName.Dark, resolveVariables = false))
-        List(
-          s"resolved contains a literal hex fill: ${resolved.contains("fill: #1f2020")}",
-          s"resolved contains var(): ${resolved.contains("fill: var(")}",
-          s"var form contains var(): ${varForm.contains("fill: var(--mermoid-main-bkg)")}",
-        ).mkString("\n")
-      }.assert(s =>
-        assertTrue(
-          s.contains("resolved contains a literal hex fill: true"),
-          s.contains("resolved contains var(): false"),
-          s.contains("var form contains var(): true"),
-        )
-      ),
       md"""
 Overriding a variable from the page, with `resolveVariables = false`:
 
@@ -89,12 +74,6 @@ No re-render — the diagram already on the page restyles.
 The built-in themes are a convenience, not a ceiling. `Theme.toStylesheet(colors: ThemeColors)` accepts a palette you
 built yourself, and a whole stylesheet can be merged over any theme — see [Custom CSS](custom-css.html).
 """,
-      exampleValue {
-        import _root_.mermoid.css.*
-        val mine  = Theme.colors(ThemeName.Neutral).copy(nodeBorder = "#d97706", lineColor = "#92400e")
-        val sheet = Theme.toStylesheet(mine)
-        sheet.get(ThemeVar.NodeBorder)
-      }.assert(v => assertTrue(v == Some(CssValue.Color("#d97706")))),
       example {
         import _root_.mermoid.css.*
         val mine = Theme.colors(ThemeName.Neutral).copy(nodeBorder = "#d97706", lineColor = "#92400e")

@@ -3,7 +3,6 @@ package mermoid.docs
 import mermoid.ascent.MermoidAscent
 import specular.*
 import specular.ziotest.DocSpecSuite
-import zio.test.*
 import _root_.mermoid.{EdgeStyle, NodeShape}
 
 /** Every flowchart construct mermoid implements, rendered live. */
@@ -76,13 +75,6 @@ ${NodeShape.markdownTable}
 The shape name lands in the wrapper's class list, so `.node-rhombus .node-shape { fill: gold }` restyles every decision
 node without touching the diagram source. See [SVG structure](svg-structure.html).
 """,
-      exampleValue {
-        import _root_.mermoid.*
-        MermaidParser.parse("flowchart TD\n  A{Decide} --> B([Done])").map(SvgRenderer.render(_)) match
-          case Right(svg) =>
-            List("node-rhombus", "node-stadium").filter(svg.contains).mkString(", ")
-          case Left(err) => s"parse error: $err"
-      }.assert(s => assertTrue(s == "node-rhombus, node-stadium")),
     ),
     section("Edge styles")(
       md"""
@@ -175,13 +167,6 @@ Three statements, all of which end up as CSS rather than as baked-in attributes:
                             |    style A fill:#ddeeff
                             |""".stripMargin)
       },
-      exampleValue {
-        import _root_.mermoid.*
-        MermaidParser
-          .parse("flowchart LR\n  classDef hot fill:#ffdddd\n  A[a] --> B[b]\n  class B hot\n  style A fill:#eee")
-          .map(SvgRenderer.render(_))
-          .map(svg => (svg.contains(".hot {"), svg.contains("""class="node node-rect hot""""), svg.contains("style=")))
-      }.assert(r => assertTrue(r == Right((true, true, true)))),
       md"""
 Note where each landed: `classDef` in the `<style>` block, `class` in the class attribute, `style` inline. See
 [Custom CSS](custom-css.html) for supplying a whole stylesheet from Scala instead.
@@ -194,16 +179,15 @@ mermoid adds one thing Mermaid does not have: `as <name>` on an edge, which fixe
 Without an alias an edge is `edge-{from}-{to}-{index}`, so inserting an earlier parallel edge renumbers it, and any CSS
 or test that selected `#edge-A-B-1` silently moves. An alias pins it:
 """,
-      exampleValue {
-        import _root_.mermoid.*
-        MermaidParser
-          .parse("flowchart LR\n  A[a] --> B[b] as happy\n  A --> B\n")
-          .map(SvgRenderer.render(_))
-          .map(svg => (svg.contains("""id="edge-happy""""), svg.contains("""id="edge-A-B-1"""")))
-      }.assert(r => assertTrue(r == Right((true, true)))),
+      example {
+        MermoidAscent.svgDiagram("""flowchart LR
+                            |    A[Start] --> B[Finish] as happy
+                            |    A --> B
+                            |""".stripMargin)
+      },
       md"""
-The first edge is `#edge-happy` no matter how many siblings appear later; the unaliased one keeps its positional id.
-Notes in [state diagrams](state-diagrams.html) take `as` the same way.
+The first edge is `#edge-happy` no matter how many siblings appear later; the unaliased one keeps its positional id
+(`#edge-A-B-1` here). Notes in [state diagrams](state-diagrams.html) take `as` the same way.
 """,
     ),
     section("Clicks")(
@@ -232,17 +216,6 @@ Link targets: `_blank`, `_self`, `_parent`, `_top`.
                             |    click C href "https://www.earlyeffect.rocks" "Open Early Effect" _blank
                             |""".stripMargin)
       },
-      exampleValue {
-        import _root_.mermoid.*
-        MermaidParser
-          .parse("""flowchart LR
-                    |  A[a] --> B[b]
-                    |  click A callback "tip"
-                    |  click B href "https://example.com" "go" _blank
-                    |""".stripMargin)
-          .map(SvgRenderer.render(_))
-          .map(svg => (svg.contains("<title>tip</title>"), svg.contains("href=\"https://example.com\"")))
-      }.assert(r => assertTrue(r == Right((true, true)))),
       md"""
 Try the same source under hybrid selection and hover on [Interactive](interactive.html).
 """,

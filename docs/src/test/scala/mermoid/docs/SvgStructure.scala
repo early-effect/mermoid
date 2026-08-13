@@ -49,25 +49,16 @@ Flowchart `click` lines (see [Flowcharts](flowcharts.html)) affect the node grou
 
 Callback names are **not** written as attributes; hosts that need them read `DiagramScene.interactions` (or use
 [Interactive](interactive.html)). State diagrams have no `click` statement.
+
+Hover the first node for the native SVG tooltip; the second is a link.
 """,
-      exampleValue {
-        import _root_.mermoid.*
-        MermaidParser
-          .parse("""flowchart LR
-                    |  A[a] --> B[b]
-                    |  click A callback "tip"
-                    |  click B href "https://example.com" "go" _blank
-                    |""".stripMargin)
-          .map(SvgRenderer.render(_))
-          .map(svg =>
-            (
-              svg.contains("<title>tip</title>"),
-              svg.contains("""href="https://example.com""""),
-              svg.contains("""target="_blank""""),
-              !svg.contains("data-callback"),
-            )
-          )
-      }.assert(r => assertTrue(r == Right((true, true, true, true)))),
+      example {
+        MermoidAscent.svgDiagram("""flowchart LR
+                            |  A[Hover for tip] --> B[Opens example.com]
+                            |  click A callback "tip"
+                            |  click B href "https://example.com" "go" _blank
+                            |""".stripMargin)
+      },
     ),
     section("Wrapper groups")(
       md"""
@@ -80,23 +71,9 @@ without parsing its id: `[data-from="A"], [data-to="A"]`.
 insert a sibling. Use `as <name>` to pin an id you intend to select. Node and subgraph ids come straight from the diagram
 source and never shift.
 """,
-      exampleValue {
-        import _root_.mermoid.*
-        MermaidParser
-          .parse(sample)
-          .map(SvgRenderer.render(_))
-          .map { svg =>
-            List(
-              """id="node-A"""",
-              """class="node node-circle"""",
-              """id="edge-A-B-0"""",
-              """class="edge edge-arrow"""",
-              """id="edge-main"""",
-              """class="edge edge-thick"""",
-              """data-from="A"""",
-            ).filterNot(svg.contains)
-          }
-      }.assert(missing => assertTrue(missing == Right(Nil))),
+      example {
+        MermoidAscent.svgDiagram(sample)
+      },
     ),
     section("Inner parts")(
       md"""

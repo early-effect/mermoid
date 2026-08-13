@@ -83,9 +83,11 @@ object ThemeSpec extends ZIOSpecDefault:
       },
       test("Dark theme renders with dark colors") {
         val css = CssRenderer.render(Theme.toStylesheet(ThemeName.Dark), resolveVariables = true)
+        val ss  = Theme.toStylesheet(ThemeName.Dark)
         assertTrue(
           css.contains("fill: #1f2020;"),
           css.contains("stroke: #81B1DB;"),
+          ss.get(ThemeVar.NodeBorder).contains(CssValue.Color("#81B1DB")),
         )
       },
     ),

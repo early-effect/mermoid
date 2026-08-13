@@ -3,7 +3,6 @@ package mermoid.docs
 import mermoid.ascent.MermoidAscent
 import specular.*
 import specular.ziotest.DocSpecSuite
-import zio.test.*
 
 /** Add the dependency, parse, render, write. */
 object QuickStart extends DocSpecSuite:
@@ -32,23 +31,7 @@ Pre-1.0 on early-semver: pin the exact version and read the release notes before
     section("Parse and render")(
       md"""
 `MermaidParser.parse` returns `Either[String, Diagram]` — the `Left` is the parse error, which you should surface rather
-than swallow. `SvgRenderer.render` turns a `Diagram` into the SVG document.
-""",
-      exampleValue {
-        import _root_.mermoid.*
-
-        val source = """flowchart LR
-                       |    A[Start] --> B{Ready?}
-                       |    B -->|yes| C([Ship it])
-                       |    B -->|no| A
-                       |""".stripMargin
-
-        MermaidParser.parse(source).map(SvgRenderer.render(_)) match
-          case Right(svg) => s"${svg.length} characters of SVG, starting ${svg.take(4)}"
-          case Left(err)  => s"parse error: $err"
-      }.assert(s => assertTrue(s.endsWith("starting <svg"), s.contains("characters of SVG"))),
-      md"""
-That same diagram, rendered:
+than swallow. `SvgRenderer.render` turns a `Diagram` into the SVG document. Same source, rendered:
 """,
       example {
         MermoidAscent.svgDiagram("""flowchart LR
