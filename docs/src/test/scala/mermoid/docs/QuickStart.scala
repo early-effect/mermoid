@@ -112,8 +112,8 @@ RenderConfig(
 ```
 
 Pass an optional `Viewport(maxWidth)` (and optionally `maxHeight`) to `SvgRenderer.render` / `DiagramLayout.scene` when
-you want the layout to fit a host width. Narrow viewports prefer vertical flow; wider ones prefer horizontal. Details
-live on [Interactive](interactive.html).
+you want the layout to fit a host width. Narrow viewports prefer vertical flow; wider ones prefer horizontal. See
+[Responsive layout](responsive-layout.html) for direction flips, spacing compression, and scale-to-fit.
 
 See [Theming](theming.html) for themes and [Custom CSS](custom-css.html) for `customStylesheet` and `resolveVariables`.
 """
