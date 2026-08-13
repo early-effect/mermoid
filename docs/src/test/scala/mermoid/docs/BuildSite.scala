@@ -22,6 +22,7 @@ object BuildSite extends DocsSite:
     Flowcharts.doc,
     StateDiagrams.doc,
     Interactive.doc,
+    Responsive.doc,
     Theming.doc,
     CustomCss.doc,
     SvgStructure.doc,
@@ -46,7 +47,7 @@ contracts. **`mermoid-ascent`** paints hybrid HTML+SVG with reactive reflow for 
 
 fastparse is the only dependency of `mermoid` core; `mermoid-ascent` adds ascent.
 
-Guide: Quick start → Flowcharts → State diagrams → Interactive → Theming → Custom CSS → SVG structure → CLI.
+Guide: Quick start → Flowcharts → State diagrams → Interactive → Responsive layout → Theming → Custom CSS → SVG structure → CLI.
 """
       ),
       installSnippets = Vector(

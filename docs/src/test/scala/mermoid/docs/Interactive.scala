@@ -156,6 +156,8 @@ Mermaid `click … "tooltip"` becomes an ascent hover card (and SVG `<title>` on
       md"""
 Use **Narrow / Medium / Wide** (or shrink the browser). Below 640px diagrams prefer TB; at/above they prefer LR.
 Spacing compresses to the viewport. Edges are **recomputed**, not stretched.
+
+See [Responsive layout](responsive-layout.html) for the mechanics: direction flips, spacing compression, and scale-to-fit.
 """,
       exampleIO {
         MermoidAscent.diagramInteractive(reflowWide, chalkboard, initialWidth = 720)

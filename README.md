@@ -258,7 +258,7 @@ Checked by the test suite (committed SVG must match the renderer):
 **[earlyeffect.rocks/mermoid](https://www.earlyeffect.rocks/mermoid/):** every diagram on the site is rendered by the
 real renderer while the page is built, and asserted by `sbt test`.
 
-Guide path: Quick start → Flowcharts → State diagrams → **Interactive** → Theming → Custom CSS → SVG structure → CLI.
+Guide path: Quick start → Flowcharts → State diagrams → **Interactive** → Responsive layout → Theming → Custom CSS → SVG structure → CLI.
 
 ```
 sbt docsPreview   # live-reload docs (interactive remount needs the docsJS client)
