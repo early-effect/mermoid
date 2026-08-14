@@ -156,6 +156,9 @@ object DiagramLayout:
     val hasStart          = transitions.exists(_.from == "[*]")
     val hasEnd            = transitions.exists(_.to == "[*]")
     val splitStartEnd     = hasStart && hasEnd
+    val nodeClasses       = StyleResolver.collectStateClasses(stmts, splitStartEnd, endId)
+    val inlineStyles      = StyleResolver.collectStateInlineStyles(stmts)
+    val classDefRules     = StyleResolver.stateClassDefsToRules(stmts)
     val edges: List[Edge] =
       transitions.map { t =>
         val to = if splitStartEnd && t.to == "[*]" then endId else t.to
@@ -171,9 +174,16 @@ object DiagramLayout:
     val cfg         = config.copy(layout = lc)
     val laid        = Layout.layout(lc, dir, nodeDefs, edges)
     val layoutNodes = laid.nodes.map { n =>
+      val user   = nodeClasses.getOrElse(n.id, Nil)
+      val styles = inlineStyles.getOrElse(n.id, Map.empty)
       if n.id == "[*]" || n.id == endId then
-        n.copy(width = 16, height = 16, cssClasses = List(PaintClass.StartEnd.cssName))
-      else n
+        n.copy(
+          width = 16,
+          height = 16,
+          cssClasses = PaintClass.StartEnd.cssName :: user,
+          styles = styles,
+        )
+      else n.copy(cssClasses = user, styles = styles)
     }
     val routes      = laid.routes
     val layoutEdges = SvgRenderer.buildLayoutEdges(edges)
@@ -225,7 +235,7 @@ object DiagramLayout:
       notes = notes,
       interactions = Map.empty,
       loopSide = loopSide,
-      classDefRules = Nil,
+      classDefRules = classDefRules,
       config = cfg,
       direction = dir,
     )

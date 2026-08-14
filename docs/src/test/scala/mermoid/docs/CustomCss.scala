@@ -100,19 +100,20 @@ over, or derived from application data.
     ),
     section("classDef, class and style")(
       md"""
-The three in-diagram styling statements interact with a custom stylesheet like this:
+The in-diagram styling statements interact with a custom stylesheet like this:
 
 | Statement | Where it lands | Wins against |
 |---|---|---|
 | `classDef n p:v` | a CSS rule appended after the custom rules | earlier rules with equal specificity |
-| `class A n` | the node's `class` attribute | — it selects, it doesn't style |
+| `class A n` / `A:::n` | the node's `class` attribute | — it selects, it doesn't style |
 | `style A p:v` | an inline `style` attribute on the node group | every stylesheet rule |
 
-`style` becoming an inline attribute means it beats your CSS. If you need a diagram whose appearance is fully controlled
-from the outside, prefer `class` + `classDef`, or strip `style` statements before rendering.
+These statements work on flowcharts and `stateDiagram-v2`. `style` becoming an inline attribute means it beats your CSS.
+If you need a diagram whose appearance is fully controlled from the outside, prefer `class` + `classDef`, or strip
+`style` statements before rendering.
 
-The same `classDef` / `class` source paints hybrid HTML: `fill` becomes `background` on the inner `.node-shape`, `stroke`
-becomes `border-color`. Hosts can keep writing SVG paint properties.
+The same `classDef` / `class` / `:::` source paints hybrid HTML: `fill` becomes `background` on the inner `.node-shape`,
+`stroke` becomes `border-color`. Hosts can keep writing SVG paint properties.
 """,
       example {
         MermoidAscent.diagram(

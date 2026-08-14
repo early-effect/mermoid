@@ -87,6 +87,30 @@ side and then a vertical offset before settling.
                             |""".stripMargin)
       },
     ),
+    section("Styling from the diagram source")(
+      md"""
+`classDef`, `class`, `:::`, and `style` are the same statements as on [flowcharts](flowcharts.html). `classDef` becomes
+a CSS rule, `class` / `:::` put the name on the state's node, and `style` can still set `noteAlign` as well as fill and
+stroke.
+""",
+      example {
+        MermoidAscent.svgDiagram("""stateDiagram-v2
+                            |    classDef happy fill:#1f4a35,stroke:#7dcea0
+                            |    classDef warn fill:#4a4030,stroke:#e0c070
+                            |    classDef sad fill:#5c2a2a,stroke:#f0a0a0
+                            |    [*] --> Green
+                            |    Green --> Yellow: Timer
+                            |    Yellow --> Red: Timer
+                            |    Red --> Green: Timer
+                            |    class Green happy
+                            |    class Yellow warn
+                            |    class Red sad
+                            |""".stripMargin)
+      },
+      md"""
+`Green:::happy --> Yellow:::warn` is the same assignment written on the transition.
+""",
+    ),
     section("Note text alignment")(
       md"""
 `style <state> noteAlign: left | center | right` sets how that state's note text is aligned. The default is `left`.

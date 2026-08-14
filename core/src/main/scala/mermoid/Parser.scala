@@ -66,11 +66,16 @@ object MermaidParser:
 
   // -- Node definition --------------------------------------------------------
 
+  /** `:::hot` or `:::hot,cold` after a node or state id. */
+  private[mermoid] def classSuffix(using P[Any]): P[List[String]] =
+    P(":::" ~ identifier.rep(sep = ws ~ "," ~ ws, min = 1)).map(_.toList)
+
   private[mermoid] def nodeDef(using P[Any]): P[NodeDef] =
-    P(identifier ~ nodeShape.?).map { case (id, shapeOpt) =>
+    P(identifier ~ nodeShape.? ~ classSuffix.?).map { case (id, shapeOpt, classes) =>
+      val cls = classes.getOrElse(Nil)
       shapeOpt match
-        case Some((label, shape)) => NodeDef(id, Some(label), shape)
-        case None                 => NodeDef(id, None, NodeShape.Rect)
+        case Some((label, shape)) => NodeDef(id, Some(label), shape, cls)
+        case None                 => NodeDef(id, None, NodeShape.Rect, cls)
     }
 
   // -- Edges ------------------------------------------------------------------
@@ -249,9 +254,16 @@ object MermaidParser:
   private[mermoid] def stateId(using P[Any]): P[String] =
     P("[*]".! | identifier)
 
+  /** `A:::cls --> B:::other: label` — classes default to Nil when the suffix is absent. */
   private[mermoid] def stateTransition(using P[Any]): P[StateStatement.TransitionSt] =
-    P(stateId ~ ws ~ "-->" ~ ws ~ stateId ~ (":" ~ ws ~ CharsWhile(_ != '\n', 1).!).?).map { case (from, to, label) =>
-      StateStatement.TransitionSt(StateTransition(from, to, label.map(_.trim)))
+    P(
+      stateId ~ classSuffix.? ~ ws ~ "-->" ~ ws ~ stateId ~ classSuffix.? ~
+        (":" ~ ws ~ CharsWhile(_ != '\n', 1).!).?
+    ).map {
+      (from: String, fromCls: Option[List[String]], to: String, toCls: Option[List[String]], label: Option[String]) =>
+        StateStatement.TransitionSt(
+          StateTransition(from, to, label.map(_.trim), fromCls.getOrElse(Nil), toCls.getOrElse(Nil))
+        )
     }
 
   private[mermoid] def notePosition(using P[Any]): P[NotePosition] =
@@ -269,20 +281,23 @@ object MermaidParser:
       StateStatement.NoteSt(pos, id, text.linesIterator.map(_.trim).filter(_.nonEmpty).mkString("\n"), alias)
     }
 
-  private[mermoid] def noteTextAlign(using P[Any]): P[NoteTextAlign] =
-    P(
-      "center".!.map(_ => NoteTextAlign.Center) |
-        "right".!.map(_ => NoteTextAlign.Right) |
-        "left".!.map(_ => NoteTextAlign.Left)
-    )
-
   private[mermoid] def stateStyleSt(using P[Any]): P[StateStatement.StyleSt] =
-    P("style" ~ ws ~ identifier ~ ws ~ "noteAlign" ~ ws ~ ":" ~ ws ~ noteTextAlign).map { case (id, align) =>
-      StateStatement.StyleSt(id, StateStyle(noteAlign = Some(align)))
+    P("style" ~ ws ~ stateId ~ ws ~ styleProperties).map { case (id, props) =>
+      StateStatement.StyleSt(id, StateStyle.fromProperties(props))
+    }
+
+  private[mermoid] def stateClassDefSt(using P[Any]): P[StateStatement.ClassDefSt] =
+    P("classDef" ~ ws ~ identifier ~ ws ~ styleProperties).map { case (name, props) =>
+      StateStatement.ClassDefSt(name, props)
+    }
+
+  private[mermoid] def stateClassSt(using P[Any]): P[StateStatement.ClassSt] =
+    P("class" ~ ws ~ stateId.rep(sep = ws ~ "," ~ ws, min = 1) ~ ws ~ identifier).map { case (ids, className) =>
+      StateStatement.ClassSt(ids.toList, className)
     }
 
   private[mermoid] def stateStatement(using P[Any]): P[StateStatement] =
-    P(noteSt | stateStyleSt | stateTransition)
+    P(noteSt | stateClassDefSt | stateClassSt | stateStyleSt | stateTransition)
 
   private[mermoid] def stateStatements(using P[Any]): P[List[StateStatement]] =
     P(wsnl ~ stateStatement.rep(sep = sep) ~ wsnl).map(_.toList)
