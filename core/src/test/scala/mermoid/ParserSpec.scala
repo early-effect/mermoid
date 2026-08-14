@@ -161,6 +161,14 @@ object ParserSpec extends ZIOSpecDefault:
         val result = fastparse.parse("A[a / b]", MermaidParser.nodeDef(using _))
         assertTrue(result.get.value == NodeDef("A", Some("a / b"), NodeShape.Rect))
       },
+      test("parses ::: class suffix on a bare id") {
+        val result = fastparse.parse("A:::hot", MermaidParser.nodeDef(using _))
+        assertTrue(result.get.value == NodeDef("A", None, NodeShape.Rect, List("hot")))
+      },
+      test("parses ::: class suffix after a labelled shape") {
+        val result = fastparse.parse("A[Hello]:::hot,cold", MermaidParser.nodeDef(using _))
+        assertTrue(result.get.value == NodeDef("A", Some("Hello"), NodeShape.Rect, List("hot", "cold")))
+      },
     ),
     suite("edgeStyle")(
       test("parses arrow -->") {
@@ -267,6 +275,18 @@ object ParserSpec extends ZIOSpecDefault:
             |""".stripMargin
         val result = MermaidParser.parse(input)
         assertTrue(result.isRight)
+      },
+      test("parses flowchart ::: class suffixes") {
+        val input =
+          """flowchart LR
+            |  classDef hot fill:#ffdddd,stroke:#cc0000
+            |  A[Start]:::hot --> B[End]
+            |""".stripMargin
+        val result = MermaidParser.parse(input)
+        val nodes  = result.toOption.get.asInstanceOf[Diagram.Flowchart].statements.collect {
+          case FlowStatement.EdgeSt(_, from, _) => from
+        }
+        assertTrue(result.isRight, nodes.head.cssClasses == List("hot"))
       },
       test("parses flowchart with multiple statements") {
         val input =
@@ -443,6 +463,44 @@ object ParserSpec extends ZIOSpecDefault:
         val stmts = result.toOption.get.asInstanceOf[Diagram.StateDiagram].statements
         val notes = stmts.collect { case n: StateStatement.NoteSt => n }
         assertTrue(notes.size == 1, notes.head.alias == Some("createdNote"))
+      },
+      test("parses classDef, class, and ::: on a state diagram") {
+        val input =
+          """stateDiagram-v2
+            |    classDef happy fill:#1f4a35,stroke:#7dcea0
+            |    [*] --> Green:::happy
+            |    Green --> Yellow: Timer
+            |    class Yellow warn
+            |""".stripMargin
+        val result = MermaidParser.parse(input)
+        assertTrue(result.isRight)
+        val stmts = result.toOption.get.asInstanceOf[Diagram.StateDiagram].statements
+        val defs  = stmts.collect { case StateStatement.ClassDefSt(name, styles) => name -> styles }
+        val cls   = stmts.collect { case StateStatement.ClassSt(ids, name) => ids -> name }
+        val green = stmts.collect { case StateStatement.TransitionSt(t) if t.to == "Green" => t }.head
+        assertTrue(
+          defs.head._1 == "happy",
+          defs.head._2(css.CssProperty.Fill) == "#1f4a35",
+          cls == List(List("Yellow") -> "warn"),
+          green.toClasses == List("happy"),
+        )
+      },
+      test("parses style fill and noteAlign on a state") {
+        val input =
+          """stateDiagram-v2
+            |    [*] --> Ready
+            |    style Ready fill:#ddeeff,noteAlign:center
+            |""".stripMargin
+        val result = MermaidParser.parse(input)
+        val styles = result.toOption.get
+          .asInstanceOf[Diagram.StateDiagram]
+          .statements
+          .collect { case StateStatement.StyleSt(id, s) => id -> s }
+        assertTrue(
+          styles.head._1 == "Ready",
+          styles.head._2.noteAlign.contains(NoteTextAlign.Center),
+          styles.head._2.paint(css.CssProperty.Fill) == "#ddeeff",
+        )
       },
     ),
     suite("subgraphs")(

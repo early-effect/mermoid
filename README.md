@@ -110,7 +110,7 @@ Directions: `TB` `TD` `BT` `LR` `RL`.
 | 5 edge styles | `-->` `---` `-.->` `-.-` `==>` |
 | Edge labels | `A -->\|label\| B` and `A -- label --> B` |
 | Subgraphs | `subgraph id [Label] … end`, nestable, optional inner `direction` |
-| Styling | `style`, `classDef`, `class` |
+| Styling | `style`, `classDef`, `class`, `A:::className` |
 | Edge aliases | `A --> B as myEdge` pins `#edge-myEdge` |
 | Clicks | `click A callback "tooltip"`, `click A href "https://…" "tip" _blank` |
 
@@ -125,6 +125,7 @@ wide widths may flip to horizontal so the diagram uses available width.
 | Start / end | `[*] --> A`, `A --> [*]` (separate markers when both roles appear) |
 | Self-transitions | `A --> A: retry` (labels stack) |
 | Notes | `note right of A` / `note left of A` … `end note` |
+| Styling | `style`, `classDef`, `class`, `A:::className` (same as flowcharts) |
 | Note alignment | `style A noteAlign:center` (`left` / `center` / `right`) |
 | Note aliases | `note right of A as myNote` |
 

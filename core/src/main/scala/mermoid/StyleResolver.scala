@@ -37,20 +37,83 @@ object StyleResolver:
       case _ => Nil
     }
 
-  /** Collect CSS class names assigned to nodes via `class A,B foo` */
+  private def appendClass(acc: Map[String, List[String]], id: String, className: String): Map[String, List[String]] =
+    val cur = acc.getOrElse(id, Nil)
+    if cur.contains(className) then acc else acc + (id -> (cur :+ className))
+
+  private def appendClasses(
+      acc: Map[String, List[String]],
+      id: String,
+      classes: List[String],
+  ): Map[String, List[String]] =
+    classes.foldLeft(acc)(appendClass(_, id, _))
+
+  private def classDefRules(name: String, styles: Map[CssProperty, String]): List[CssRule] =
+    val decls = styles.toList.map { case (prop, value) => CssDeclaration(prop, CssValue.Str(value)) }
+    List(
+      CssRule(CssSelector.Class(name), decls),
+      CssRule(
+        CssSelector.Descendant(CssSelector.Class(name), PaintClass.NodeShape.selector),
+        decls,
+      ),
+    )
+
+  /** Convert `classDef` statements to CSS rules */
+  private[mermoid] def classDefsToRules(stmts: List[FlowStatement]): List[CssRule] =
+    stmts.flatMap {
+      case FlowStatement.ClassDefSt(name, styles)   => classDefRules(name, styles)
+      case FlowStatement.SubgraphSt(_, _, _, inner) => classDefsToRules(inner)
+      case _                                        => Nil
+    }
+
+  /** Collect CSS class names assigned to nodes via `class A,B foo` and `A:::foo`. */
   private[mermoid] def collectNodeClasses(stmts: List[FlowStatement]): Map[String, List[String]] =
     stmts.foldLeft(Map.empty[String, List[String]]) { (acc, stmt) =>
       stmt match
         case FlowStatement.ClassSt(ids, className) =>
-          ids.foldLeft(acc) { (m, id) =>
-            m + (id -> (m.getOrElse(id, Nil) :+ className))
-          }
+          ids.foldLeft(acc)(appendClass(_, _, className))
+        case FlowStatement.NodeSt(n) =>
+          appendClasses(acc, n.id, n.cssClasses)
+        case FlowStatement.EdgeSt(_, fromNode, toNode) =>
+          appendClasses(appendClasses(acc, fromNode.id, fromNode.cssClasses), toNode.id, toNode.cssClasses)
         case FlowStatement.SubgraphSt(_, _, _, inner) =>
           collectNodeClasses(inner).foldLeft(acc) { case (a, (id, cls)) =>
-            a + (id -> (a.getOrElse(id, Nil) ++ cls))
+            cls.foldLeft(a)(appendClass(_, id, _))
           }
         case _ => acc
     }
+
+  /** `class` / `:::` on a state diagram. `class end` and `A --> [*]:::x` target the end marker when start/end split. */
+  private[mermoid] def collectStateClasses(
+      stmts: List[StateStatement],
+      splitStartEnd: Boolean,
+      endId: String,
+  ): Map[String, List[String]] =
+    def rewriteClassId(id: String): String =
+      if id == "end" && splitStartEnd then endId else id
+
+    stmts.foldLeft(Map.empty[String, List[String]]) { (acc, stmt) =>
+      stmt match
+        case StateStatement.ClassSt(ids, className) =>
+          ids.foldLeft(acc)((m, id) => appendClass(m, rewriteClassId(id), className))
+        case StateStatement.TransitionSt(t) =>
+          val withFrom = appendClasses(acc, t.from, t.fromClasses)
+          val to       = if splitStartEnd && t.to == "[*]" then endId else t.to
+          appendClasses(withFrom, to, t.toClasses)
+        case _ => acc
+    }
+  end collectStateClasses
+
+  private[mermoid] def collectStateInlineStyles(stmts: List[StateStatement]): Map[String, Map[CssProperty, String]] =
+    stmts.foldLeft(Map.empty[String, Map[CssProperty, String]]) { (acc, stmt) =>
+      stmt match
+        case StateStatement.StyleSt(id, style) if style.paint.nonEmpty =>
+          acc + (id -> (acc.getOrElse(id, Map.empty) ++ style.paint))
+        case _ => acc
+    }
+
+  private[mermoid] def stateClassDefsToRules(stmts: List[StateStatement]): List[CssRule] =
+    stmts.collect { case StateStatement.ClassDefSt(name, styles) => classDefRules(name, styles) }.flatten
 
   /** Collect inline style overrides from `style A fill:#f00` */
   private[mermoid] def collectInlineStyles(stmts: List[FlowStatement]): Map[String, Map[css.CssProperty, String]] =
@@ -63,19 +126,6 @@ object StyleResolver:
             a + (id -> (a.getOrElse(id, Map.empty) ++ s))
           }
         case _ => acc
-    }
-
-  /** Convert `classDef` statements to CSS rules */
-  private[mermoid] def classDefsToRules(stmts: List[FlowStatement]): List[CssRule] =
-    stmts.flatMap {
-      case FlowStatement.ClassDefSt(name, styles) =>
-        val decls = styles.toList.map { case (prop, value) =>
-          CssDeclaration(prop, CssValue.Str(value))
-        }
-        List(CssRule(CssSelector.Class(name), decls))
-      case FlowStatement.SubgraphSt(_, _, _, inner) =>
-        classDefsToRules(inner)
-      case _ => Nil
     }
 
   /** Merge `click` bindings (later statements win per field when re-specified). */

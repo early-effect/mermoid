@@ -150,20 +150,22 @@ is a `<g class="subgraph" id="subgraph-{id}">` rendered behind the edges and nod
     ),
     section("Styling from the diagram source")(
       md"""
-Three statements, all of which end up as CSS rather than as baked-in attributes:
+Three statements (and one suffix), all of which end up as CSS rather than as baked-in attributes:
 
 - `classDef name prop:value,…` becomes a CSS rule in the embedded stylesheet
 - `class A,B name` adds `name` to those nodes' class lists
+- `A:::name` (and `A[Label]:::name`) is the same assignment written on the node
 - `style A prop:value,…` becomes an inline `style` attribute on that one node
 
-`classDef` scales — one rule, however many nodes carry the class — so prefer it over `style`.
+`classDef` scales — one rule, however many nodes carry the class — so prefer it over `style`. The same statements work
+on [state diagrams](state-diagrams.html).
 """,
       example {
         MermoidAscent.svgDiagram("""flowchart LR
                             |    classDef hot fill:#ffdddd,stroke:#cc0000
-                            |    A[Cold] --> B[Hot]
+                            |    A[Cold] --> B[Hot]:::hot
                             |    B --> C[Hot too]
-                            |    class B,C hot
+                            |    class C hot
                             |    style A fill:#ddeeff
                             |""".stripMargin)
       },

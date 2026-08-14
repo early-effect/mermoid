@@ -105,6 +105,21 @@ object MermoidAscentSpec extends ZIOSpecDefault:
         html.contains("border-color: #e0c070") || html.contains("border-color:#e0c070"),
       )
     },
+    test("state classDef paints the hybrid node-shape") {
+      val src =
+        """stateDiagram-v2
+          |  classDef happy fill:#1f4a35,stroke:#7dcea0
+          |  [*] --> Green
+          |  class Green happy
+          |""".stripMargin
+      val ui = MermoidAscent.diagram(src)
+      for html <- Html.render(ui)
+      yield assertTrue(
+        html.contains("happy"),
+        html.contains("background: #1f4a35") || html.contains("background:#1f4a35"),
+        html.contains("border-color: #7dcea0") || html.contains("border-color:#7dcea0"),
+      )
+    },
     test("subgraph frames land in the hybrid SVG layer") {
       val src =
         """flowchart LR

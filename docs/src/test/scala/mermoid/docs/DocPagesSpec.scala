@@ -18,8 +18,7 @@ object DocPagesSpec extends ZIOSpecDefault:
   private def examplesOf(nodes: Vector[DocNode]): Vector[Example[Any]] = nodes.flatMap {
     case Section(_, children) => examplesOf(children)
     case ex: Example[?]       => Vector(ex.asInstanceOf[Example[Any]])
-    case _: ValueExample[?]   => Vector.empty
-    case _: Prose             => Vector.empty
+    case _                    => Vector.empty
   }
 
   private def elements(ui: UI[Any]): List[UI.Element[Any]] = ui match

@@ -430,6 +430,7 @@ object SvgRendererSpec extends ZIOSpecDefault:
         val svg = SvgRenderer.render(diagram)
         assertTrue(
           svg.contains(".highlight"),
+          svg.contains(".highlight .node-shape"),
           svg.contains("fill: #ff0"),
           svg.contains("stroke: #f00"),
           svg.indexOf(".node-shape {") < svg.indexOf(".highlight {"),
@@ -456,6 +457,45 @@ object SvgRendererSpec extends ZIOSpecDefault:
         )
         val svg = SvgRenderer.render(diagram)
         assertTrue(svg.contains("""style="fill: #f00""""))
+      },
+      test("::: class suffix adds CSS classes to flowchart nodes") {
+        val src =
+          """flowchart LR
+            |  classDef hot fill:#ffdddd,stroke:#cc0000
+            |  A[Start]:::hot --> B[End]
+            |""".stripMargin
+        val svg = SvgRenderer.render(MermaidParser.parse(src).toOption.get)
+        assertTrue(
+          svg.contains("""class="node node-rect hot" id="node-A""""),
+          svg.contains(".hot"),
+          svg.contains("fill: #ffdddd"),
+        )
+      },
+      test("state classDef and class paint like flowcharts") {
+        val src =
+          """stateDiagram-v2
+            |  classDef happy fill:#1f4a35,stroke:#7dcea0
+            |  [*] --> Green
+            |  Green --> Yellow: Timer
+            |  class Green happy
+            |""".stripMargin
+        val svg = SvgRenderer.render(MermaidParser.parse(src).toOption.get)
+        assertTrue(
+          svg.contains("""class="node node-round happy" id="node-Green""""),
+          svg.contains(".happy"),
+          svg.contains(".happy .node-shape"),
+          svg.contains("fill: #1f4a35"),
+          svg.contains("start-end"),
+        )
+      },
+      test("state ::: class suffix paints the target state") {
+        val src =
+          """stateDiagram-v2
+            |  classDef warn fill:#4a4030,stroke:#e0c070
+            |  [*] --> Yellow:::warn
+            |""".stripMargin
+        val svg = SvgRenderer.render(MermaidParser.parse(src).toOption.get)
+        assertTrue(svg.contains("""class="node node-round warn" id="node-Yellow""""))
       },
       test("custom stylesheet merges into <style> block") {
         val custom = Stylesheet(

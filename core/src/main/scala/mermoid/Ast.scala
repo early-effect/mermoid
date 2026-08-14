@@ -37,7 +37,13 @@ object NodeShape:
     s"| Syntax | `NodeShape` | CSS class |\n|---|---|---|\n$rows"
 end NodeShape
 
-case class NodeDef(id: String, label: Option[String], shape: NodeShape)
+case class NodeDef(
+    id: String,
+    label: Option[String],
+    shape: NodeShape,
+    /** Classes from the `:::` suffix (`A:::hot` / `A[Label]:::hot,cold`). */
+    cssClasses: List[String] = Nil,
+)
 
 enum EdgeStyle(val mermaid: String, val cssClass: String, val arrowhead: Boolean):
   case Arrow      extends EdgeStyle("-->", "arrow", true)
@@ -88,11 +94,36 @@ enum NotePosition:
 enum NoteTextAlign:
   case Left, Center, Right
 
-case class StateTransition(from: String, to: String, label: Option[String])
+case class StateTransition(
+    from: String,
+    to: String,
+    label: Option[String],
+    fromClasses: List[String] = Nil,
+    toClasses: List[String] = Nil,
+)
 
-case class StateStyle(noteAlign: Option[NoteTextAlign] = None)
+case class StateStyle(
+    noteAlign: Option[NoteTextAlign] = None,
+    paint: Map[css.CssProperty, String] = Map.empty,
+)
+
+object StateStyle:
+  private val noteAlignProp = css.CssProperty.parse("noteAlign")
+
+  /** Split `style A fill:#f00,noteAlign:center` into note alignment plus SVG/HTML paint. */
+  def fromProperties(props: Map[css.CssProperty, String]): StateStyle =
+    val align = props.get(noteAlignProp).flatMap {
+      case "center" => Some(NoteTextAlign.Center)
+      case "right"  => Some(NoteTextAlign.Right)
+      case "left"   => Some(NoteTextAlign.Left)
+      case _        => None
+    }
+    StateStyle(noteAlign = align, paint = props - noteAlignProp)
+end StateStyle
 
 enum StateStatement:
   case TransitionSt(transition: StateTransition)
   case NoteSt(position: NotePosition, stateId: String, text: String, alias: Option[String] = None)
   case StyleSt(stateId: String, style: StateStyle)
+  case ClassDefSt(className: String, styles: Map[css.CssProperty, String])
+  case ClassSt(stateIds: List[String], className: String)
