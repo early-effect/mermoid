@@ -1,7 +1,7 @@
 import org.scalajs.linker.interface.ModuleKind
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.*
 
-val ascentVersion   = "0.3.1"
+val ascentVersion   = "0.4.0"
 val scala3Version   = "3.8.4"
 val zioVersion      = "2.1.26"
 val specularVersion = "0.12.0"
