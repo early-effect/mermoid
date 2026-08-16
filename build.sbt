@@ -4,7 +4,7 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.*
 val ascentVersion   = "0.4.0"
 val scala3Version   = "3.8.4"
 val zioVersion      = "2.1.26"
-val specularVersion = "0.12.0"
+val specularVersion = "0.12.1"
 
 // sbt 2.x scopes bare build.sbt settings to ThisBuild, so these apply build-wide to every module.
 scalaVersion         := scala3Version
