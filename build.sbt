@@ -195,11 +195,7 @@ lazy val docs = (projectMatrix in file("docs"))
           specularMetaProject   := Some(LocalProject("core")),
           specularSiteDirectory := (ThisBuild / baseDirectory).value / "target" / "site",
           // Docs-only (workflow_dispatch) builds are dynver `-ci`; don't advertise that as a Central coord.
-          specularDisplayVersion := {
-            val v = (ThisBuild / version).value
-            if (v.endsWith("-ci") || v.endsWith("-SNAPSHOT")) previousStableVersion.value.getOrElse("<version>")
-            else ""
-          },
+          specularDisplayVersion := stripCi,
           // Link docsJS then write marker path for BuildSite.afterBuild → assets/client.js.
           specularJsLink := Def
             .uncached(Def.task {
