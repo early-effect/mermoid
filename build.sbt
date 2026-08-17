@@ -1,13 +1,11 @@
 import org.scalajs.linker.interface.ModuleKind
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.*
 
-val ascentVersion   = "0.3.1"
-val scala3Version   = "3.8.4"
-val zioVersion      = "2.1.26"
-val specularVersion = "0.12.0"
+MyVersions.settings
+
+val scala3Version: String = MyVersions.scala
 
 // sbt 2.x scopes bare build.sbt settings to ThisBuild, so these apply build-wide to every module.
-scalaVersion         := scala3Version
 organization         := "rocks.earlyeffect"
 organizationName     := "Early Effect"
 organizationHomepage := Some(url("https://www.earlyeffect.rocks"))
@@ -46,24 +44,10 @@ pomIncludeRepository := { _ => false }
 // loadable for local compile/test but makes signing fail loudly if anyone publishes off-CI.
 usePgpKeyHex(sys.env.getOrElse("PGP_KEY_HEX", "MISSING_KEY_HEX"))
 
-// zipx CI: Aggregate verify gated on formatting + workflow-drift, then Central publish and Pages docs.
-val Fmt = CapabilityName("fmt")
-
+// zipx CI: builtin fmt / workflow-check / advisories / test (testFull) run in parallel, then Central + Pages.
 zipxJavaVersion      := JdkVersion("25")
 zipxWorkflowDispatch := true
-zipxScalaSteward     := true
-// sbt 2.x aliases `test` to `testQuick`, and the CI cache restores `target/` — so on a cache hit
-// `test` would skip unchanged suites. CI must run everything.
-// Typed at its definition: SbtCommand's apply is inline and only accepts a literal.
-val ciTestTask: SbtCommand = SbtCommand("testFull")
-zipxTestTask := ciTestTask.text
 zipxCapabilities ++= Seq(
-  // Compound, so a literal SbtCommand rather than a spliced task key.
-  Capability.once(Fmt, SbtCommand("scalafmtCheckAll; zipxWorkflowCheck")),
-  // Overriding the builtin `test` capability by name replaces its command too, and Capability.test's
-  // is ModuleNode.DefaultTestTask (`test`) — so the command has to be restated here or zipxTestTask
-  // is silently lost.
-  Capability.test.copy(command = _ => Some(ciTestTask), needsCapabilities = List(Fmt)),
   ZipxCentral.release,
   ZipxDocs.pages(),
 )
@@ -76,16 +60,10 @@ val commonScalacOptions = Seq(
 
 val scalaVersions = Seq(scala3Version)
 
-/** zio-test deps. A Def.settings block (not a bare Seq) so the per-project platform suffix that `%%` appends in sbt 2.x
-  * resolves at each module's scope. ZTestFramework registers itself via zio-test-sbt, so no testFrameworks wiring is
-  * needed.
+/** zio-test deps. `library()` resolves `%%` at each module's platform. ZTestFramework registers itself via zio-test-sbt,
+  * so no testFrameworks wiring is needed.
   */
-val zioTestSettings = Def.settings(
-  libraryDependencies ++= Seq(
-    "dev.zio" %% "zio-test"     % zioVersion % Test,
-    "dev.zio" %% "zio-test-sbt" % zioVersion % Test,
-  )
-)
+val zioTestSettings = MyVersions.zioTests
 
 lazy val root = (project in file("."))
   .aggregate((core.projectRefs ++ ascent.projectRefs ++ cli.projectRefs ++ docs.projectRefs)*)
@@ -102,18 +80,13 @@ lazy val core = (projectMatrix in file("core"))
     name        := "mermoid",
     description := "Mermaid-compatible diagram to SVG renderer for Scala 3, themed with real CSS",
     scalacOptions ++= commonScalacOptions,
-    libraryDependencies += "com.lihaoyi" %% "fastparse" % "3.1.1",
+    MyVersions.parserLib,
     zioTestSettings,
   )
   .jvmPlatform(scalaVersions = scalaVersions)
   .jsPlatform(scalaVersions = scalaVersions)
 
-val javaTimePolyfill = Def.settings(
-  libraryDependencies ++= Seq(
-    "io.github.cquiroz" %% "scala-java-time"      % "2.7.0",
-    "io.github.cquiroz" %% "scala-java-time-tzdb" % "2.7.0",
-  )
-)
+val javaTimePolyfill = MyVersions.javaTime
 
 // --- mermoid-ascent : hybrid HTML+SVG ascent painter with reactive reflow. Published; depends on ascent.
 lazy val ascent = (projectMatrix in file("ascent"))
@@ -122,18 +95,14 @@ lazy val ascent = (projectMatrix in file("ascent"))
     name        := "mermoid-ascent",
     description := "Ascent UI painter for mermoid diagrams (hybrid HTML nodes, SVG edges, reactive reflow)",
     scalacOptions ++= commonScalacOptions,
-    libraryDependencies ++= Seq(
-      "rocks.earlyeffect" %% "ascent-core" % ascentVersion,
-      "rocks.earlyeffect" %% "ascent-css"  % ascentVersion,
-      "dev.zio"           %% "zio"         % zioVersion,
-    ),
+    MyVersions.ascentLib,
   )
   .jvmPlatform(
     scalaVersions,
     Nil,
     (p: Project) =>
       p.settings(
-        libraryDependencies += "rocks.earlyeffect" %% "ascent-html" % ascentVersion,
+        MyVersions.ascentHtmlLib,
         zioTestSettings,
       ),
   )
@@ -143,7 +112,7 @@ lazy val ascent = (projectMatrix in file("ascent"))
     (p: Project) =>
       p.settings(
         javaTimePolyfill,
-        libraryDependencies += "rocks.earlyeffect" %% "ascent-js" % ascentVersion,
+        MyVersions.ascentJsLib,
         // SSR round-trip specs need ascent-html (JVM-only).
         Test / skip    := true,
         Test / sources := Nil,
@@ -158,7 +127,7 @@ lazy val cli = (projectMatrix in file("cli"))
     publish / skip  := true,
     publishArtifact := false, // zipx derives publish jobs from publishArtifact
     scalacOptions ++= commonScalacOptions,
-    libraryDependencies += "dev.zio" %% "zio" % zioVersion,
+    MyVersions.zioLib,
     zioTestSettings,
     Compile / mainClass        := Some("mermoid.cli.MermoidCli"),
     assembly / mainClass       := Some("mermoid.cli.MermoidCli"),
@@ -207,13 +176,7 @@ lazy val docs = (projectMatrix in file("docs"))
     (p: Project) =>
       p.enablePlugins(SpecularPlugin)
         .settings(
-          libraryDependencies ++= Seq(
-            "rocks.earlyeffect" %% "specular-core"           % specularVersion % Test,
-            "rocks.earlyeffect" %% "specular-zio-test"       % specularVersion % Test,
-            "rocks.earlyeffect" %% "specular-site"           % specularVersion % Test,
-            "rocks.earlyeffect" %% "early-effect-docs-theme" % specularVersion % Test,
-            "dev.zio"           %% "zio"                     % zioVersion      % Test,
-          ),
+          MyVersions.docsJvm,
           zioTestSettings,
           Test / mainClass       := Some("specular.site.DocsServe"),
           Test / run / mainClass := (Test / mainClass).value,
@@ -266,12 +229,7 @@ lazy val docs = (projectMatrix in file("docs"))
     (p: Project) =>
       p.settings(
         javaTimePolyfill,
-        libraryDependencies ++= Seq(
-          "rocks.earlyeffect" %% "specular-core" % specularVersion,
-          "rocks.earlyeffect" %% "ascent-js"     % ascentVersion,
-          "rocks.earlyeffect" %% "ascent-css"    % ascentVersion,
-          "dev.zio"           %% "zio"           % zioVersion,
-        ),
+        MyVersions.docsJs,
         // Share Interactive DocSpec + registry with the JVM Test CP (Specular LibraryAuthors pattern).
         Compile / unmanagedSources ++= {
           val dir = (ThisBuild / baseDirectory).value / "docs" / "src" / "test" / "scala" / "mermoid" / "docs"
