@@ -21,7 +21,7 @@ object MyVersions extends ZipxVersions:
   val scalaJavaTime     = Lib("io.github.cquiroz", "scala-java-time", "2.7.0")
   val scalaJavaTimeTzdb = scalaJavaTime.mod("scala-java-time-tzdb")
 
-  val ascent     = Lib("rocks.earlyeffect", "ascent-core", "0.4.0")
+  val ascent     = Lib("rocks.earlyeffect", "ascent-core", "0.3.1")
   val ascentCss  = ascent.mod("ascent-css")
   val ascentHtml = ascent.mod("ascent-html")
   val ascentJs   = ascent.mod("ascent-js")
@@ -45,5 +45,5 @@ object MyVersions extends ZipxVersions:
   def ascentHtmlLib = library(ascentHtml)
   def ascentJsLib   = library(ascentJs)
   def docsJvm       = library(specularZioTest, specularTheme)
-  def docsJs        = library(specular, ascentJs, ascentCss, zio)
+  def docsJs        = library(specular, zio)
 end MyVersions
