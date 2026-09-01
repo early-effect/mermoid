@@ -43,3 +43,5 @@ build.sbt.semanticdb
 .cursor/
 
 node_modules/
+.playwright-mcp/
+.scala-build/
