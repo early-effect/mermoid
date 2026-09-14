@@ -6,10 +6,14 @@ MyVersions.settings
 ThisBuild / scalaVersion := (MyVersions.scala: String)
 
 // specular 0.14.1 still pins ascent 0.5.0; this build takes 0.7.0. Under early-semver that is a hard eviction.
+// %% covers JVM `_3`; Scala.js artifacts are `_sjs1_3` and need their own rows.
 ThisBuild / libraryDependencySchemes ++= Seq(
-  "rocks.earlyeffect" %% "ascent-core" % "always",
-  "rocks.earlyeffect" %% "ascent-css"  % "always",
-  "rocks.earlyeffect" %% "ascent-html" % "always",
+  "rocks.earlyeffect" %% "ascent-core"      % "always",
+  "rocks.earlyeffect" %% "ascent-css"       % "always",
+  "rocks.earlyeffect" %% "ascent-html"      % "always",
+  "rocks.earlyeffect" %% "ascent-core_sjs1" % "always",
+  "rocks.earlyeffect" %% "ascent-css_sjs1"  % "always",
+  "rocks.earlyeffect" %% "ascent-js_sjs1"   % "always",
 )
 
 val scala3Version: String = MyVersions.scala
