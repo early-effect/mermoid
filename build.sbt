@@ -3,20 +3,33 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.*
 
 MyVersions.settings
 
+ThisBuild / scalaVersion := (MyVersions.scala: String)
+
+// specular 0.14.1 still pins ascent 0.5.0; this build takes 0.7.0. Under early-semver that is a hard eviction.
+// %% covers JVM `_3`; Scala.js artifacts are `_sjs1_3` and need their own rows.
+ThisBuild / libraryDependencySchemes ++= Seq(
+  "rocks.earlyeffect" %% "ascent-core"      % "always",
+  "rocks.earlyeffect" %% "ascent-css"       % "always",
+  "rocks.earlyeffect" %% "ascent-html"      % "always",
+  "rocks.earlyeffect" %% "ascent-core_sjs1" % "always",
+  "rocks.earlyeffect" %% "ascent-css_sjs1"  % "always",
+  "rocks.earlyeffect" %% "ascent-js_sjs1"   % "always",
+)
+
 val scala3Version: String = MyVersions.scala
 
 // sbt 2.x scopes bare build.sbt settings to ThisBuild, so these apply build-wide to every module.
 organization         := "rocks.earlyeffect"
 organizationName     := "Early Effect"
-organizationHomepage := Some(url("https://www.earlyeffect.rocks"))
+organizationHomepage := Some(uri("https://www.earlyeffect.rocks"))
 versionScheme        := Some("early-semver")
 // No hardcoded version — sbt-dynver-ci derives it: clean tag -> 0.1.0, else <last-tag>-ci (cache-stable).
 
-homepage := Some(url("https://github.com/early-effect/mermoid"))
-licenses := Seq("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt"))
+homepage := Some(uri("https://github.com/early-effect/mermoid"))
+licenses := Seq("Apache-2.0" -> uri("http://www.apache.org/licenses/LICENSE-2.0.txt"))
 scmInfo  := Some(
   ScmInfo(
-    url("https://github.com/early-effect/mermoid"),
+    uri("https://github.com/early-effect/mermoid"),
     "scm:git@github.com:early-effect/mermoid.git",
   )
 )
@@ -25,7 +38,7 @@ developers := List(
     id = "russwyte",
     name = "Russ White",
     email = "356303+russwyte@users.noreply.github.com",
-    url = url("https://github.com/russwyte"),
+    url = uri("https://github.com/russwyte"),
   )
 )
 
