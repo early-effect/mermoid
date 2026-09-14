@@ -9,8 +9,8 @@ import zipx.*
   * module already pulls them (specular-site via the docs theme).
   */
 object MyVersions extends ZipxVersions:
-  val sbt: SbtVersion     = SbtVersion("2.0.7")
-  val scala: ScalaVersion = ScalaVersion("3.8.4")
+  val sbt: SbtVersion     = SbtVersion("2.1.0-M1")
+  val scala: ScalaVersion = ScalaVersion("3.9.0")
 
   val zio        = Lib("dev.zio", "zio", "2.1.26")
   val zioTest    = zio.mod("zio-test")
@@ -21,7 +21,7 @@ object MyVersions extends ZipxVersions:
   val scalaJavaTime     = Lib("io.github.cquiroz", "scala-java-time", "2.7.0")
   val scalaJavaTimeTzdb = scalaJavaTime.mod("scala-java-time-tzdb")
 
-  val ascent     = Lib("rocks.earlyeffect", "ascent-core", "0.5.0")
+  val ascent     = Lib("rocks.earlyeffect", "ascent-core", "0.7.0")
   val ascentCss  = ascent.mod("ascent-css")
   val ascentHtml = ascent.mod("ascent-html")
   val ascentJs   = ascent.mod("ascent-js")
