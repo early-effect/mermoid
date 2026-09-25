@@ -116,11 +116,14 @@ Directions: `TB` `TD` `BT` `LR` `RL`.
 
 ### State diagrams: `stateDiagram-v2`
 
-Author direction is top-to-bottom. With a [`Viewport`](#layout-and-responsive), narrow widths keep vertical layout;
-wide widths may flip to horizontal so the diagram uses available width.
+`direction TB`, `TD`, `BT`, `LR`, or `RL` may appear on any statement line. The default is `TB`. A later `direction`
+replaces an earlier one. With a [`Viewport`](#layout-and-responsive), narrow widths keep a vertical layout and wide
+widths may flip a vertical author to horizontal, the same rules as flowcharts. An explicit `direction LR` with no
+viewport stays left to right.
 
 | Feature | Syntax |
 |---|---|
+| Direction | `direction LR` (`TB` `TD` `BT` `LR` `RL`; default `TB`) |
 | Transitions | `A --> B: label` |
 | Start / end | `[*] --> A`, `A --> [*]` (separate markers when both roles appear) |
 | Self-transitions | `A --> A: retry` (labels stack) |
@@ -138,7 +141,7 @@ Documented so adopters are not surprised:
 | Chained edges `A --> B --> C` | One hop per pair, same as writing each edge on its own line. |
 | Mermaid `%%` comments | Ignored. `%%{init:…}%%` is skipped too; it does not pick a theme. |
 | Parallel edges `A --> B` twice | Both render; offset so they do not sit on top of each other. Use `as` if you CSS-select one. |
-| Cycles / back-edges | Layering breaks cycles; barycenter ordering cuts crossings; long edges route through waypoints. |
+| Cycles / back-edges | A greedy feedback arc set reverses back edges for ranking and draws them in the original direction, so a retry sits on the next rank instead of ranking as a root. Barycenter ordering cuts crossings. Long edges route through waypoints. |
 | Self-loops | Attach right (vertical flow) or top (horizontal); stacked labels get room in the bbox. |
 | Nested subgraphs | Supported; frames paint behind edges and nodes. |
 | State notes vs neighbours | Notes dodge other nodes when the preferred side would overlap (especially in LR). |
@@ -152,7 +155,7 @@ Documented so adopters are not surprised:
 **Not yet implemented** (parse-fail or ignored):
 
 - Diagram types: sequence, class, ER, Gantt, pie, journey, git graph
-- State: composite states, concurrency (`--`), in-diagram `direction`, `state X as "…"`
+- State: composite states, concurrency (`--`), `state X as "…"`
 - Flowchart: `linkStyle`, Mermaid theme directives
 
 ## Layout and responsive
@@ -161,7 +164,8 @@ Documented so adopters are not surprised:
 import mermoid.*
 
 val config = RenderConfig(
-  layout = LayoutConfig(),                 // spacing, fonts, shape geometry, crossing sweeps
+  layout = LayoutConfig(),                 // spacing, shape geometry, crossing sweeps
+                                            // edgeLabelFontSize (default 12) is the painted edge-label size
   theme = css.ThemeName.Default,
   customStylesheet = None,
   resolveVariables = true,                 // false keeps var(--mermoid-*) for page cascade

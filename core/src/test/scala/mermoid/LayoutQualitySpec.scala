@@ -8,6 +8,99 @@ object LayoutQualitySpec extends ZIOSpecDefault:
 
   private def edge(from: String, to: String) = Edge(from, to, EdgeStyle.Arrow, None)
 
+  /** Issue 48: a pipeline with one Retry per fault leaf and two cycle-closers. */
+  private val initiativeMachine =
+    """stateDiagram-v2
+      |    [*] --> Draft
+      |    Draft --> JourneyPreparing: Launch
+      |    Draft --> Archived: Archive
+      |    JourneyPreparing --> PredictionsRequested: JourneyPublished
+      |    JourneyPreparing --> JourneyPreparationFaulted: DsmlBridgeFailed, PreparationWatch
+      |    JourneyPreparationFaulted --> JourneyPreparing: Retry
+      |    PredictionsRequested --> Enqueueing: PredictionsPromoted
+      |    PredictionsRequested --> PredictionsFaulted: DatabricksFailed +3
+      |    PredictionsFaulted --> PredictionsRequested: Retry
+      |    Enqueueing --> Live: EnqueueComplete
+      |    Enqueueing --> EnqueueFaulted: DsmlBridgeFailed, EnqueueWatch
+      |    EnqueueFaulted --> Enqueueing: Retry
+      |    Live --> CycleExiting: EndCycle
+      |    Live --> Stopping: Stop
+      |    Live --> Archived: Archive
+      |    CycleExiting --> JourneyRepublishing: ExitsComplete
+      |    CycleExiting --> CycleExitFaulted: JourneysFailed, ExitsWatch
+      |    CycleExitFaulted --> CycleExiting: Retry
+      |    JourneyRepublishing --> PredictionsRequested: JourneyPublished
+      |    JourneyRepublishing --> JourneyRepublishFaulted: DsmlBridgeFailed, RepublishWatch
+      |    JourneyRepublishFaulted --> JourneyRepublishing: Retry
+      |    Stopping --> Stopped: ExitsComplete
+      |    Stopping --> StopFaulted: JourneysFailed, ExitsWatch
+      |    StopFaulted --> Stopping: Retry
+      |    Stopped --> JourneyRepublishing: Restart
+      |    Stopped --> Archived: Archive
+      |""".stripMargin
+
+  private val faultOf = List(
+    "JourneyPreparationFaulted" -> "JourneyPreparing",
+    "PredictionsFaulted"        -> "PredictionsRequested",
+    "EnqueueFaulted"            -> "Enqueueing",
+    "CycleExitFaulted"          -> "CycleExiting",
+    "JourneyRepublishFaulted"   -> "JourneyRepublishing",
+    "StopFaulted"               -> "Stopping",
+  )
+
+  private def sceneOf(src: String): DiagramScene =
+    MermaidParser.parse(src) match
+      case Right(d)  => DiagramLayout.scene(d)
+      case Left(err) => throw new IllegalArgumentException(err)
+
+  /** Cluster centers that share a rank. Layer pitch is ~100px; same-rank height jitter stays under 30. */
+  private def ranks(scene: DiagramScene, axis: LayoutNode => Double): Map[String, Int] =
+    val sorted = scene.visibleNodes.map(n => n.id -> axis(n)).sortBy(_._2)
+    val groups = sorted.foldLeft(List.empty[List[(String, Double)]]) {
+      case (Nil, item)             => List(List(item))
+      case (current :: rest, item) =>
+        val anchor = current.map(_._2).min
+        if item._2 - anchor <= 30.0 then (item :: current) :: rest
+        else List(item) :: current :: rest
+    }
+    groups.reverse.zipWithIndex.flatMap((group, idx) => group.map((id, _) => id -> idx)).toMap
+  end ranks
+
+  private def rankOk(layer: Map[String, Int]): Boolean =
+    val draft   = layer("Draft")
+    val others  = layer.filter((id, _) => id != "[*]" && id != "Draft")
+    val faults  = faultOf.forall((fault, hop) => layer(fault) == layer(hop) + 1)
+    val deepest = layer.values.max
+    layer("[*]") < draft && others.forall((_, rank) => rank > draft) && faults &&
+    layer("Archived") == deepest && layer("Live") > draft
+
+  /** Crossings of the routed polyline (center, waypoints, center), not the straight chord. */
+  private def routedCrossings(scene: DiagramScene): Int =
+    val pos       = scene.visibleNodes.map(n => n.id -> n.center).toMap
+    val polylines = scene.edges.filter(e => e.from != e.to).flatMap { e =>
+      pos.get(e.from).zip(pos.get(e.to)).map { (a, b) =>
+        a :: scene.routes.getOrElse((e.from, e.to), Nil) ::: List(b)
+      }
+    }
+    val segs = polylines.flatMap(pts => pts.zip(pts.tail))
+    segs.indices.foldLeft(0) { (acc, i) =>
+      val (p1, p2) = segs(i)
+      acc + segs.drop(i + 1).count { (p3, p4) =>
+        val share = p1 == p3 || p1 == p4 || p2 == p3 || p2 == p4
+        !share && segmentsCross(p1, p2, p3, p4)
+      }
+    }
+  end routedCrossings
+
+  private def segmentsCross(p1: Point, p2: Point, p3: Point, p4: Point): Boolean =
+    def cross(a: Point, b: Point, c: Point): Double =
+      (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)
+    val d1 = cross(p3, p4, p1)
+    val d2 = cross(p3, p4, p2)
+    val d3 = cross(p1, p2, p3)
+    val d4 = cross(p1, p2, p4)
+    ((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) && ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0))
+
   /** Classic crossing: A→D and B→C with layers [A,B] / [C,D] in wrong order. */
   private val crossedLayers = List(List("A", "B"), List("C", "D"))
   private val crossedEdges  = List(("A", "D"), ("B", "C"))
@@ -104,6 +197,31 @@ object LayoutQualitySpec extends ZIOSpecDefault:
         val paths = """d="([^"]+)"""".r.findAllMatchIn(svg).map(_.group(1)).filter(_.startsWith("M")).toList
         // The middle parallel (zero offset) stays straight; the outer ones bow.
         assertTrue(paths.size >= 3, paths.count(d => d.contains("Q") || d.contains("C")) >= 2)
+      },
+      test("a two-cycle ranks the forward node first for either id order") {
+        def ys(ids: List[String]): Map[String, Double] =
+          val nodes = ids.map(id => id -> NodeDef(id, Some(id), NodeShape.Rect)).toMap
+          val edges = List(edge("A", "B"), edge("B", "A"))
+          Layout.layout(LayoutConfig(), Direction.TB, nodes, edges).visibleNodes.map(n => n.id -> n.center.y).toMap
+        val ab = ys(List("A", "B"))
+        val ba = ys(List("B", "A"))
+        assertTrue(ab("A") < ab("B"), ba("A") < ba("B"))
+      },
+      test("state retry edges sit one rank after their hop, not on the first rank") {
+        val tb = sceneOf(initiativeMachine)
+        val lr =
+          sceneOf(s"stateDiagram-v2\n    direction LR\n${initiativeMachine.linesIterator.drop(1).mkString("\n")}")
+        val tbR = ranks(tb, _.center.y)
+        val lrR = ranks(lr, _.center.x)
+        assertTrue(
+          rankOk(tbR),
+          rankOk(lrR),
+          tb.direction == Direction.TB,
+          lr.direction == Direction.LR,
+          lr.width > lr.height,
+          routedCrossings(tb) <= 8,
+          routedCrossings(lr) <= 8,
+        )
       },
       test("long-span edges emit cubic segments through waypoints") {
         val src =

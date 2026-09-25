@@ -216,6 +216,9 @@ object EdgeRenderer:
         "y"                 -> my.f,
         "text-anchor"       -> "middle",
         "dominant-baseline" -> "central",
+        // Stylesheet `.edge-label { font-size }` would beat a presentation attribute. Inline style
+        // is the configured size the layout already measured.
+        "style" -> s"font-size: ${lc.edgeLabelFontSize}px",
       )(lbl),
     )
   end edgeLabelSvg

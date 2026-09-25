@@ -66,6 +66,56 @@ object LayoutBoundsSpec extends ZIOSpecDefault:
       val pathOk    = pathXs.forall(x => x >= -1.0 && x <= cw + 1.0)
       assertTrue(clipped.isEmpty, pathOk, labelBoxes(svg).size >= 2)
     },
+    test("direction LR lays a chain out wider than tall with labels inside the viewBox") {
+      val src =
+        """stateDiagram-v2
+          |    direction LR
+          |    [*] --> Draft
+          |    Draft --> Preparing: Launch
+          |    Preparing --> Live: Published
+          |    Live --> [*]
+          |""".stripMargin
+      val scene     = DiagramLayout.scene(parse(src))
+      val svg       = SvgRenderer.render(parse(src))
+      val (cw, ch)  = viewBoxSize(svg)
+      val clipped   = labelBoxes(svg).filterNot((x, y, w, h) => inside(x, y, w, h, cw, ch))
+      val draft     = scene.nodeMap("Draft").center.x
+      val preparing = scene.nodeMap("Preparing").center.x
+      val live      = scene.nodeMap("Live").center.x
+      assertTrue(
+        scene.direction == Direction.LR,
+        scene.width > scene.height,
+        draft < preparing,
+        preparing < live,
+        clipped.isEmpty,
+        labelBoxes(svg).nonEmpty,
+      )
+    },
+    test("direction LR keeps a retry self-loop and its back edge on the canvas") {
+      val src =
+        """stateDiagram-v2
+          |    direction LR
+          |    [*] --> Draft
+          |    Draft --> JourneyPreparing: Launch
+          |    JourneyPreparing --> JourneyPreparing: tick
+          |    JourneyPreparing --> PredictionsRequested: JourneyPublished
+          |    JourneyPreparing --> JourneyPreparationFaulted: DsmlBridgeFailed
+          |    JourneyPreparationFaulted --> JourneyPreparing: Retry
+          |    classDef fault fill:#3a2a10,stroke:#f59e0b
+          |    class JourneyPreparationFaulted fault
+          |""".stripMargin
+      val scene    = DiagramLayout.scene(parse(src))
+      val svg      = SvgRenderer.render(parse(src))
+      val (cw, ch) = viewBoxSize(svg)
+      val clipped  = labelBoxes(svg).filterNot((x, y, w, h) => inside(x, y, w, h, cw, ch))
+      assertTrue(
+        scene.direction == Direction.LR,
+        scene.loopSide == SelfLoopSide.Top,
+        scene.width > scene.height,
+        clipped.isEmpty,
+        labelBoxes(svg).nonEmpty,
+      )
+    },
     test("order FSM ranks start above end (split [*])") {
       val scene   = DiagramLayout.scene(parse(orderFsm))
       val pending = scene.nodeMap("Pending").center.y

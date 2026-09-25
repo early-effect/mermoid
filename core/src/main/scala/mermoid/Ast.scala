@@ -4,7 +4,7 @@ package mermoid
 
 enum Diagram:
   case Flowchart(direction: Direction, statements: List[FlowStatement])
-  case StateDiagram(statements: List[StateStatement])
+  case StateDiagram(direction: Direction, statements: List[StateStatement])
 
 // -- Flowchart ----------------------------------------------------------------
 

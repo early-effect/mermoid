@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="240" height="520" viewBox="0 0 240 520">
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="390" viewBox="0 0 400 390">
   <defs>
     <marker id="arrowhead" markerWidth="12" markerHeight="10.2" refX="12" refY="5.1" orient="auto" markerUnits="userSpaceOnUse">
       <polygon class="arrowhead" points="0 0, 12 5.1, 0 10.2"/>
@@ -98,33 +98,33 @@
   stroke: #333;
 }
 </style>
-  <rect class="diagram-bg" x="0" y="0" width="240" height="520"/>
+  <rect class="diagram-bg" x="0" y="0" width="400" height="390"/>
   <g class="edge edge-arrow" id="edge-A-B-0" data-from="A" data-to="B">
-    <path class="edge-line" d="M99.35483870967742,300 C116.12903225806451,278.3333333333333 197.46046609676563,204.12199385617532 200,170 C202.53953390323437,135.87800614382468 128.82670177423634,107.72336405245679 114.5920421290836,95.26803686294815" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M164.80769230769232,90 Q126.16017196134607,119.73759274814307 105.21900454900866,163.77647055837022" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="edge edge-arrow" id="edge-B-C-0" data-from="B" data-to="C">
-    <path class="edge-line" d="M80,90 L80,162" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M97.3076923076923,220 Q131.53385558070073,250.61151896694813 148.1386278616652,293.42246246684977" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="edge edge-arrow" id="edge-C-A-0" data-from="C" data-to="A">
-    <path class="edge-line" d="M80,220 L80,292" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M174.83870967741936,300 C179.03225806451613,278.3333333333333 197.5226517093487,203.6800673417851 200,170 C202.4773482906513,136.3199326582149 191.41899951777253,109.93299662440778 189.70279942132706,97.91959594928933" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="edge edge-arrow" id="edge-A-D-0" data-from="A" data-to="D">
-    <path class="edge-line" d="M80,350 L80,422" fill="none" marker-end="url(#arrowhead)"/>
-  </g>
-  <g class="node node-rect" id="node-B">
-    <rect class="node-shape" x="40" y="40" width="80" height="50" rx="0" ry="0"/>
-    <text class="node-label" x="80" y="65" text-anchor="middle" dominant-baseline="central">B</text>
-  </g>
-  <g class="node node-rect" id="node-C">
-    <rect class="node-shape" x="40" y="170" width="80" height="50" rx="0" ry="0"/>
-    <text class="node-label" x="80" y="195" text-anchor="middle" dominant-baseline="central">C</text>
+    <path class="edge-line" d="M210.96153846153845,90 Q258.55282312645085,117.94770988745756 288.2758998305297,164.45086650347304" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="node node-rect" id="node-A">
-    <rect class="node-shape" x="40" y="300" width="80" height="50" rx="0" ry="0"/>
-    <text class="node-label" x="80" y="325" text-anchor="middle" dominant-baseline="central">A</text>
+    <rect class="node-shape" x="145" y="40" width="80" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="185" y="65" text-anchor="middle" dominant-baseline="central">A</text>
+  </g>
+  <g class="node node-rect" id="node-B">
+    <rect class="node-shape" x="40" y="170" width="80" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="80" y="195" text-anchor="middle" dominant-baseline="central">B</text>
   </g>
   <g class="node node-rect" id="node-D">
-    <rect class="node-shape" x="40" y="430" width="80" height="50" rx="0" ry="0"/>
-    <text class="node-label" x="80" y="455" text-anchor="middle" dominant-baseline="central">D</text>
+    <rect class="node-shape" x="280" y="170" width="80" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="320" y="195" text-anchor="middle" dominant-baseline="central">D</text>
+  </g>
+  <g class="node node-rect" id="node-C">
+    <rect class="node-shape" x="130" y="300" width="80" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="170" y="325" text-anchor="middle" dominant-baseline="central">C</text>
   </g>
 </svg>

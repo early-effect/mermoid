@@ -2,6 +2,7 @@ package mermoid.ascent
 
 import ascent.html.Html
 import mermoid.*
+import mermoid.css.CssParser
 import zio.*
 import zio.test.*
 
@@ -118,6 +119,48 @@ object MermoidAscentSpec extends ZIOSpecDefault:
         html.contains("happy"),
         html.contains("background: #1f4a35") || html.contains("background:#1f4a35"),
         html.contains("border-color: #7dcea0") || html.contains("border-color:#7dcea0"),
+      )
+    },
+    test("state classDef beats a theme rule of equal chrome specificity") {
+      val src =
+        """stateDiagram-v2
+          |    [*] --> PredictionsRequested
+          |    PredictionsRequested --> PredictionsFaulted: DatabricksFailed
+          |    PredictionsFaulted --> PredictionsRequested: Retry
+          |    classDef fault fill:#2e2410,stroke:#f59e0b,color:#fde68a
+          |    class PredictionsFaulted fault
+          |""".stripMargin
+      val custom = CssParser
+        .parse(
+          """.mermoid-node .node-shape { background: #123040 }
+            |.node-shape { background: #000 }
+            |""".stripMargin
+        )
+        .fold(err => throw new IllegalArgumentException(err), identity)
+      val ui = MermoidAscent.diagram(src, RenderConfig(customStylesheet = Some(custom)))
+      for html <- Html.render(ui)
+      yield assertTrue(
+        html.contains(".mermoid-node.fault .node-shape"),
+        html.contains("background: #2e2410") || html.contains("background:#2e2410"),
+        html.contains("border-color: #f59e0b") || html.contains("border-color:#f59e0b"),
+        html.contains(".mermoid-node.fault"),
+        html.contains("color: #fde68a") || html.contains("color:#fde68a"),
+        html.contains(":where(.mermoid-node) .node-shape"),
+        html.contains("""class="mermoid-node node-round fault""""),
+      )
+    },
+    test("style fill and color beat the theme on the shape and the button") {
+      val src =
+        """stateDiagram-v2
+          |    [*] --> PredictionsFaulted
+          |    style PredictionsFaulted fill:#112233,color:#abcdef
+          |""".stripMargin
+      val ui = MermoidAscent.diagram(src)
+      for html <- Html.render(ui)
+      yield assertTrue(
+        html.contains("background: #112233") || html.contains("background:#112233"),
+        html.contains("color: #abcdef") || html.contains("color:#abcdef"),
+        html.contains("""id="node-PredictionsFaulted""""),
       )
     },
     test("subgraph frames land in the hybrid SVG layer") {

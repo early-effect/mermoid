@@ -4,7 +4,7 @@ import ascent.ast.{AscentEvent, Attr, UI}
 import ascent.domtypes.{AttrValue, Events}
 import ascent.dsl.*
 import mermoid.*
-import mermoid.css.{CssHybrid, CssRenderer, PaintClass, WrapperClass}
+import mermoid.css.{CssHybrid, CssProperty, CssRenderer, CssRule, CssSelector, PaintClass, Stylesheet, WrapperClass}
 import zio.*
 
 /** Paints a [[DiagramScene]] as hybrid HTML nodes + SVG edges. */
@@ -23,7 +23,7 @@ private[ascent] object HybridPainter:
       val withClassDefs =
         if scene.classDefRules.isEmpty then base
         else base.copy(rules = base.rules ++ scene.classDefRules)
-      val htmlSheet = CssHybrid.htmlCompat(withClassDefs)
+      val htmlSheet = boostClassDefs(CssHybrid.htmlCompat(withClassDefs), scene.classDefRules)
       val theme     = CssRenderer.render(htmlSheet, cfg.resolveVariables)
       theme + HybridChrome.css
 
@@ -169,9 +169,12 @@ private[ascent] object HybridPainter:
         node.shape.wrapperClass,
       ) ++ node.cssClasses ++ Option.when(isSel)(PaintClass.IsSelected.cssName) ++
         Option.when(node.cssClasses.contains(PaintClass.StartEnd.cssName))(PaintClass.StartEnd.cssName)
-    val style =
-      s"left:${left.f}px;top:${top.f}px;width:${node.width.f}px;height:${node.height.f}px"
-    val shapeStyle = CssHybrid.htmlInline(node.styles)
+    val painted    = CssHybrid.htmlInline(node.styles)
+    val labelColor = painted.get(CssProperty.Color).map(c => s";color: $c").getOrElse("")
+    val style      =
+      s"left:${left.f}px;top:${top.f}px;width:${node.width.f}px;height:${node.height.f}px$labelColor"
+    // `color` belongs on the button: the label is a sibling of the shape, so a color on the shape never reaches it.
+    val shapeStyle = painted - CssProperty.Color
     val shapeAttrs =
       Vector(Attr.StaticAttr("class", AttrValue.Str(PaintClass.NodeShape.cssName))) ++
         ShapeRenderer.inlineStyle(shapeStyle).map(s => Attr.StaticAttr("style", AttrValue.Str(s)))
@@ -233,6 +236,32 @@ private[ascent] object HybridPainter:
         UI.Element("button", attrs, kids)
     end match
   end nodeButton
+
+  /** Copy classDef rules onto `.mermoid-node.<name>` so they outrank `.mermoid-node .node-shape` (0, 2, 0). */
+  private def boostClassDefs(sheet: Stylesheet, classDefRules: List[CssRule]): Stylesheet =
+    val names = classDefRules.collect { case CssRule(CssSelector.Class(name), _) => name }.toSet
+    if names.isEmpty then sheet
+    else
+      val extra = sheet.rules.flatMap { rule =>
+        boostedSelector(rule.selector, names).map(sel => rule.copy(selector = sel))
+      }
+      sheet.copy(rules = sheet.rules ++ extra)
+
+  private def boostedSelector(sel: CssSelector, names: Set[String]): Option[CssSelector] =
+    val node = CssSelector.Class(HybridClass.Node.cssName)
+    sel match
+      case CssSelector.Class(name) if names.contains(name) =>
+        Some(CssSelector.Compound(List(node, CssSelector.Class(name))))
+      case CssSelector.Descendant(CssSelector.Class(name), child) if names.contains(name) =>
+        Some(
+          CssSelector.Descendant(
+            CssSelector.Compound(List(node, CssSelector.Class(name))),
+            child,
+          )
+        )
+      case _ => None
+    end match
+  end boostedSelector
 
   private def noteCard(
       note: StateNote,

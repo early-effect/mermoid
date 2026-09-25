@@ -117,22 +117,22 @@
   <g class="edge edge-arrow" id="edge-A-D-0" data-from="A" data-to="D">
     <path class="edge-line" d="M147.5,181.17608836907084 C171.79166666666666,186.22698722113927 235,211.21453324669702 293.25,211.4814814814815 C351.5,211.74842971626597 437.95582453568414,189.10279241486032 497,182.77777777777777 C556.0441754643158,176.45276314069523 622.4292106549125,175.07245767878476 647.515052785895,173.53139365898616" fill="none" marker-end="url(#arrowhead)"/>
     <rect class="edge-label-bg" x="460.6" y="172.77777777777777" width="72.8" height="20" rx="3" ry="3"/>
-    <text class="edge-label" x="497" y="182.77777777777777" text-anchor="middle" dominant-baseline="central">fast path</text>
+    <text class="edge-label" x="497" y="182.77777777777777" text-anchor="middle" dominant-baseline="central" style="font-size: 12px">fast path</text>
   </g>
   <g class="edge edge-arrow" id="edge-A-F-0" data-from="A" data-to="F">
     <path class="edge-line" d="M134.80564024390242,195 C161.21303353658536,211.08024691358025 232.88427337398375,266.8518518518519 293.25,291.4814814814815 C353.6157266260163,316.11111111111114 428.375,336.358024691358 497,342.77777777777777 C565.625,349.1975308641975 637.7916666666666,343.24074074074076 705,330 C772.2083333333334,316.75925925925924 844.6196252261832,285.48130021909583 900.25,263.33333333333337 C955.8803747738168,241.18536644757089 1015.6935405357507,208.14905446007648 1038.7822486429009,197.1121986854251" fill="none" marker-end="url(#arrowhead)"/>
     <rect class="edge-label-bg" x="675.8" y="320" width="58.4" height="20" rx="3" ry="3"/>
-    <text class="edge-label" x="705" y="330" text-anchor="middle" dominant-baseline="central">express</text>
+    <text class="edge-label" x="705" y="330" text-anchor="middle" dominant-baseline="central" style="font-size: 12px">express</text>
   </g>
   <g class="edge edge-arrow" id="edge-B-E-0" data-from="B" data-to="E">
     <path class="edge-line" d="M332.0458392101551,156.4814814814815 C359.5381993417959,174.19753086419755 434.8409732016925,247.19135802469134 497,262.77777777777777 C559.1590267983074,278.3641975308642 648.0118078415544,259.7511492170915 705,250 C761.9881921584456,240.2488507829085 816.607627458895,211.8924020626906 838.9291529506739,204.27088247522872" fill="none" marker-end="url(#arrowhead)"/>
     <rect class="edge-label-bg" x="679.4" y="240" width="51.199999999999996" height="20" rx="3" ry="3"/>
-    <text class="edge-label" x="705" y="250" text-anchor="middle" dominant-baseline="central">bypass</text>
+    <text class="edge-label" x="705" y="250" text-anchor="middle" dominant-baseline="central" style="font-size: 12px">bypass</text>
   </g>
   <g class="edge edge-arrow" id="edge-C-F-0" data-from="C" data-to="F">
     <path class="edge-line" d="M555,85.27243589743588 C580,77.72702991452991 647.4583333333334,45.323183760683754 705,40 C762.5416666666666,34.676816239316246 843.2844529585437,36.517243196170696 900.25,53.33333333333334 C957.2155470414563,70.14942347049599 1022.3694018739478,126.30267290803543 1046.7932822487373,140.89654082297585" fill="none" marker-end="url(#arrowhead)"/>
     <rect class="edge-label-bg" x="867.45" y="43.33333333333334" width="65.6" height="20" rx="3" ry="3"/>
-    <text class="edge-label" x="900.25" y="53.33333333333334" text-anchor="middle" dominant-baseline="central">shortcut</text>
+    <text class="edge-label" x="900.25" y="53.33333333333334" text-anchor="middle" dominant-baseline="central" style="font-size: 12px">shortcut</text>
   </g>
   <g class="node node-rect" id="node-A">
     <rect class="node-shape" x="40" y="145" width="107.5" height="50" rx="0" ry="0"/>
