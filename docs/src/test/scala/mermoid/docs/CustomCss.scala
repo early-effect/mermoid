@@ -100,20 +100,23 @@ over, or derived from application data.
     ),
     section("classDef, class and style")(
       md"""
-The in-diagram styling statements interact with a custom stylesheet like this:
+The in-diagram styling statements interact with a custom stylesheet like this. Later rows win.
 
-| Statement | Where it lands | Wins against |
+| Layer | Where it lands | What it loses to |
 |---|---|---|
-| `classDef n p:v` | a CSS rule appended after the custom rules | earlier rules with equal specificity |
-| `class A n` / `A:::n` | the node's `class` attribute | — it selects, it doesn't style |
-| `style A p:v` | an inline `style` attribute on the node group | every stylesheet rule |
+| Hybrid chrome layout | `.mermoid-node` and `.mermoid-node .node-shape` (position, inset, z-index) | nothing written as paint. These keep the shape inside the button |
+| Hybrid chrome paint | `:where(.mermoid-node)` for `color`, `:where(.mermoid-node) .node-shape` for `background` and `border` | the theme, `classDef`, and `style`. `:where` adds no specificity |
+| Theme and `customStylesheet` | the embedded stylesheet, before `classDef` | `classDef` and `style` |
+| `classDef n p:v` | SVG: `.n` and `.n .node-shape`. Hybrid also copies those onto `.mermoid-node.n` and `.mermoid-node.n .node-shape`, which outrank `.mermoid-node .node-shape` | `style` |
+| `class A n` / `A:::n` | the node's `class` attribute. It selects. It does not paint | |
+| `style A p:v` | inline `style`. `fill` and `stroke` land on the shape (`background`, `border-color`). `color` lands on the node, because the label is a sibling of the shape | an `!important` rule in the host page |
 
-These statements work on flowcharts and `stateDiagram-v2`. `style` becoming an inline attribute means it beats your CSS.
-If you need a diagram whose appearance is fully controlled from the outside, prefer `class` + `classDef`, or strip
-`style` statements before rendering.
+These statements work on flowcharts and `stateDiagram-v2`. `fill` becomes `background` on the inner `.node-shape`, and
+`stroke` becomes `border-color`, in both SVG and hybrid HTML. Hosts can keep writing SVG paint properties.
 
-The same `classDef` / `class` / `:::` source paints hybrid HTML: `fill` becomes `background` on the inner `.node-shape`,
-`stroke` becomes `border-color`. Hosts can keep writing SVG paint properties.
+Two hybrid shapes do not take `classDef` paint. A rhombus draws its visible fill on `.mermoid-node-diamond-fill`, and
+the `[*]` marker keeps `.mermoid-node.start-end .node-shape`. `style` on a rhombus still sets inline background on
+`.node-shape`, which is the diamond's stroke plate, not the inner fill.
 """,
       example {
         MermoidAscent.diagram(

@@ -31,7 +31,7 @@ None of these parse today; the README says so explicitly.
 
 ## Syntax Gaps in Supported Diagram Types
 
-- State diagrams: composite states, concurrency (`--`), an in-diagram `direction`, `state X as "…"`
+- State diagrams: composite states, concurrency (`--`), `state X as "…"`
 
 ## Mermaid Compatibility
 

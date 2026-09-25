@@ -299,15 +299,30 @@ object MermaidParser:
   private[mermoid] def stateStatement(using P[Any]): P[StateStatement] =
     P(noteSt | stateClassDefSt | stateClassSt | stateStyleSt | stateTransition)
 
-  private[mermoid] def stateStatements(using P[Any]): P[List[StateStatement]] =
-    P(wsnl ~ stateStatement.rep(sep = sep) ~ wsnl).map(_.toList)
+  /** `direction LR` anywhere among the statements. A following letter (`directional`) or `-->` fails this alternative
+    * so the id can still be a state.
+    */
+  private[mermoid] def stateDirectionLine(using P[Any]): P[Direction] =
+    P("direction" ~ CharsWhileIn(" \t", 1) ~ direction ~ !CharPred(c => c.isLetterOrDigit || c == '_'))
+
+  private enum StateLine:
+    case Dir(direction: Direction)
+    case Stmt(statement: StateStatement)
+
+  private def stateLine(using P[Any]): P[StateLine] =
+    P(stateDirectionLine.map(StateLine.Dir(_)) | stateStatement.map(StateLine.Stmt(_)))
+
+  private def stateLines(using P[Any]): P[List[StateLine]] =
+    P(wsnl ~ stateLine.rep(sep = sep) ~ wsnl).map(_.toList)
 
   private[mermoid] def stateDiagramHeader(using P[Any]): P[Unit] =
     P("stateDiagram-v2" ~ nl)
 
   private[mermoid] def stateDiagram(using P[Any]): P[Diagram.StateDiagram] =
-    P(wsnl ~ stateDiagramHeader ~ stateStatements ~ wsnl ~ End).map { stmts =>
-      Diagram.StateDiagram(stmts)
+    P(wsnl ~ stateDiagramHeader ~ stateLines ~ wsnl ~ End).map { lines =>
+      val dir   = lines.collect { case StateLine.Dir(d) => d }.lastOption.getOrElse(Direction.TB)
+      val stmts = lines.collect { case StateLine.Stmt(s) => s }
+      Diagram.StateDiagram(dir, stmts)
     }
 
   // -- Top-level --------------------------------------------------------------

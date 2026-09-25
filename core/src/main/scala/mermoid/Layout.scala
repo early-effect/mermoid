@@ -13,9 +13,13 @@ object Layout:
       case Direction.LR | Direction.RL                => false
 
     val layoutEdges = edges.filter(e => e.from != e.to)
-    val reverseAdj  = layoutEdges.groupBy(_.to).map((k, v) => k -> v.map(_.from).distinct)
     val nodeIds     = nodes.keys.toList
-    val layerOf     = longestPathLayers(nodeIds, reverseAdj)
+    val forward     = layoutEdges.map(e => (e.from, e.to))
+    // Reverse only the feedback set. Drawing, dummies, and barycenter keep the original direction.
+    val feedback   = feedbackEdges(nodeIds, forward)
+    val ranking    = forward.map { (from, to) => if feedback.contains((from, to)) then (to, from) else (from, to) }
+    val reverseAdj = ranking.groupBy(_._2).map((to, es) => to -> es.map(_._1).distinct)
+    val layerOf    = longestPathLayers(nodeIds, reverseAdj)
 
     val maxLayer = layerOf.values.maxOption.getOrElse(0)
     val layers   = (0 to maxLayer)
@@ -105,6 +109,67 @@ object Layout:
 
     LayoutResult(placed, routePoints)
   end layout
+
+  /** Edges to reverse so [[longestPathLayers]] sees a DAG.
+    *
+    * Depth-first search from the sources, following edges in the order they were written. An edge into a node still on
+    * the stack is a back edge. An edge into a finished node is a back edge when that node can still reach the source,
+    * which is how a restart (`Stopped --> JourneyRepublishing`) is told from a second forward parent (`Live -->
+    * Archived`). A two-cycle keeps the first-written direction. Self-loops are ignored.
+    *
+    * A left/right degree peel is the wrong greedy choice here: it can reverse a forward pipeline edge that happens to
+    * point at a node the peel placed early, and the fault leaves rank as roots again.
+    */
+  private[mermoid] def feedbackEdges(nodeIds: List[String], edges: List[(String, String)]): Set[(String, String)] =
+    val known = nodeIds.toSet
+    val uniq  = edges.filter((a, b) => a != b && known.contains(a) && known.contains(b)).distinct
+    if uniq.isEmpty || nodeIds.isEmpty then Set.empty
+    else
+      val succ = uniq.groupBy(_._1).map((from, es) => from -> es.map(_._2))
+
+      def reaches(from: String, to: String): Boolean =
+        if from == to then true
+        else
+          @annotation.tailrec
+          def bfs(queue: List[String], seen: Set[String]): Boolean =
+            queue match
+              case Nil          => false
+              case head :: tail =>
+                if seen.contains(head) then bfs(tail, seen)
+                else
+                  val next = succ.getOrElse(head, Nil)
+                  if next.contains(to) then true
+                  else bfs(tail ++ next, seen + head)
+          bfs(List(from), Set.empty)
+
+      // 0 white, 1 on the stack, 2 finished. Local to this search.
+      val color    = scala.collection.mutable.Map.empty[String, Int]
+      val feedback = scala.collection.mutable.Set.empty[(String, String)]
+      nodeIds.foreach(id => color(id) = 0)
+
+      def dfs(id: String): Unit =
+        color(id) = 1
+        succ.getOrElse(id, Nil).foreach { next =>
+          color(next) match
+            case 0 => dfs(next)
+            case 1 => feedback += ((id, next))
+            case _ =>
+              if reaches(next, id) then feedback += ((id, next))
+        }
+        color(id) = 2
+      end dfs
+
+      val indeg = uniq.groupBy(_._2).map((to, es) => to -> es.size)
+      nodeIds.foreach { id =>
+        if indeg.getOrElse(id, 0) == 0 && color(id) == 0 then dfs(id)
+      }
+      uniq.foreach { (from, to) =>
+        if color(from) == 0 then dfs(from)
+        if color(to) == 0 then dfs(to)
+      }
+      feedback.toSet
+    end if
+  end feedbackEdges
 
   /** Longest-path layering: a node's layer is one past its deepest predecessor.
     *

@@ -229,7 +229,7 @@ Try the same source under hybrid selection and hover on [Interactive](interactiv
 | Chained edges `A --> B --> C` | One hop per pair, same as writing each edge on its own line. |
 | `%%` comments / `%%{init:…}%%` | Comments are ignored. Init directives are skipped; they do not pick a theme. |
 | Parallel edges (same endpoints twice) | Both render, offset so they do not overlap. Alias with `as` if you CSS-select one. |
-| Cycles / back-edges | Layering breaks cycles; barycenter cuts crossings; long edges use waypoints. |
+| Cycles / back-edges | Back edges are reversed for ranking and drawn forward, so a retry sits on the next rank. Barycenter cuts crossings. Long edges use waypoints. |
 | `linkStyle` | Not implemented. |
 | Nested subgraphs | Supported; frames paint behind edges and nodes. |
 | Semicolon separators | OK as statement separators (in addition to newlines). |

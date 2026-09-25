@@ -105,17 +105,17 @@
   <g class="edge edge-arrow" id="edge-Idle-Active-0" data-from="Idle" data-to="Active">
     <path class="edge-line" d="M87.78365384615384,250 Q97.01225234688518,285.85930142114626 88.9605943901331,322.0010685728476" fill="none" marker-end="url(#arrowhead)"/>
     <rect class="edge-label-bg" x="66.37212411814346" y="276.0005342864238" width="44" height="20" rx="3" ry="3"/>
-    <text class="edge-label" x="88.37212411814346" y="286.0005342864238" text-anchor="middle" dominant-baseline="central">start</text>
+    <text class="edge-label" x="88.37212411814346" y="286.0005342864238" text-anchor="middle" dominant-baseline="central" style="font-size: 12px">start</text>
   </g>
   <g class="edge edge-arrow" id="edge-Active-Idle-0" data-from="Active" data-to="Idle">
     <path class="edge-line" d="M89.09134615384616,330 Q79.86274765311482,294.14069857885374 87.9144056098669,257.9989314271524" fill="none" marker-end="url(#arrowhead)"/>
     <rect class="edge-label-bg" x="66.50287588185654" y="283.9994657135762" width="44" height="20" rx="3" ry="3"/>
-    <text class="edge-label" x="88.50287588185654" y="293.9994657135762" text-anchor="middle" dominant-baseline="central">pause</text>
+    <text class="edge-label" x="88.50287588185654" y="293.9994657135762" text-anchor="middle" dominant-baseline="central" style="font-size: 12px">pause</text>
   </g>
   <g class="edge edge-arrow" id="edge-Active-Done-0" data-from="Active" data-to="Done">
     <path class="edge-line" d="M89.27163461538461,380 Q80.30274688795849,415.9212434291958 88.61393925907008,452.00033374390705" fill="none" marker-end="url(#arrowhead)"/>
     <rect class="edge-label-bg" x="63.342786937227345" y="406.0001668719535" width="51.199999999999996" height="20" rx="3" ry="3"/>
-    <text class="edge-label" x="88.94278693722734" y="416.0001668719535" text-anchor="middle" dominant-baseline="central">finish</text>
+    <text class="edge-label" x="88.94278693722734" y="416.0001668719535" text-anchor="middle" dominant-baseline="central" style="font-size: 12px">finish</text>
   </g>
   <g class="edge edge-arrow" id="edge-Done-[*]-end-0" data-from="Done" data-to="[*]-end">
     <path class="edge-line" d="M88.10775862068965,510 Q75.20182997030409,561.898060844475 87.25603008870867,614.0005365366255" fill="none" marker-end="url(#arrowhead)"/>

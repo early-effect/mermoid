@@ -115,7 +115,6 @@ object HybridChrome
         S.cursor.pointer,
         S.border.none,
         S.background(Color.transparent),
-        S.color(HybridTokens.themeColor(ThemeVar.Text, "#333")),
         S.fontFamily.inherit,
         S.fontSize.inherit,
         S.lineHeight(1.2),
@@ -125,14 +124,21 @@ object HybridChrome
           S.position.absolute,
           S.inset.zero,
           S.boxSizing.borderBox,
-          S.background(HybridTokens.themeColor(ThemeVar.MainBkg, "#ececff")),
-          S.border.solid(Length.px(2), HybridTokens.themeColor(ThemeVar.NodeBorder, "#9370db")),
           S.pointerEvents.none,
           S.zIndex(0),
         ),
         Selector(PseudoClass.hover)(
           S.filter.brightness(1.05)
         ),
+      ),
+      // Paint sits in :where so a classDef or theme `.node-shape` wins regardless of emit order.
+      // Layout above stays on `.mermoid-node` so a paint rule cannot pull the shape out of the button.
+      HybridTokens.rule(PseudoClass.where(HybridTokens.node))(
+        S.color(HybridTokens.themeColor(ThemeVar.Text, "#333"))
+      ),
+      HybridTokens.rule(PseudoClass.where(HybridTokens.node).descendant(HybridTokens.shape))(
+        S.background(HybridTokens.themeColor(ThemeVar.MainBkg, "#ececff")),
+        S.border.solid(Length.px(2), HybridTokens.themeColor(ThemeVar.NodeBorder, "#9370db")),
       ),
       HybridTokens.rule(
         HybridTokens.node

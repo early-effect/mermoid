@@ -129,22 +129,22 @@
   <g class="edge edge-arrow" id="edge-Start-End-0" data-from="Start" data-to="End">
     <path class="edge-line" d="M724.8012187499999,88.61588934957207 C754.6231671874999,104.17990779131006 890.3995760416666,142.76931489159534 903.732909375,182 C917.0662427083333,221.23068510840466 874.6583076285974,276.08114732026235 804.8012187499999,324 C734.9441298714023,371.91885267973765 537.9588498778458,445.26093006535496 484.59037610341494,469.5131160784259" fill="none" marker-end="url(#arrowhead)"/>
     <rect class="edge-label-bg" x="772.0012187499999" y="314" width="65.6" height="20" rx="3" ry="3"/>
-    <text class="edge-label" x="804.8012187499999" y="324" text-anchor="middle" dominant-baseline="central">skip mid</text>
+    <text class="edge-label" x="804.8012187499999" y="324" text-anchor="middle" dominant-baseline="central" style="font-size: 12px">skip mid</text>
   </g>
   <g class="edge edge-arrow" id="edge-L1-End-0" data-from="L1" data-to="End">
     <path class="edge-line" d="M295.8842575320512,232 C297.203751068376,247.33333333333334 284.3942954075017,286.0414445886662 303.8012187499999,324 C323.2081420924981,361.9585554113338 394.238367780867,437.1261103900023 412.3257975870404,459.7513324680028" fill="none" marker-end="url(#arrowhead)"/>
     <rect class="edge-label-bg" x="285.40121874999994" y="314" width="36.8" height="20" rx="3" ry="3"/>
-    <text class="edge-label" x="303.8012187499999" y="324" text-anchor="middle" dominant-baseline="central">skip</text>
+    <text class="edge-label" x="303.8012187499999" y="324" text-anchor="middle" dominant-baseline="central" style="font-size: 12px">skip</text>
   </g>
   <g class="edge edge-arrow" id="edge-L3-End-0" data-from="L3" data-to="End">
     <path class="edge-line" d="M503.52955667735034,232 C511.99150035612524,247.33333333333334 561.6542470349644,286.09202009016377 554.3012187499999,324 C546.9481904650353,361.90797990983623 475.22635893130234,436.8732328825145 459.41138696756286,459.44787945901743" fill="none" marker-end="url(#arrowhead)"/>
     <rect class="edge-label-bg" x="535.9012187499999" y="314" width="36.8" height="20" rx="3" ry="3"/>
-    <text class="edge-label" x="554.3012187499999" y="324" text-anchor="middle" dominant-baseline="central">skip</text>
+    <text class="edge-label" x="554.3012187499999" y="324" text-anchor="middle" dominant-baseline="central" style="font-size: 12px">skip</text>
   </g>
   <g class="edge edge-arrow" id="edge-Start-M2-0" data-from="Start" data-to="M2">
     <path class="edge-line" d="M710.3592723023503,90 C729.2548784811253,105.33333333333333 824.3989020290481,144.00923359787302 823.732909375,182 C823.0669167209518,219.99076640212698 725.9249152108845,295.2871653439683 706.3633163780614,317.94459841276193" fill="none" marker-end="url(#arrowhead)"/>
     <rect class="edge-label-bg" x="808.932909375" y="172" width="29.599999999999998" height="20" rx="3" ry="3"/>
-    <text class="edge-label" x="823.732909375" y="182" text-anchor="middle" dominant-baseline="central">far</text>
+    <text class="edge-label" x="823.732909375" y="182" text-anchor="middle" dominant-baseline="central" style="font-size: 12px">far</text>
   </g>
   <g class="node node-rect" id="node-Start">
     <rect class="node-shape" x="634.3012187499999" y="40" width="90.5" height="50" rx="0" ry="0"/>

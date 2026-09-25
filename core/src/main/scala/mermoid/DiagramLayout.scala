@@ -11,8 +11,8 @@ object DiagramLayout:
       viewport: Option[Viewport] = None,
   ): DiagramScene =
     diagram match
-      case Diagram.Flowchart(dir, stmts) => flowchartScene(dir, stmts, config, viewport)
-      case Diagram.StateDiagram(stmts)   => stateScene(stmts, config, viewport)
+      case Diagram.Flowchart(dir, stmts)    => flowchartScene(dir, stmts, config, viewport)
+      case Diagram.StateDiagram(dir, stmts) => stateScene(dir, stmts, config, viewport)
 
   private[mermoid] def effectiveDirection(
       author: Direction,
@@ -136,11 +136,11 @@ object DiagramLayout:
   end flowchartScene
 
   private def stateScene(
+      authorDir: Direction,
       stmts: List[StateStatement],
       config: RenderConfig,
       viewport: Option[Viewport],
   ): DiagramScene =
-    val authorDir   = Direction.TB
     val dir         = effectiveDirection(authorDir, config.responsive, viewport)
     val transitions = stmts.collect { case StateStatement.TransitionSt(t) => t }
     val stateStyles = stmts.collect { case StateStatement.StyleSt(id, style) => id -> style }.toMap

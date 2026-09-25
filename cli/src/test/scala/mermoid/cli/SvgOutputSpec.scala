@@ -95,8 +95,8 @@ object SvgOutputSpec extends ZIOSpecDefault:
 
   /** Node ids the diagram declares, as the renderer keys them. */
   private def declaredNodeIds(diagram: Diagram): Set[String] = diagram match
-    case Diagram.Flowchart(_, stmts) => StyleResolver.collectNodes(stmts).keySet
-    case Diagram.StateDiagram(stmts) =>
+    case Diagram.Flowchart(_, stmts)    => StyleResolver.collectNodes(stmts).keySet
+    case Diagram.StateDiagram(_, stmts) =>
       val ends     = stmts.collect { case StateStatement.TransitionSt(t) => List(t.from, t.to) }.flatten
       val hasStart = ends.contains("[*]") && stmts.exists {
         case StateStatement.TransitionSt(t) => t.from == "[*]"

@@ -502,6 +502,56 @@ object ParserSpec extends ZIOSpecDefault:
           styles.head._2.paint(css.CssProperty.Fill) == "#ddeeff",
         )
       },
+      test("parses direction LR and keeps classDef on the statement list") {
+        val input =
+          """stateDiagram-v2
+            |    direction LR
+            |    [*] --> Draft
+            |    Draft --> JourneyPreparing: Launch
+            |    JourneyPreparing --> PredictionsRequested: JourneyPublished
+            |    JourneyPreparing --> JourneyPreparationFaulted: DsmlBridgeFailed
+            |    JourneyPreparationFaulted --> JourneyPreparing: Retry
+            |    classDef fault fill:#3a2a10,stroke:#f59e0b
+            |    class JourneyPreparationFaulted fault
+            |""".stripMargin
+        val diagram = MermaidParser.parse(input).toOption.get.asInstanceOf[Diagram.StateDiagram]
+        val defs    = diagram.statements.collect { case StateStatement.ClassDefSt(name, _) => name }
+        assertTrue(
+          diagram.direction == Direction.LR,
+          defs == List("fault"),
+          diagram.statements.size == 7,
+        )
+      },
+      test("direction between transitions wins over an earlier one, and a missing direction stays TB") {
+        val between =
+          """stateDiagram-v2
+            |    [*] --> Draft
+            |    direction TB
+            |    Draft --> Live: go
+            |    direction LR
+            |""".stripMargin
+        val plain =
+          """stateDiagram-v2
+            |    [*] --> Draft
+            |""".stripMargin
+        val mid   = MermaidParser.parse(between).toOption.get.asInstanceOf[Diagram.StateDiagram]
+        val bare  = MermaidParser.parse(plain).toOption.get.asInstanceOf[Diagram.StateDiagram]
+        val edges = mid.statements.collect { case StateStatement.TransitionSt(t) => t.from -> t.to }
+        assertTrue(
+          mid.direction == Direction.LR,
+          edges == List("[*]" -> "Draft", "Draft" -> "Live"),
+          bare.direction == Direction.TB,
+        )
+      },
+      test("a state id named direction is still a transition") {
+        val input =
+          """stateDiagram-v2
+            |    direction --> Next: go
+            |""".stripMargin
+        val diagram = MermaidParser.parse(input).toOption.get.asInstanceOf[Diagram.StateDiagram]
+        val edges   = diagram.statements.collect { case StateStatement.TransitionSt(t) => (t.from, t.to, t.label) }
+        assertTrue(diagram.direction == Direction.TB, edges == List(("direction", "Next", Some("go"))))
+      },
     ),
     suite("subgraphs")(
       test("parses a subgraph with a label and inner edge") {

@@ -210,10 +210,11 @@ object SvgRendererSpec extends ZIOSpecDefault:
       },
       test("renders state diagram") {
         val diagram = Diagram.StateDiagram(
+          Direction.TB,
           List(
             StateStatement.TransitionSt(StateTransition("[*]", "Created", None)),
             StateStatement.TransitionSt(StateTransition("Created", "Done", Some("Finish"))),
-          )
+          ),
         )
         val svg = SvgRenderer.render(diagram)
         assertTrue(
@@ -295,6 +296,17 @@ object SvgRendererSpec extends ZIOSpecDefault:
         val svg = SvgRenderer.render(diagram)
         assertTrue(svg.contains("""id="edge-myEdge""""))
       },
+      test("edge labels paint at LayoutConfig.edgeLabelFontSize") {
+        val src =
+          """flowchart LR
+            |  A -->|go| B
+            |""".stripMargin
+        val svg = SvgRenderer.render(
+          MermaidParser.parse(src).toOption.get,
+          RenderConfig(layout = LayoutConfig(edgeLabelFontSize = 18)),
+        )
+        assertTrue(svg.contains("""class="edge-label""""), svg.contains("font-size: 18px"))
+      },
       test("edge labels have CSS classes") {
         val diagram = Diagram.Flowchart(
           Direction.TD,
@@ -314,10 +326,11 @@ object SvgRendererSpec extends ZIOSpecDefault:
       },
       test("wraps notes in <g> with class and auto id") {
         val diagram = Diagram.StateDiagram(
+          Direction.TB,
           List(
             StateStatement.TransitionSt(StateTransition("[*]", "Idle", None)),
             StateStatement.NoteSt(NotePosition.RightOf, "Idle", "hello"),
-          )
+          ),
         )
         val svg = SvgRenderer.render(diagram)
         assertTrue(
@@ -329,10 +342,11 @@ object SvgRendererSpec extends ZIOSpecDefault:
       },
       test("note uses alias for id when present") {
         val diagram = Diagram.StateDiagram(
+          Direction.TB,
           List(
             StateStatement.TransitionSt(StateTransition("[*]", "Idle", None)),
             StateStatement.NoteSt(NotePosition.RightOf, "Idle", "hello", Some("myNote")),
-          )
+          ),
         )
         val svg = SvgRenderer.render(diagram)
         assertTrue(svg.contains("""id="note-myNote""""))
@@ -539,9 +553,10 @@ object SvgRendererSpec extends ZIOSpecDefault:
       },
       test("[*] state nodes get start-end CSS class") {
         val diagram = Diagram.StateDiagram(
+          Direction.TB,
           List(
             StateStatement.TransitionSt(StateTransition("[*]", "Idle", None))
-          )
+          ),
         )
         val svg = SvgRenderer.render(diagram)
         assertTrue(
@@ -551,10 +566,11 @@ object SvgRendererSpec extends ZIOSpecDefault:
       },
       test("[*] start and end are two markers with distinct ids") {
         val diagram = Diagram.StateDiagram(
+          Direction.TB,
           List(
             StateStatement.TransitionSt(StateTransition("[*]", "A", None)),
             StateStatement.TransitionSt(StateTransition("A", "[*]", None)),
-          )
+          ),
         )
         val svg = SvgRenderer.render(diagram)
         assertTrue(

@@ -20,9 +20,10 @@ object StateDiagrams extends DocSpecSuite:
 
   def doc = page("State diagrams")(
     md"""
-`stateDiagram-v2` opens a state diagram. There is no in-diagram `direction` keyword; the author default is top-to-bottom.
-With a `Viewport`, responsive layout may flip wide diagrams to horizontal so they use available width (same rules as
-flowcharts). Without a viewport, layout stays vertical.
+`stateDiagram-v2` opens a state diagram. `direction TB`, `TD`, `BT`, `LR`, or `RL` may appear on any statement line.
+The default is top to bottom. A later `direction` replaces an earlier one. With a `Viewport`, responsive layout may
+still flip a vertical author to horizontal so a wide column is used (same rules as flowcharts). Without a viewport,
+the diagram keeps the direction it names.
 """,
     example {
       MermoidAscent.svgDiagram(orderFsm)
@@ -156,11 +157,52 @@ loops, and for notes pushed below them.
                             |""".stripMargin)
       },
     ),
+    section("Direction")(
+      md"""
+`direction LR` lays the machine out left to right. `TB` and `TD` are top to bottom, `BT` bottom to top, `RL` right to
+left. The line can sit above the transitions or among them.
+
+```
+stateDiagram-v2
+    direction LR
+    [*] --> Draft
+    Draft --> Live: publish
+    Live --> [*]
+```
+""",
+      example {
+        MermoidAscent.svgDiagram("""stateDiagram-v2
+                            |    direction LR
+                            |    [*] --> Draft
+                            |    Draft --> Preparing: Launch
+                            |    Preparing --> Live: Published
+                            |    Live --> [*]
+                            |""".stripMargin)
+      },
+    ),
+    section("Back edges")(
+      md"""
+A retry (`Faulted --> Preparing`) is a back edge. Ranking follows a depth-first search from `[*]` and reverses back
+edges, so the fault sits one rank after the hop it returns to, not above the start. The edge is still drawn from the
+fault back to the hop. A second forward parent, such as two states that both archive, stays a forward edge and the
+sink lands on the last rank.
+""",
+      example {
+        MermoidAscent.svgDiagram("""stateDiagram-v2
+                            |    [*] --> Preparing
+                            |    Preparing --> Live: published
+                            |    Preparing --> Faulted: failed
+                            |    Faulted --> Preparing: Retry
+                            |    Live --> Archived: archive
+                            |    Preparing --> Archived: archive
+                            |""".stripMargin)
+      },
+    ),
     section("Not yet implemented")(
       md"""
-Composite (nested) states, concurrency (`--`), an in-diagram `direction`, and `state X as "long name"` declarations are
-not implemented. `click` is flowchart-only; state diagrams have no click statement. A state diagram that needs nesting
-can be expressed as a [flowchart](flowcharts.html) with subgraphs today.
+Composite (nested) states, concurrency (`--`), and `state X as "long name"` declarations are not implemented. `click`
+is flowchart-only; state diagrams have no click statement. A state diagram that needs nesting can be expressed as a
+[flowchart](flowcharts.html) with subgraphs today.
 """
     ),
   )

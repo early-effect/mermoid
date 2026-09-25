@@ -103,10 +103,11 @@ object SvgSerializerSpec extends ZIOSpecDefault:
       },
       test("state diagrams also produce a tree") {
         val diagram = Diagram.StateDiagram(
+          Direction.TB,
           List(
             StateStatement.TransitionSt(StateTransition("[*]", "Idle", None)),
             StateStatement.NoteSt(NotePosition.RightOf, "Idle", "hello"),
-          )
+          ),
         )
         val tree = SvgRenderer.renderTree(diagram)
         assertTrue(SvgSerializer.render(tree) == SvgRenderer.render(diagram))
