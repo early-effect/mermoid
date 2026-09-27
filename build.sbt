@@ -5,20 +5,6 @@ MyVersions.settings
 
 ThisBuild / scalaVersion := (MyVersions.scala: String)
 
-// The docs take specular 0.16.1, built on ascent 0.7; this build takes 0.8.0, which early-semver calls a hard
-// eviction. It is safe: 0.8.0 left ascent-core, -css, -html, and -js unchanged (it moved ascent-preview and
-// ascent-datastar-http to heddle 0.6.0).
-// Drop these once the docs are on a specular built on ascent 0.8. %% covers JVM `_3`; Scala.js artifacts are
-// `_sjs1_3` and need their own rows.
-ThisBuild / libraryDependencySchemes ++= Seq(
-  "rocks.earlyeffect" %% "ascent-core"      % "always",
-  "rocks.earlyeffect" %% "ascent-css"       % "always",
-  "rocks.earlyeffect" %% "ascent-html"      % "always",
-  "rocks.earlyeffect" %% "ascent-core_sjs1" % "always",
-  "rocks.earlyeffect" %% "ascent-css_sjs1"  % "always",
-  "rocks.earlyeffect" %% "ascent-js_sjs1"   % "always",
-)
-
 val scala3Version: String = MyVersions.scala
 
 // sbt 2.x scopes bare build.sbt settings to ThisBuild, so these apply build-wide to every module.
@@ -166,14 +152,23 @@ lazy val cli = (projectMatrix in file("cli"))
   )
   .jvmPlatform(scalaVersions = scalaVersions)
 
-lazy val specularPreview =
-  taskKey[Unit]("Build specularSite then serve with sbt-reload (prefer alias: docsPreview)")
-
 lazy val regenerateExamples =
   taskKey[Unit]("Re-render every examples/*.mmd to its sibling .svg (paired with SvgOutputSpec's staleness check)")
 
 lazy val layoutGallery =
   taskKey[Unit]("Re-render examples and write target/layout-gallery/index.html for visual review")
+
+/** Fast-link the docs client and record where `BuildSite` finds it. */
+lazy val linkDocsClient = Def.uncached(Def.task {
+  (LocalProject("docsJS") / Compile / fastLinkJS).value
+  val outDir = (LocalProject("docsJS") / Compile / fastLinkJSOutput).value
+  val mainJs = outDir / "main.js"
+  if (!mainJs.exists)
+    sys.error(
+      s"Expected $mainJs after fastLinkJS; directory contains: " + Option(outDir.list).toSeq.flatten.mkString(", ")
+    )
+  IO.write((ThisBuild / baseDirectory).value / "target" / "specular-client-js.path", mainJs.getAbsolutePath)
+})
 
 // --- mermoid-docs : Specular docs-as-tests site. Never published; every diagram on the site is
 //   rendered and asserted by `sbt test`, so a broken diagram is a red CI check.
@@ -194,45 +189,17 @@ lazy val docs = (projectMatrix in file("docs"))
         .settings(
           MyVersions.docsJvm,
           zioTestSettings,
-          Test / mainClass       := Some("specular.site.DocsServe"),
-          Test / run / mainClass := (Test / mainClass).value,
-          Test / runReloadArgs   := Seq(specularPort.value.toString),
-          // runReload forks with the docs project as cwd, so a relative target/site would miss the
-          // repo-root site written by specularSite. Point DocsServe at specularSiteDirectory.
-          Test / run / javaOptions ++= {
-            val dir = specularSiteDirectory.value.getAbsolutePath
-            Seq(
-              s"-Dspecular.site.dir=$dir",
-              s"-Dspecular.site.port=${specularPort.value}",
-            )
-          },
           specularBuildMain := "mermoid.docs.BuildSite",
           // The JVM row of the core matrix — a bare LocalProject name resolves to it.
           specularMetaProject   := Some(LocalProject("core")),
           specularSiteDirectory := (ThisBuild / baseDirectory).value / "target" / "site",
           // Docs-only (workflow_dispatch) builds are dynver `-ci`; don't advertise that as a Central coord.
           specularDisplayVersion := stripCi,
-          // Link docsJS then write marker path for BuildSite.afterBuild → assets/client.js.
-          specularJsLink := Def
-            .uncached(Def.task {
-              (LocalProject("docsJS") / Compile / fastLinkJS).value
-              val outDir = (LocalProject("docsJS") / Compile / fastLinkJSOutput).value
-              val mainJs = outDir / "main.js"
-              if (!mainJs.exists)
-                sys.error(
-                  s"Expected $mainJs after fastLinkJS; directory contains: " +
-                    Option(outDir.list).toSeq.flatten.mkString(", ")
-                )
-              val marker = (ThisBuild / baseDirectory).value / "target" / "specular-client-js.path"
-              IO.write(marker, mainJs.getAbsolutePath)
-            })
-            .value,
-          specularPreview := Def
-            .uncached(Def.task {
-              specularSite.value
-              (Test / runReload).value
-            })
-            .value,
+          // Link docsJS then write marker path for BuildSite.afterBuild → assets/client.js. The site and its
+          // preview share one link, and the preview watches docsJS so a client edit reloads the page.
+          specularJsLink    := linkDocsClient.value,
+          specularJsLinkDev := linkDocsClient.value,
+          specularJsProject := Some(LocalProject("docsJS")),
         ),
   )
   .jsPlatform(
@@ -255,5 +222,6 @@ lazy val docs = (projectMatrix in file("docs"))
       ),
   )
 
-addCommandAlias("docsPreview", "~docs/specularPreview")
+// The plugin's preview rebuilds and reloads on its own; it must not run under `~`.
+addCommandAlias("docsPreview", "docs/specularPreview")
 addCommandAlias("release", "; publishSigned; sonaRelease")
