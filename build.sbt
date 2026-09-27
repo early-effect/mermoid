@@ -5,8 +5,11 @@ MyVersions.settings
 
 ThisBuild / scalaVersion := (MyVersions.scala: String)
 
-// specular 0.14.1 still pins ascent 0.5.0; this build takes 0.7.0. Under early-semver that is a hard eviction.
-// %% covers JVM `_3`; Scala.js artifacts are `_sjs1_3` and need their own rows.
+// The docs take specular 0.16.1, built on ascent 0.7; this build takes 0.8.0, which early-semver calls a hard
+// eviction. It is safe: 0.8.0 left ascent-core, -css, -html, and -js unchanged (it moved ascent-preview and
+// ascent-datastar-http to heddle 0.6.0).
+// Drop these once the docs are on a specular built on ascent 0.8. %% covers JVM `_3`; Scala.js artifacts are
+// `_sjs1_3` and need their own rows.
 ThisBuild / libraryDependencySchemes ++= Seq(
   "rocks.earlyeffect" %% "ascent-core"      % "always",
   "rocks.earlyeffect" %% "ascent-css"       % "always",
