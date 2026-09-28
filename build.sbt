@@ -5,6 +5,19 @@ MyVersions.settings
 
 ThisBuild / scalaVersion := (MyVersions.scala: String)
 
+// The docs take specular 0.18.0, built on ascent 0.8; this build takes 0.9.0, which early-semver calls a hard
+// eviction. It is safe: 0.9.0 left ascent-core, -css, -html, and -js unchanged (it moved ascent-preview and
+// ascent-datastar-http to heddle 0.7.1 and added ascent-mcp-app). Drop these once the docs are on a specular built on
+// ascent 0.9. %% covers JVM `_3`; Scala.js artifacts are `_sjs1_3` and need their own rows.
+ThisBuild / libraryDependencySchemes ++= Seq(
+  "rocks.earlyeffect" %% "ascent-core"      % "always",
+  "rocks.earlyeffect" %% "ascent-css"       % "always",
+  "rocks.earlyeffect" %% "ascent-html"      % "always",
+  "rocks.earlyeffect" %% "ascent-core_sjs1" % "always",
+  "rocks.earlyeffect" %% "ascent-css_sjs1"  % "always",
+  "rocks.earlyeffect" %% "ascent-js_sjs1"   % "always",
+)
+
 val scala3Version: String = MyVersions.scala
 
 // sbt 2.x scopes bare build.sbt settings to ThisBuild, so these apply build-wide to every module.
