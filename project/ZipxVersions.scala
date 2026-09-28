@@ -26,7 +26,7 @@ object MyVersions extends ZipxVersions:
   val ascentHtml = ascent.mod("ascent-html")
   val ascentJs   = ascent.mod("ascent-js")
 
-  val specular        = Lib("rocks.earlyeffect", "specular-core", "0.18.0")
+  val specular        = Lib("rocks.earlyeffect", "specular-core", "0.18.1")
   val specularZioTest = specular.mod("specular-zio-test").test
   val specularTheme   = specular.mod("early-effect-docs-theme").test
 
@@ -34,7 +34,7 @@ object MyVersions extends ZipxVersions:
   val scalafmt       = Plugin("org.scalameta", "sbt-scalafmt", "2.6.2")
   val assembly       = Plugin("com.eed3si9n", "sbt-assembly", "2.5.0")
   val dynverCi       = Plugin("rocks.earlyeffect", "sbt-dynver-ci", "0.2.3")
-  val specularPlugin = Plugin("rocks.earlyeffect", "sbt-specular", "0.18.0")
+  val specularPlugin = Plugin("rocks.earlyeffect", "sbt-specular", "0.18.1")
 
   def zioTests      = library(zioTest.test, zioTestSbt.test)
   def zioLib        = library(zio)
