@@ -12,7 +12,6 @@ organization         := "rocks.earlyeffect"
 organizationName     := "Early Effect"
 organizationHomepage := Some(uri("https://www.earlyeffect.rocks"))
 versionScheme        := Some("early-semver")
-// No hardcoded version — sbt-dynver-ci derives it: clean tag -> 0.1.0, else <last-tag>-ci (cache-stable).
 
 homepage := Some(uri("https://github.com/early-effect/mermoid"))
 licenses := Seq("Apache-2.0" -> uri("http://www.apache.org/licenses/LICENSE-2.0.txt"))
@@ -50,9 +49,11 @@ usePgpKeyHex(sys.env.getOrElse("PGP_KEY_HEX", "MISSING_KEY_HEX"))
 zipxJavaVersion      := JdkVersion("25")
 zipxWorkflowDispatch := true
 zipxCapabilities ++= Seq(
-  ZipxCentral.release,
+  ZipxCentral.snapshots,
+  ZipxCentral.pullRequestSnapshots("snapshots"),
   ZipxDocs.pages(),
 )
+zipxReleaseWorkflow := Some(ZipxCentral.releases)
 
 val commonScalacOptions = Seq(
   "-deprecation",
