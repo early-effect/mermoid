@@ -58,6 +58,46 @@ object DiagramLayoutSpec extends ZIOSpecDefault:
       )
       assertTrue(scene.direction == Direction.TB)
     },
+    test("default config keeps authored TD in a column wider than 640") {
+      val src =
+        """flowchart TD
+          |  A --> B
+          |  B --> C
+          |""".stripMargin
+      val scene = DiagramLayout.scene(parse(src), viewport = Some(Viewport(832)))
+      assertTrue(scene.direction == Direction.TD)
+    },
+    test("opt-in flip turns a wide TD into LR") {
+      val src =
+        """flowchart TD
+          |  A --> B
+          |  B --> C
+          |""".stripMargin
+      val scene = DiagramLayout.scene(
+        parse(src),
+        RenderConfig(responsive = ResponsiveConfig(flipDirectionBelow = Some(640))),
+        Some(Viewport(832)),
+      )
+      assertTrue(scene.direction == Direction.LR)
+    },
+    test("fitScale does not shrink a wide scene below one half") {
+      val wide  = DiagramLayout.scene(parse(simpleFlow)).copy(width = 3037)
+      val scale = wide.fitScale(961)
+      assertTrue(scale == 0.5)
+    },
+    test("fitScale stays at 1 when the scene is narrower than the column") {
+      val scene = DiagramLayout.scene(parse(simpleFlow)).copy(width = 400)
+      assertTrue(scene.fitScale(961) == 1.0)
+    },
+    test("scale-to-fit off keeps scale at 1 for a wider scene") {
+      val scene = DiagramLayout
+        .scene(parse(simpleFlow))
+        .copy(
+          width = 3037,
+          config = RenderConfig(responsive = ResponsiveConfig(fit = ContainerFit.Off)),
+        )
+      assertTrue(scene.fitScale(961) == 1.0)
+    },
     test("narrow keeps vertical authors vertical") {
       val src =
         """stateDiagram-v2
@@ -68,17 +108,39 @@ object DiagramLayoutSpec extends ZIOSpecDefault:
       val scene = DiagramLayout.scene(parse(src), viewport = Some(Viewport(360)))
       assertTrue(scene.direction == Direction.TB, scene.height > scene.width * 0.6)
     },
-    test("wide flips vertical authors to horizontal") {
+    test("opt-in flip turns a wide vertical state diagram horizontal") {
       val src =
         """stateDiagram-v2
           |  [*] --> Idle
           |  Idle --> Done
           |  Done --> [*]
           |""".stripMargin
-      val scene = DiagramLayout.scene(parse(src), viewport = Some(Viewport(720)))
+      val scene = DiagramLayout.scene(
+        parse(src),
+        RenderConfig(responsive = ResponsiveConfig(flipDirectionBelow = Some(640))),
+        Some(Viewport(720)),
+      )
       assertTrue(scene.direction == Direction.LR, scene.width > scene.height * 0.6)
     },
-    test("wide expands spacing vs medium for the same orientation") {
+    test("a wider column keeps TD and gets more vertical spacing") {
+      val src =
+        """flowchart TD
+          |  A --> B
+          |  B --> C
+          |  C --> D
+          |  D --> E
+          |  E --> F
+          |""".stripMargin
+      val d      = parse(src)
+      val medium = DiagramLayout.scene(d, viewport = Some(Viewport(640)))
+      val wide   = DiagramLayout.scene(d, viewport = Some(Viewport(900)))
+      assertTrue(
+        medium.direction == Direction.TD,
+        wide.direction == Direction.TD,
+        wide.config.layout.vSpacing > medium.config.layout.vSpacing,
+      )
+    },
+    test("opt-in flip expands horizontal spacing for the same orientation") {
       val src =
         """stateDiagram-v2
           |  [*] --> Idle
@@ -86,8 +148,9 @@ object DiagramLayoutSpec extends ZIOSpecDefault:
           |  Done --> [*]
           |""".stripMargin
       val d      = parse(src)
-      val medium = DiagramLayout.scene(d, viewport = Some(Viewport(640)))
-      val wide   = DiagramLayout.scene(d, viewport = Some(Viewport(900)))
+      val flip   = RenderConfig(responsive = ResponsiveConfig(flipDirectionBelow = Some(640)))
+      val medium = DiagramLayout.scene(d, flip, Some(Viewport(640)))
+      val wide   = DiagramLayout.scene(d, flip, Some(Viewport(900)))
       assertTrue(
         medium.direction == Direction.LR,
         wide.direction == Direction.LR,
@@ -106,17 +169,18 @@ object DiagramLayoutSpec extends ZIOSpecDefault:
           |    Waiting for input
           |  end note
           |""".stripMargin
-      val scene  = DiagramLayout.scene(parse(src), viewport = Some(Viewport(900)))
-      val idle   = scene.nodeMap("Idle")
-      val active = scene.nodeMap("Active")
-      val note   = scene.notes.head
-      val box    = NoteRenderer.placeNote(scene.config, note, idle, scene.visibleNodes)
-      val gap    = 10.0
-      assertTrue(
-        scene.direction == Direction.LR,
-        !box.overlaps(active, gap),
-        !box.overlaps(idle, gap),
+      val scene = DiagramLayout.scene(
+        parse(src),
+        RenderConfig(responsive = ResponsiveConfig(flipDirectionBelow = Some(640))),
+        Some(Viewport(900)),
       )
+      val gap   = 10.0
+      val clear = (scene.nodeMap.get("Idle"), scene.nodeMap.get("Active"), scene.notes) match
+        case (Some(idle), Some(active), note :: Nil) =>
+          val box = NoteRenderer.placeNote(scene.config, note, idle, scene.visibleNodes)
+          !box.overlaps(active, gap) && !box.overlaps(idle, gap)
+        case _ => false
+      assertTrue(scene.direction == Direction.LR, scene.notes.size == 1, clear)
     },
     test("click tooltips land on the scene") {
       val src =

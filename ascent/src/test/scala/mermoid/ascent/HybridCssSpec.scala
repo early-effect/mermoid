@@ -28,6 +28,24 @@ object HybridCssSpec extends ZIOSpecDefault:
         HybridClass.Fit.cssName == "mermoid-fit",
         HybridClass.DiamondFill.cssName == "mermoid-node-diamond-fill",
         HybridVar.SceneWidth.cssName == "--mermoid-scene-width",
+        HybridVar.Fit.cssName == "--mermoid-fit",
+        HybridVar.ScaleFloor.cssName == "--mermoid-scale-floor",
+      )
+    },
+    test("fit uses a registered number and trig, not length division") {
+      val css = HybridChrome.css
+      assertTrue(
+        css.contains("@property"),
+        css.contains("--mermoid-fit"),
+        css.contains("--mermoid-scale-floor"),
+        css.contains("tan(atan2"),
+        css.contains("margin-right:"),
+        css.contains("margin-bottom:"),
+        css.contains("\\3c number\\3e"),
+        SvgBridge.cssIsEntitySafe(css),
+        !css.contains("100cqi /"),
+        !css.contains("scale(min(1"),
+        !css.contains("<"),
       )
     },
   )

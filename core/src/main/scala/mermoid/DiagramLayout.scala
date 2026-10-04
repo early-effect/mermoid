@@ -43,35 +43,36 @@ object DiagramLayout:
       nodeCount: Int,
       direction: Direction,
   ): LayoutConfig =
-    if !responsive.compressSpacing then return layout
-    viewport match
-      case None     => layout
-      case Some(vp) =>
-        val isVertical = direction match
-          case Direction.TB | Direction.TD | Direction.BT => true
-          case Direction.LR | Direction.RL                => false
-        // Naive estimate: nodes in a chain along the main axis with default spacing.
-        val along   = Math.max(1, nodeCount)
-        val rawSpan =
-          if isVertical then along * layout.nodeHeight + (along - 1) * layout.vSpacing + 2 * layout.padding
-          else along * layout.minNodeWidth + (along - 1) * layout.hSpacing + 2 * layout.padding
-        val target =
-          if isVertical then vp.maxHeight.getOrElse(vp.maxWidth * 1.5)
-          else vp.maxWidth
-        val scale =
-          if rawSpan <= 0 then 1.0
+    if !responsive.compressSpacing then layout
+    else
+      viewport match
+        case None     => layout
+        case Some(vp) =>
+          val isVertical = direction match
+            case Direction.TB | Direction.TD | Direction.BT => true
+            case Direction.LR | Direction.RL                => false
+          // Naive estimate: nodes in a chain along the main axis with default spacing.
+          val along   = Math.max(1, nodeCount)
+          val rawSpan =
+            if isVertical then along * layout.nodeHeight + (along - 1) * layout.vSpacing + 2 * layout.padding
+            else along * layout.minNodeWidth + (along - 1) * layout.hSpacing + 2 * layout.padding
+          val target =
+            if isVertical then vp.maxHeight.getOrElse(vp.maxWidth * 1.5)
+            else vp.maxWidth
+          val scale =
+            if rawSpan <= 0 then 1.0
+            else
+              val raw = target / rawSpan
+              Math.max(responsive.minSpacingScale, Math.min(responsive.maxSpacingScale, raw))
+          if Math.abs(scale - 1.0) < 0.04 then layout
           else
-            val raw = target / rawSpan
-            Math.max(responsive.minSpacingScale, Math.min(responsive.maxSpacingScale, raw))
-        if Math.abs(scale - 1.0) < 0.04 then layout
-        else
-          layout.copy(
-            hSpacing = layout.hSpacing * scale,
-            vSpacing = layout.vSpacing * scale,
-            padding = Math.max(12.0, layout.padding * scale),
-            parallelEdgeSpacing = layout.parallelEdgeSpacing * scale,
-          )
-    end match
+            layout.copy(
+              hSpacing = layout.hSpacing * scale,
+              vSpacing = layout.vSpacing * scale,
+              padding = Math.max(12.0, layout.padding * scale),
+              parallelEdgeSpacing = layout.parallelEdgeSpacing * scale,
+            )
+      end match
   end compressLayout
 
   private def flowchartScene(

@@ -35,9 +35,12 @@ object MermoidAscent:
       onSelect: String => UIO[Unit] = _ => ZIO.unit,
       containerWidth: Option[Double] = None,
   ): UI[Any] =
-    val scale  = containerWidth.map(scene.fitScale).getOrElse(1.0)
-    val cssFit = containerWidth.isEmpty
+    val cssFit = containerWidth.isEmpty && (scene.config.responsive.fit match
+      case ContainerFit.ToWidth(_) => true
+      case ContainerFit.Off        => false)
+    val scale = containerWidth.fold(1.0)(scene.fitScale)
     HybridPainter.paint(scene, selected, onSelect, scale, cssFit)
+  end fromScene
 
   /** Interactive diagram: selection + viewport-driven re-layout.
     *

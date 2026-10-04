@@ -65,11 +65,16 @@ private[ascent] object HybridPainter:
     val htmlNodes = scene.visibleNodes.map(n => nodeButton(n, scene, selected, onSelect))
     val htmlNotes = scene.notes.flatMap(n => noteCard(n, scene, selfLoopExtents, selected, onSelect))
 
+    val box = s"width:${scene.width.f}px;height:${scene.height.f}px"
+    // An inline transform beats the fit class. CSS fit owns the transform when cssFit is set.
     val scalerStyle =
-      s"width:${scene.width.f}px;height:${scene.height.f}px;transform:scale(${Num.format(scale)})"
+      if cssFit then box else s"$box;transform:scale(${Num.format(scale)})"
+    val floorDecl = scene.config.responsive.fit match
+      case ContainerFit.ToWidth(floor) => s";${HybridVar.ScaleFloor.cssName}:${Num.format(floor)}"
+      case ContainerFit.Off            => ""
     val wrapStyle =
       if cssFit then
-        s"${HybridVar.SceneWidth.cssName}:${scene.width.f}px;${HybridVar.SceneHeight.cssName}:${scene.height.f}px;width:100%;max-width:100%"
+        s"${HybridVar.SceneWidth.cssName}:${scene.width.f}px;${HybridVar.SceneHeight.cssName}:${scene.height.f}px$floorDecl;width:100%;max-width:100%"
       else s"width:${(scene.width * scale).f}px;height:${(scene.height * scale).f}px"
     val rootClass =
       if cssFit then s"${HybridClass.Root.cssName} ${HybridClass.Fit.cssName}"

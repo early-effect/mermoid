@@ -17,10 +17,14 @@ object Responsive extends DocSpecSuite:
       |  D --> E[Five]
       |""".stripMargin
 
-  private def sceneOf(src: String, viewport: Option[Viewport]): DiagramScene =
+  private def sceneOf(
+      src: String,
+      viewport: Option[Viewport],
+      config: RenderConfig = RenderConfig(),
+  ): DiagramScene =
     MermaidParser
       .parse(src)
-      .map(d => DiagramLayout.scene(d, RenderConfig(), viewport))
+      .map(d => DiagramLayout.scene(d, config, viewport))
       .getOrElse(throw new AssertionError(s"unparseable: $src"))
 
   def doc = page("Responsive layout")(
@@ -30,36 +34,39 @@ all controlled by `ResponsiveConfig`:
 
 | Mechanism | What it does | Controlled by |
 |---|---|---|
-| **Direction flip** | Narrow viewports prefer vertical flow; wide ones prefer horizontal | `flipDirectionBelow` |
+| **Direction flip** | Opt-in. Below the threshold prefers vertical; at or above prefers horizontal | `flipDirectionBelow` (default `None`) |
 | **Spacing compression** | Scales spacing and padding toward the viewport target | `compressSpacing`, `minSpacingScale`, `maxSpacingScale` |
-| **Scale-to-fit** | Uniform `transform: scale` when the scene still overflows width | `scaleToFit` |
+| **Container fit** | Hybrid paint scales nodes and edges down to the column, never below a floor | `fit` (`ContainerFit.ToWidth(0.5)` or `Off`) |
 
-All three are enabled by default. Disabling them is how you lock a diagram at its natural size.
+Spacing compression and container fit are on by default. Direction is not. A viewport width changes spacing. It does
+not turn an authored `TD` into `LR`.
 """,
     section("Direction flip")(
       md"""
-The author writes `flowchart LR`. Below `flipDirectionBelow` (default 640), the layout reorients to vertical so content
-gets height instead of fighting for width. At or above the threshold, horizontal is preferred.
+The default keeps the direction the author wrote. `flipDirectionBelow = Some(640)` opts in: below 640 the layout
+prefers vertical flow, and at or above 640 it prefers horizontal.
 
 | Author direction | Below threshold | At / above threshold |
 |---|---|---|
-| `LR` | stays `LR` (already horizontal) — actually flips to `TB` | stays `LR` |
+| `LR` | flips to `TB` | stays `LR` |
 | `RL` | flips to `BT` | stays `RL` |
-| `TB` / `TD` | stays `TB` | flips to `LR` |
+| `TB` / `TD` | stays vertical | flips to `LR` |
 | `BT` | stays `BT` | flips to `RL` |
 
 The flip is a layout decision, not a CSS transform. The SVG dimensions and edge routes are recomputed for the new
-direction.
+direction. A static embed does not know the reader's window, so it does not flip. Pass a `Viewport` together with
+`flipDirectionBelow`, or use `diagramResponsive` with a live width.
 """,
       example {
-        MermoidAscent.svgDiagram(chain, RenderConfig(responsive = ResponsiveConfig(flipDirectionBelow = None)))
+        MermoidAscent.svgDiagram(chain)
       },
       md"""
-That is the unconstrained layout: five nodes in a horizontal chain. Now with viewport-driven direction flip at 640px:
+That is the authored layout: five nodes in a horizontal chain. The same chain with the flip opted in at 640px:
 """,
       exampleValue {
-        val wide   = sceneOf(chain, Some(Viewport(900)))
-        val narrow = sceneOf(chain, Some(Viewport(400)))
+        val flip   = RenderConfig(responsive = ResponsiveConfig(flipDirectionBelow = Some(640)))
+        val wide   = sceneOf(chain, Some(Viewport(900)), flip)
+        val narrow = sceneOf(chain, Some(Viewport(400)), flip)
         List(
           s"Wide (${wide.width.toInt}×${wide.height.toInt}) direction: ${wide.direction}",
           s"Narrow (${narrow.width.toInt}×${narrow.height.toInt}) direction: ${narrow.direction}",
@@ -72,6 +79,18 @@ That is the unconstrained layout: five nodes in a horizontal chain. Now with vie
           s.contains("Flipped: true"),
         )
       ),
+      md"""
+Without that opt-in, a `flowchart TD` laid out for a 900px column stays top to bottom:
+""",
+      exampleValue {
+        val src =
+          """flowchart TD
+            |  A --> B
+            |  B --> C
+            |""".stripMargin
+        val scene = sceneOf(src, Some(Viewport(900)))
+        s"Direction: ${scene.direction}"
+      }.assert(s => assertTrue(s.contains("Direction: TD"))),
     ),
     section("Spacing compression")(
       md"""
@@ -124,14 +143,17 @@ Disable compression to keep the author's geometry intact regardless of viewport:
         )
       ),
     ),
-    section("Scale-to-fit")(
+    section("Container fit")(
       md"""
-After layout, if `scene.width > viewport.maxWidth` and `scaleToFit` is enabled (default), the painters may apply a
-uniform `transform: scale(scene.fitScale(maxWidth))`. This keeps HTML nodes and SVG edges aligned in hybrid mode —
-both scale together instead of one overflowing.
+After layout, hybrid paint scales the scaler that holds the HTML nodes and the SVG edges together. The scale is
+`min(1, column / scene)`, and it never drops below the floor on `ContainerFit.ToWidth` (default 0.5). A scene that is
+already narrower than the column stays at scale 1. Below the floor the root scrolls horizontally.
 
-Spacing compression handles moderate overflows, but a dense hub still exceeds its budget even at minimum spacing. That
-is when uniform scaling kicks in:
+`DiagramScene.fitScale` is the same policy for a known width (the interactive reflow path). `ContainerFit.Off` leaves
+the scene at scale 1.
+
+Spacing compression handles moderate overflows. A dense hub still exceeds its budget at minimum spacing, and that is
+when the floor matters:
 """,
       exampleValue {
         val hub =
@@ -185,11 +207,12 @@ Three knobs to turn off. Omitting the `Viewport` altogether is the simplest appr
     ),
     section("In hybrid mode")(
       md"""
-`mermoid-ascent` recomputes the entire `DiagramScene` on every width change — geometry, edge routes, and direction.
-Selection state is preserved by node id, so clicking a node before reflow keeps it selected after.
+`mermoid-ascent` recomputes the entire `DiagramScene` on every width change: geometry, edge routes, and, when
+`flipDirectionBelow` is set, direction. Selection state is preserved by node id, so clicking a node before reflow
+keeps it selected after.
 
 See [Interactive](interactive.html) for live Narrow / Medium / Wide controls. The built-in buttons set 360px, 640px,
-and 900px; the threshold between vertical and horizontal flow sits at 640px by default.
+and 900px. Direction changes at 640px only when the diagram opts into `flipDirectionBelow`.
 """,
       example {
         MermoidAscent.diagram(chain, RenderConfig(), Some(Viewport(640)))
