@@ -8,16 +8,32 @@ case class Viewport(
     maxHeight: Option[Double] = None,
 )
 
+/** How a painter fits a scene that is wider than its container. */
+enum ContainerFit:
+  /** Scene stays at scale 1. The parent scrolls. */
+  case Off
+
+  /** Scale down to the container width, never above 1, never below `floor`.
+    *
+    * `floor` is in (0, 1]. Below the floor the fit root scrolls horizontally.
+    */
+  case ToWidth(floor: Double)
+
+object ContainerFit:
+  /** A 16px label stays at least 8px, and a scene up to twice the column fits without a scrollbar. */
+  val defaultFloor: Double  = 0.5
+  val default: ContainerFit = ContainerFit.ToWidth(defaultFloor)
+
 /** How [[DiagramLayout]] adapts a diagram to a [[Viewport]]. */
 case class ResponsiveConfig(
     /** Compress hSpacing/vSpacing/padding to target the viewport. */
     compressSpacing: Boolean = true,
-    /** When a viewport is set, re-orient relative to this width: below → prefer vertical (LR→TB); at/above → prefer
-      * horizontal (TB→LR). `None` = keep author direction.
+    /** Opt in to a direction flip. `None` keeps the authored direction. `Some(px)`: below prefers vertical (LR to TB),
+      * at or above prefers horizontal (TB to LR).
       */
-    flipDirectionBelow: Option[Double] = Some(640.0),
-    /** After layout, if scene.width > maxWidth, painters may apply uniform scale. */
-    scaleToFit: Boolean = true,
+    flipDirectionBelow: Option[Double] = None,
+    /** Container fit for painters. The default scales down to the column and stops at [[ContainerFit.defaultFloor]]. */
+    fit: ContainerFit = ContainerFit.default,
     /** Floor for spacing compression so graphs stay readable. */
     minSpacingScale: Double = 0.45,
     /** Cap when expanding spacing to fill a wider viewport. */
@@ -52,8 +68,15 @@ case class DiagramScene(
   def nodeMap: Map[String, LayoutNode]        = nodes.map(n => n.id -> n).toMap
   def visibleNodeMap: Map[String, LayoutNode] = visibleNodes.map(n => n.id -> n).toMap
 
-  /** Uniform scale so the scene fits `maxWidth`, or 1.0 when scale-to-fit is off / not needed. */
+  /** Uniform scale so the scene fits `maxWidth`.
+    *
+    * `ContainerFit.Off` and a scene that is already narrower than `maxWidth` stay at 1. `ToWidth` never goes below its
+    * floor, so a very wide scene scrolls instead of shrinking labels without limit.
+    */
   def fitScale(maxWidth: Double): Double =
-    if !config.responsive.scaleToFit || width <= maxWidth || width <= 0 then 1.0
-    else maxWidth / width
+    config.responsive.fit match
+      case ContainerFit.Off            => 1.0
+      case ContainerFit.ToWidth(floor) =>
+        if width <= 0 || width <= maxWidth then 1.0
+        else Math.max(floor, Math.min(1.0, maxWidth / width))
 end DiagramScene

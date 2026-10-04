@@ -2,7 +2,7 @@ package mermoid.docs
 
 import mermoid.ascent.MermoidAscent
 import mermoid.css.{Theme, ThemeColors, ThemeName}
-import mermoid.{RenderConfig, Viewport}
+import mermoid.{RenderConfig, ResponsiveConfig, Viewport}
 import specular.*
 
 /** Every interactive / hybrid feature, exercisable via `docsPreview`.
@@ -154,18 +154,24 @@ Mermaid `click … "tooltip"` becomes an ascent hover card (and SVG `<title>` on
     ),
     section("Reactive reflow")(
       md"""
-Use **Narrow / Medium / Wide** (or shrink the browser). Below 640px diagrams prefer TB; at/above they prefer LR.
-Spacing compresses to the viewport. Edges are **recomputed**, not stretched.
+Use **Narrow / Medium / Wide** (or shrink the browser). This example opts into `flipDirectionBelow = Some(640)`:
+below 640px the layout prefers TB, and at or above 640px it prefers LR. The default config does not flip. Spacing
+compresses to the viewport. Edges are **recomputed**, not stretched.
 
-See [Responsive layout](responsive-layout.html) for the mechanics: direction flips, spacing compression, and scale-to-fit.
+See [Responsive layout](responsive-layout.html) for direction, spacing compression, and container fit.
 """,
       exampleIO {
-        MermoidAscent.diagramInteractive(reflowWide, chalkboard, initialWidth = 720)
+        MermoidAscent.diagramInteractive(
+          reflowWide,
+          chalkboard.copy(responsive = ResponsiveConfig(flipDirectionBelow = Some(640))),
+          initialWidth = 720,
+        )
       }.interactive,
     ),
     section("Scale-to-fit safety")(
       md"""
-A dense hub still overflows after minimum spacing; uniform `transform: scale` keeps HTML and SVG aligned.
+A dense hub still overflows after minimum spacing. Container fit scales the HTML nodes and the SVG edges together,
+down to the scale floor (default 0.5), then the root scrolls horizontally.
 """,
       example {
         MermoidAscent.diagram(denseFit, chalkboard, Some(Viewport(320)))

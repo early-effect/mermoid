@@ -177,5 +177,32 @@ object MermoidAscentSpec extends ZIOSpecDefault:
         html.contains("subgraph-g") || html.contains("id=\"subgraph-g\""),
       )
     },
+    test("static hybrid fit registers the scale floor and leaves transform to the class") {
+      val ui = MermoidAscent.diagram(flow)
+      for html <- Html.render(ui)
+      yield
+        val marker = """class="mermoid-diagram mermoid-diagram-scaler" style=""""
+        val at     = html.indexOf(marker)
+        val end    = if at < 0 then -1 else html.indexOf('"', at + marker.length)
+        val style  = if at < 0 || end < 0 then "" else html.slice(at + marker.length, end)
+        assertTrue(
+          html.contains("""class="mermoid-root mermoid-fit""""),
+          html.contains("--mermoid-scale-floor:0.5"),
+          style.startsWith("width:"),
+          !style.contains("transform"),
+        )
+      end for
+    },
+    test("container fit off does not mark the root as fit") {
+      val ui = MermoidAscent.diagram(
+        flow,
+        RenderConfig(responsive = ResponsiveConfig(fit = ContainerFit.Off)),
+      )
+      for html <- Html.render(ui)
+      yield assertTrue(
+        html.contains("""class="mermoid-root""""),
+        !html.contains("""class="mermoid-root mermoid-fit""""),
+      )
+    },
   )
 end MermoidAscentSpec

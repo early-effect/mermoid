@@ -90,13 +90,13 @@ RenderConfig(
   theme             = css.ThemeName.Default,    // Default | Dark | Forest | Neutral
   customStylesheet  = None,                     // merged over the theme
   resolveVariables  = true,                     // false keeps var(--mermoid-*) in the output
-  responsive        = ResponsiveConfig(),       // spacing compress, direction flip, scale-to-fit
+  responsive        = ResponsiveConfig(),       // keep authored direction; fit down to scale 0.5
 )
 ```
 
 Pass an optional `Viewport(maxWidth)` (and optionally `maxHeight`) to `SvgRenderer.render` / `DiagramLayout.scene` when
-you want the layout to fit a host width. Narrow viewports prefer vertical flow; wider ones prefer horizontal. See
-[Responsive layout](responsive-layout.html) for direction flips, spacing compression, and scale-to-fit.
+you want spacing compressed toward a host width. That width does not change direction. Set `flipDirectionBelow` to opt
+into a flip. See [Responsive layout](responsive-layout.html) for direction, spacing, and container fit.
 
 See [Theming](theming.html) for themes and [Custom CSS](custom-css.html) for `customStylesheet` and `resolveVariables`.
 """

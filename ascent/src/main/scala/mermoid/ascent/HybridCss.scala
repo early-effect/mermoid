@@ -6,6 +6,7 @@ import _root_.ascent.{
   Color,
   CssMember,
   Elem,
+  Declaration,
   Filter,
   GlobalRule,
   GlobalStyle,
@@ -16,7 +17,7 @@ import _root_.ascent.{
   Selector,
   Shadow,
 }
-import mermoid.NodeShape
+import mermoid.{ContainerFit, NodeShape, Num}
 import mermoid.css.{PaintClass, ThemeVar, WrapperClass}
 
 /** Hybrid chrome class names. SVG paint classes live on [[PaintClass]]; these are the HTML shell. */
@@ -42,6 +43,8 @@ end HybridClass
 enum HybridVar(val cssName: String):
   case SceneWidth  extends HybridVar("--mermoid-scene-width")
   case SceneHeight extends HybridVar("--mermoid-scene-height")
+  case Fit         extends HybridVar("--mermoid-fit")
+  case ScaleFloor  extends HybridVar("--mermoid-scale-floor")
 
   def cssVar: String = s"var($cssName)"
 
@@ -71,6 +74,17 @@ end HybridTokens
 /** Typed hybrid chrome. Public class names stay on [[HybridClass]] / [[PaintClass]] so hosts can still target them. */
 object HybridChrome
     extends GlobalStyle(
+      // `\3c number\3e ` is the CSS string `<number>`. A literal `<` fails cssIsEntitySafe and the painter
+      // drops the whole stylesheet, theme included.
+      GlobalRule.raw(
+        "mermoid-fit-property",
+        s"""@property ${HybridVar.Fit.cssName} { syntax: "\\3c number\\3e "; inherits: true; initial-value: 1; }""",
+      ),
+      GlobalRule.raw(
+        "mermoid-scale-floor-property",
+        s"""@property ${HybridVar.ScaleFloor.cssName} { syntax: "\\3c number\\3e "; inherits: true; initial-value: ${Num
+            .format(ContainerFit.defaultFloor)}; }""",
+      ),
       HybridTokens.rule(HybridClass.Diagram.sel)(
         S.position.relative,
         S.fontFamily(ThemeVar.FontFamily.cssVar("sans-serif")),
@@ -264,16 +278,23 @@ object HybridChrome
         S.fontSize.px(12),
         S.opacity(0.8),
       ),
+      // Firefox rejects length/length (`100cqi / 3000px`). tan(atan2(a, b)) is a unitless ratio, and it has
+      // to be computed on the scaler: the root is the container, so 100cqi in a property on the root does not
+      // resolve to the root's own width. Registered <number> properties keep the ratio typed. transform does not
+      // change layout size, so the negative margins are the scaled width and height.
       HybridTokens.rule(HybridClass.Root.sel.cls(HybridClass.Fit.cssName))(
         S.containerType.inlineSize,
         S.width.pct(100),
         S.maxWidth.pct(100),
-        S.height(
-          s"calc(${HybridVar.SceneHeight.cssVar} * min(1, 100cqi / ${HybridVar.SceneWidth.cssVar}))"
-        ),
-        S.overflow.hidden,
+        S.overflowX.auto,
         Selector(Sel.descendant(HybridClass.Scaler.sel))(
-          S.transform(s"scale(min(1, 100cqi / ${HybridVar.SceneWidth.cssVar}))").important
+          Declaration(
+            HybridVar.Fit.cssName,
+            s"max(${HybridVar.ScaleFloor.cssVar}, min(1, tan(atan2(100cqi, ${HybridVar.SceneWidth.cssVar}))))",
+          ),
+          S.transform(s"scale(${HybridVar.Fit.cssVar})"),
+          S.marginRight(s"calc(${HybridVar.SceneWidth.cssVar} * (${HybridVar.Fit.cssVar} - 1))"),
+          S.marginBottom(s"calc(${HybridVar.SceneHeight.cssVar} * (${HybridVar.Fit.cssVar} - 1))"),
         ),
       ),
     ):

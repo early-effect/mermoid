@@ -171,8 +171,8 @@ val config = RenderConfig(
   resolveVariables = true,                 // false keeps var(--mermoid-*) for page cascade
   responsive = ResponsiveConfig(
     compressSpacing = true,                // shrink/expand spacing toward the viewport
-    flipDirectionBelow = Some(640),        // below → prefer TB; at/above → prefer LR
-    scaleToFit = true,                     // uniform scale if scene still overflows width
+    flipDirectionBelow = None,             // Some(px) opts into a direction flip
+    fit = ContainerFit.ToWidth(0.5),       // scale down to the container, never below 0.5
     minSpacingScale = 0.45,
     maxSpacingScale = 1.75,
   ),
