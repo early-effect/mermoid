@@ -105,8 +105,6 @@ jobs:
           cache-mode: save
           purge: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'purge') }}
           cache-epoch: "644cd9940c69f344"
-      - name: Pinned snapshots
-        run: echo "::warning title=zipx snapshots::pinned snapshots (rocks.earlyeffect:sbt-zipx:0.17.0-SNAPSHOT)"
       - name: test
         run: |
           if [ "$ZIPX_VERIFY_CLEAN_FULL" = "true" ]; then
