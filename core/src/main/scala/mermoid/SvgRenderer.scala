@@ -54,7 +54,7 @@ object SvgRenderer:
   end arrowheadDefs
 
   /** `None` when the resolved stylesheet renders empty. */
-  private def styleBlock(config: RenderConfig, classDefRules: List[css.CssRule]): Option[SvgNode] =
+  private[mermoid] def styleBlock(config: RenderConfig, classDefRules: List[css.CssRule]): Option[SvgNode] =
     val base          = RenderConfig.resolvedStylesheet(config)
     val withClassDefs =
       if classDefRules.isEmpty then base
@@ -62,7 +62,7 @@ object SvgRenderer:
     val css = CssRenderer.render(withClassDefs, config.resolveVariables)
     Option.when(css.nonEmpty)(SvgNode.elem("style")()(SvgNode.Raw(s"\n$css\n")))
 
-  private def svgRoot(width: Double, height: Double, children: List[SvgNode]): SvgNode =
+  private[mermoid] def svgRoot(width: Double, height: Double, children: List[SvgNode]): SvgNode =
     SvgNode.Element(
       "svg",
       List(
@@ -90,7 +90,11 @@ object SvgRenderer:
     paint(DiagramLayout.scene(diagram, config, viewport))
 
   /** Paint a pre-built scene (SVG backend). */
-  def paint(scene: DiagramScene): SvgNode =
+  def paint(scene: Scene): SvgNode = scene match
+    case Scene.Ranked(ranked) => paintRanked(ranked)
+    case Scene.Sequence(seq)  => SequenceRenderer.paint(seq)
+
+  private def paintRanked(scene: DiagramScene): SvgNode =
     val config  = scene.config
     val nodeMap = scene.nodeMap
     val visible = scene.visibleNodes
@@ -144,5 +148,5 @@ object SvgRenderer:
         scene.classDefRules,
       ).toList ++ (background :: subgraphSvg ++ edgeSvg ++ nodeSvg ++ noteSvg),
     )
-  end paint
+  end paintRanked
 end SvgRenderer

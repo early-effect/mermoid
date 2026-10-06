@@ -1,0 +1,236 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1055.5" height="640" viewBox="0 0 1055.5 640">
+  <defs>
+    <marker id="seq-head" markerWidth="12" markerHeight="10.2" refX="12" refY="5.1" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon class="arrowhead" points="0 0, 12 5.1, 0 10.2"/>
+    </marker>
+    <marker id="seq-tail" markerWidth="12" markerHeight="10.2" refX="12" refY="5.1" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <polygon class="arrowhead" points="0 0, 12 5.1, 0 10.2"/>
+    </marker>
+    <marker id="seq-open" markerWidth="12" markerHeight="10.2" refX="12" refY="5.1" orient="auto" markerUnits="userSpaceOnUse">
+      <polyline class="arrow-open" points="0 0, 12 5.1, 0 10.2" fill="none"/>
+    </marker>
+    <marker id="seq-cross" markerWidth="12" markerHeight="10.2" refX="12" refY="5.1" orient="auto" markerUnits="userSpaceOnUse">
+      <path class="arrow-cross" d="M 0 0 L 12 10.2 M 0 10.2 L 12 0" fill="none"/>
+    </marker>
+  </defs>
+  <style>
+:root {
+  --mermoid-background: #ffffff;
+  --mermoid-edge-label-bg: #ffffff;
+  --mermoid-font-family: sans-serif;
+  --mermoid-font-size: 14px;
+  --mermoid-line: #333;
+  --mermoid-main-bkg: #ECECFF;
+  --mermoid-node-border: #9370DB;
+  --mermoid-note-bg: #ffffcc;
+  --mermoid-note-border: #333333;
+  --mermoid-note-text: #333333;
+  --mermoid-primary: #1f77b4;
+  --mermoid-primary-border: #1a5a8a;
+  --mermoid-primary-text: #333;
+  --mermoid-secondary: #ffffde;
+  --mermoid-secondary-border: #aaaa33;
+  --mermoid-secondary-text: #333;
+  --mermoid-selection: #333;
+  --mermoid-tertiary: #f4f4f4;
+  --mermoid-tertiary-border: #cccccc;
+  --mermoid-tertiary-text: #333;
+  --mermoid-text: #333;
+}
+.diagram-bg {
+  fill: #ffffff;
+  stroke: none;
+}
+.node-shape {
+  fill: #ECECFF;
+  stroke: #9370DB;
+  stroke-width: 2;
+}
+.node-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+.edge-line {
+  stroke: #333;
+  stroke-width: 2;
+}
+.edge-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.edge-label-bg {
+  fill: #ffffff;
+}
+.note-rect {
+  fill: #ffffcc;
+  stroke: #333333;
+  stroke-width: 1;
+  stroke-dasharray: 4,2;
+}
+.note-text {
+  fill: #333333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.note-connector {
+  stroke: #333333;
+  stroke-width: 1;
+  stroke-dasharray: 4,2;
+}
+.subgraph-rect {
+  fill: none;
+  stroke: #9370DB;
+  stroke-width: 1;
+  stroke-dasharray: 6,3;
+}
+.subgraph-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+.edge-thick .edge-line {
+  stroke-width: 3;
+}
+.edge-dotted .edge-line {
+  stroke-dasharray: 5,5;
+}
+.edge-dotted-open .edge-line {
+  stroke-dasharray: 5,5;
+}
+.arrowhead {
+  fill: #333;
+}
+.arrow-open {
+  fill: none;
+  stroke: #333;
+  stroke-width: 2;
+}
+.arrow-cross {
+  fill: none;
+  stroke: #333;
+  stroke-width: 2;
+}
+.actor-box {
+  fill: #ECECFF;
+  stroke: #9370DB;
+  stroke-width: 2;
+}
+.actor-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+.actor-figure {
+  fill: none;
+  stroke: #9370DB;
+  stroke-width: 2;
+}
+.lifeline {
+  stroke: #333;
+  stroke-width: 1;
+  fill: none;
+  stroke-dasharray: 4,4;
+}
+.message-line {
+  stroke: #333;
+  stroke-width: 2;
+  fill: none;
+}
+.message-dashed .message-line {
+  stroke-dasharray: 6,4;
+}
+.message-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.activation {
+  fill: #333;
+  stroke: none;
+  fill-opacity: 0.25;
+}
+.fragment-frame {
+  fill: none;
+  stroke: #9370DB;
+  stroke-width: 1;
+}
+.fragment-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.fragment-divider {
+  stroke: #9370DB;
+  stroke-width: 1;
+  fill: none;
+}
+.start-end .node-shape {
+  fill: #333;
+  stroke: #333;
+}
+</style>
+  <rect class="diagram-bg" x="0" y="0" width="1055.5" height="640"/>
+  <line id="lifeline-Alice" class="lifeline" x1="88" y1="84" x2="88" y2="600"/>
+  <line id="lifeline-Bob" class="lifeline" x1="240" y1="84" x2="240" y2="600"/>
+  <line id="lifeline-Carol" class="lifeline" x1="613" y1="84" x2="613" y2="600"/>
+  <line id="lifeline-Dave" class="lifeline" x1="765" y1="84" x2="765" y2="600"/>
+  <line id="lifeline-Eve" class="lifeline" x1="959.5" y1="84" x2="959.5" y2="600"/>
+  <g id="message-0" class="message message-solid">
+    <path class="message-line" d="M 88 126 L 240 126" fill="none" marker-end="url(#seq-head)"/>
+    <text class="message-label" x="164" y="122" text-anchor="middle">place order</text>
+  </g>
+  <g id="message-1" class="message message-solid">
+    <path class="message-line" d="M 240 178 L 613 178" fill="none" marker-end="url(#seq-head)"/>
+    <text class="message-label" x="426.5" y="174" text-anchor="middle">reserve stock and write the durable record</text>
+  </g>
+  <g id="message-2" class="message message-solid">
+    <path class="message-line" d="M 240 230 L 613 230" fill="none" marker-end="url(#seq-head)"/>
+    <text class="message-label" x="426.5" y="226" text-anchor="middle">confirm the row after reserve completes</text>
+  </g>
+  <g id="message-3" class="message message-solid">
+    <path class="message-line" d="M 240 282 L 88 282" fill="none" marker-end="url(#seq-head)"/>
+    <text class="message-label" x="164" y="278" text-anchor="middle">order accepted</text>
+  </g>
+  <g id="message-4" class="message message-solid">
+    <path class="message-line" d="M 88 334 L 765 334" fill="none" marker-end="url(#seq-head)"/>
+    <text class="message-label" x="426.5" y="330" text-anchor="middle">ask status</text>
+  </g>
+  <g id="message-5" class="message message-solid">
+    <path class="message-line" d="M 765 386 L 613 386" fill="none" marker-end="url(#seq-head)"/>
+    <text class="message-label" x="689" y="382" text-anchor="middle">read hold</text>
+  </g>
+  <g id="message-6" class="message message-dashed">
+    <path class="message-line" d="M 765 438 L 88 438" fill="none" marker-end="url(#seq-head)"/>
+    <text class="message-label" x="426.5" y="434" text-anchor="middle">accepted or pending</text>
+  </g>
+  <g id="message-7" class="message message-solid">
+    <path class="message-line" d="M 959.5 490 L 765 490" fill="none" marker-end="url(#seq-head)"/>
+    <text class="message-label" x="862.25" y="486" text-anchor="middle">fetch snapshot</text>
+  </g>
+  <g id="message-8" class="message message-dashed">
+    <path class="message-line" d="M 765 542 L 959.5 542" fill="none" marker-end="url(#seq-head)"/>
+    <text class="message-label" x="862.25" y="538" text-anchor="middle">snapshot plus version</text>
+  </g>
+  <g id="actor-Alice" class="actor">
+    <rect class="actor-box" x="40" y="40" width="96" height="44" rx="8"/>
+    <text class="actor-label" x="88" y="62" text-anchor="middle" dominant-baseline="middle">Alice</text>
+  </g>
+  <g id="actor-Bob" class="actor">
+    <rect class="actor-box" x="192" y="40" width="96" height="44" rx="8"/>
+    <text class="actor-label" x="240" y="62" text-anchor="middle" dominant-baseline="middle">Bob</text>
+  </g>
+  <g id="actor-Carol" class="actor">
+    <rect class="actor-box" x="565" y="40" width="96" height="44" rx="8"/>
+    <text class="actor-label" x="613" y="62" text-anchor="middle" dominant-baseline="middle">Carol</text>
+  </g>
+  <g id="actor-Dave" class="actor">
+    <rect class="actor-box" x="717" y="40" width="96" height="44" rx="8"/>
+    <text class="actor-label" x="765" y="62" text-anchor="middle" dominant-baseline="middle">Dave</text>
+  </g>
+  <g id="actor-Eve" class="actor">
+    <rect class="actor-box" x="911.5" y="40" width="96" height="44" rx="8"/>
+    <text class="actor-label" x="959.5" y="62" text-anchor="middle" dominant-baseline="middle">Eve</text>
+  </g>
+</svg>

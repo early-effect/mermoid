@@ -375,7 +375,7 @@ object ParserSpec extends ZIOSpecDefault:
             |  A[broken
             |""".stripMargin
         val err = MermaidParser.parse(input).swap.toOption.get
-        assertTrue(!err.contains("Position 1:1"))
+        assertTrue(!err.message.contains("Position 1:1"))
       },
     ),
     suite("state diagram")(
@@ -684,7 +684,7 @@ object ParserSpec extends ZIOSpecDefault:
             |  click A callback "Tip A"
             |""".stripMargin
         MermaidParser.parse(input) match
-          case Left(err)                          => assertTrue(err.isEmpty)
+          case Left(err)                          => assertTrue(err.message.isEmpty)
           case Right(Diagram.Flowchart(_, stmts)) =>
             val click = stmts.collect { case FlowStatement.ClickSt(b) => b }.head
             assertTrue(

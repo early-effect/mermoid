@@ -335,12 +335,14 @@ object MermaidParser:
       Diagram.Flowchart(dir, stmts)
     }
 
-  def diagram(using P[Any]): P[Diagram] = P(stateDiagram | flowchart)
+  def diagram(using P[Any]): P[Diagram] = P(SequenceParser.diagram | stateDiagram | flowchart)
 
   // -- Public API -------------------------------------------------------------
 
-  def parse(input: String): Either[String, Diagram] =
+  def parse(input: String): Either[ParseError, Diagram] =
     fastparse.parse(input, diagram(using _)) match
+      case Parsed.Success(Diagram.Sequence(stmts), _) =>
+        SequenceModel.resolve(stmts).map(Diagram.Sequence(_))
       case Parsed.Success(value, _) => Right(value)
-      case f: Parsed.Failure        => Left(f.msg)
+      case f: Parsed.Failure        => Left(ParseError.fromFastparse(f))
 end MermaidParser

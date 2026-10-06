@@ -11,15 +11,15 @@ object Overview extends DocSpecSuite:
     """flowchart LR
       |    Source[".mmd source"] --> Parser[MermaidParser]
       |    Parser --> Ast[Diagram AST]
-      |    Ast --> Scene[DiagramScene]
-      |    Scene --> Tree[SvgNode tree]
+      |    Ast --> Laid[Scene]
+      |    Laid --> Tree[SvgNode tree]
       |    Tree --> Svg([SVG string])
       |""".stripMargin
 
   def doc = page("Overview")(
     md"""
-**mermoid** is a Scala 3 library that parses [Mermaid](https://mermaid.js.org) flowchart and `stateDiagram-v2` syntax and
-renders SVG. It cross-builds for the JVM and Scala.js. Core depends on nothing but
+**mermoid** is a Scala 3 library that parses [Mermaid](https://mermaid.js.org) flowchart, `stateDiagram-v2`, and
+`sequenceDiagram` syntax and renders SVG. It cross-builds for the JVM and Scala.js. Core depends on nothing but
 [fastparse](https://github.com/com-lihaoyi/fastparse).
 
 Two published artifacts:
@@ -66,7 +66,7 @@ Three layers, pick the one that matches your host:
 |---|---|---|
 | `SvgRenderer.render` | SVG `String` | files, static pages, emails |
 | `SvgRenderer.renderTree` | `SvgNode` tree | frameworks that map trees to DOM |
-| `DiagramLayout.scene` | `DiagramScene` | custom painters, metrics, responsive hosts |
+| `DiagramLayout.scene` | `Scene` | custom painters, metrics, responsive hosts |
 
 This site maps inert SVG trees for structure docs, and uses **`mermoid-ascent`** for hybrid HTML nodes + SVG edges with
 selection and viewport reflow; see [Interactive](interactive.html). The [SvgNode tree](svg-structure.html) page shows the
@@ -76,9 +76,9 @@ element tree `renderTree` returns.
     section("Status")(
       md"""
 Pre-1.0, on [early-semver](https://www.scala-lang.org/blog/2021/02/16/preventing-version-conflicts-with-versionscheme.html):
-`0.x` releases may break binary compatibility. Flowcharts and `stateDiagram-v2` are implemented; sequence, class, ER and
-Gantt diagrams are not. The [README](https://github.com/early-effect/mermoid#supported-syntax) has the honest feature
-table.
+`0.x` releases may break binary compatibility. Flowcharts, `stateDiagram-v2`, and `sequenceDiagram` are implemented.
+Class, ER, and Gantt diagrams are not. The [README](https://github.com/early-effect/mermoid#supported-syntax) has the
+honest feature table.
 """
     ),
   )

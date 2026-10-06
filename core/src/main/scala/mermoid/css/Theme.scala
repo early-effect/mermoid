@@ -154,6 +154,109 @@ object Theme:
         ),
       ),
       CssRule(
+        PaintClass.ArrowOpen.selector,
+        List(
+          CssDeclaration(CssProperty.Fill, CssValue.Str("none")),
+          CssDeclaration(CssProperty.Stroke, ThemeVar.Line.asVar),
+          CssDeclaration(CssProperty.StrokeWidth, CssValue.Str("2")),
+        ),
+      ),
+      CssRule(
+        PaintClass.ArrowCross.selector,
+        List(
+          CssDeclaration(CssProperty.Fill, CssValue.Str("none")),
+          CssDeclaration(CssProperty.Stroke, ThemeVar.Line.asVar),
+          CssDeclaration(CssProperty.StrokeWidth, CssValue.Str("2")),
+        ),
+      ),
+      CssRule(
+        PaintClass.ActorBox.selector,
+        List(
+          CssDeclaration(CssProperty.Fill, ThemeVar.MainBkg.asVar),
+          CssDeclaration(CssProperty.Stroke, ThemeVar.NodeBorder.asVar),
+          CssDeclaration(CssProperty.StrokeWidth, CssValue.Str("2")),
+        ),
+      ),
+      CssRule(
+        PaintClass.ActorLabel.selector,
+        List(
+          CssDeclaration(CssProperty.Fill, ThemeVar.Text.asVar),
+          CssDeclaration(CssProperty.FontFamily, ThemeVar.FontFamily.asVar),
+          CssDeclaration(CssProperty.FontSize, ThemeVar.FontSize.asVar),
+        ),
+      ),
+      CssRule(
+        PaintClass.ActorFigure.selector,
+        List(
+          CssDeclaration(CssProperty.Fill, CssValue.Str("none")),
+          CssDeclaration(CssProperty.Stroke, ThemeVar.NodeBorder.asVar),
+          CssDeclaration(CssProperty.StrokeWidth, CssValue.Str("2")),
+        ),
+      ),
+      CssRule(
+        PaintClass.Lifeline.selector,
+        List(
+          CssDeclaration(CssProperty.Stroke, ThemeVar.Line.asVar),
+          CssDeclaration(CssProperty.StrokeWidth, CssValue.Str("1")),
+          CssDeclaration(CssProperty.Fill, CssValue.Str("none")),
+          CssDeclaration(CssProperty.StrokeDasharray, CssValue.Str("4,4")),
+        ),
+      ),
+      CssRule(
+        PaintClass.MessageLine.selector,
+        List(
+          CssDeclaration(CssProperty.Stroke, ThemeVar.Line.asVar),
+          CssDeclaration(CssProperty.StrokeWidth, CssValue.Str("2")),
+          CssDeclaration(CssProperty.Fill, CssValue.Str("none")),
+        ),
+      ),
+      CssRule(
+        CssSelector.Descendant(CssSelector.Class("message-dashed"), PaintClass.MessageLine.selector),
+        List(
+          CssDeclaration(CssProperty.StrokeDasharray, CssValue.Str("6,4"))
+        ),
+      ),
+      CssRule(
+        PaintClass.MessageLabel.selector,
+        List(
+          CssDeclaration(CssProperty.Fill, ThemeVar.Text.asVar),
+          CssDeclaration(CssProperty.FontFamily, ThemeVar.FontFamily.asVar),
+          CssDeclaration(CssProperty.FontSize, CssValue.Str("12px")),
+        ),
+      ),
+      CssRule(
+        PaintClass.Activation.selector,
+        List(
+          CssDeclaration(CssProperty.Fill, ThemeVar.Line.asVar),
+          CssDeclaration(CssProperty.Stroke, CssValue.Str("none")),
+          CssDeclaration(CssProperty.Custom("fill-opacity"), CssValue.Str("0.25")),
+        ),
+      ),
+      CssRule(
+        PaintClass.FragmentFrame.selector,
+        List(
+          CssDeclaration(CssProperty.Fill, CssValue.Str("none")),
+          CssDeclaration(CssProperty.Stroke, ThemeVar.NodeBorder.asVar),
+          CssDeclaration(CssProperty.StrokeWidth, CssValue.Str("1")),
+        ),
+      ),
+      CssRule(
+        PaintClass.FragmentLabel.selector,
+        List(
+          CssDeclaration(CssProperty.Fill, ThemeVar.Text.asVar),
+          CssDeclaration(CssProperty.FontFamily, ThemeVar.FontFamily.asVar),
+          CssDeclaration(CssProperty.FontSize, CssValue.Str("12px")),
+        ),
+      ),
+      CssRule(
+        PaintClass.FragmentDivider.selector,
+        List(
+          CssDeclaration(CssProperty.Stroke, ThemeVar.NodeBorder.asVar),
+          CssDeclaration(CssProperty.StrokeWidth, CssValue.Str("1")),
+          CssDeclaration(CssProperty.Fill, CssValue.Str("none")),
+        ),
+      ),
+      CssRule(
         CssSelector.Descendant(PaintClass.StartEnd.selector, PaintClass.NodeShape.selector),
         List(
           CssDeclaration(CssProperty.Fill, ThemeVar.Line.asVar),

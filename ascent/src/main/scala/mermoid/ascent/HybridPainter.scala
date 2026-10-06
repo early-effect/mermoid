@@ -7,15 +7,28 @@ import mermoid.*
 import mermoid.css.{CssHybrid, CssProperty, CssRenderer, CssRule, CssSelector, PaintClass, Stylesheet, WrapperClass}
 import zio.*
 
-/** Paints a [[DiagramScene]] as hybrid HTML nodes + SVG edges. */
+/** Paints a [[Scene]]. Ranked diagrams keep HTML nodes. Sequence headers are HTML buttons; lifelines and messages stay
+  * SVG.
+  */
 private[ascent] object HybridPainter:
 
   def paint(
-      scene: DiagramScene,
+      scene: Scene,
       selected: Option[String],
       onSelect: String => UIO[Unit],
       scale: Double = 1.0,
       cssFit: Boolean = false,
+  ): UI[Any] =
+    scene match
+      case Scene.Ranked(ranked) => paintRanked(ranked, selected, onSelect, scale, cssFit)
+      case Scene.Sequence(seq)  => paintSequence(seq, selected, onSelect, scale, cssFit)
+
+  private def paintRanked(
+      scene: DiagramScene,
+      selected: Option[String],
+      onSelect: String => UIO[Unit],
+      scale: Double,
+      cssFit: Boolean,
   ): UI[Any] =
     val cfg      = scene.config
     val styleCss =
@@ -65,22 +78,83 @@ private[ascent] object HybridPainter:
     val htmlNodes = scene.visibleNodes.map(n => nodeButton(n, scene, selected, onSelect))
     val htmlNotes = scene.notes.flatMap(n => noteCard(n, scene, selfLoopExtents, selected, onSelect))
 
-    val box = s"width:${scene.width.f}px;height:${scene.height.f}px"
+    shell(
+      scene.config,
+      scene.width,
+      scene.height,
+      scale,
+      cssFit,
+      styleCss,
+      Some(scene.direction.toString),
+      SvgBridge.toUi(edgeSvg),
+      htmlNodes ++ htmlNotes,
+    )
+  end paintRanked
+
+  private def paintSequence(
+      scene: SequenceScene,
+      selected: Option[String],
+      onSelect: String => UIO[Unit],
+      scale: Double,
+      cssFit: Boolean,
+  ): UI[Any] =
+    val cfg      = scene.config
+    val styleCss =
+      val theme = CssRenderer.render(CssHybrid.htmlCompat(RenderConfig.resolvedStylesheet(cfg)), cfg.resolveVariables)
+      theme + HybridChrome.css
+    val edgeSvg = SvgNode.Element(
+      "svg",
+      List(
+        "class"   -> HybridClass.Edges.cssName,
+        "xmlns"   -> "http://www.w3.org/2000/svg",
+        "width"   -> scene.width.f,
+        "height"  -> scene.height.f,
+        "viewBox" -> s"0 0 ${scene.width.f} ${scene.height.f}",
+      ),
+      SequenceRenderer.chrome(scene),
+    )
+    val actors = scene.participants.map(actorButton(_, selected, onSelect))
+    val notes  = scene.notes.map(sequenceNote)
+    shell(
+      cfg,
+      scene.width,
+      scene.height,
+      scale,
+      cssFit,
+      styleCss,
+      None,
+      SvgBridge.toUi(edgeSvg),
+      actors ++ notes,
+    )
+  end paintSequence
+
+  private def shell(
+      config: RenderConfig,
+      width: Double,
+      height: Double,
+      scale: Double,
+      cssFit: Boolean,
+      styleCss: String,
+      direction: Option[String],
+      layer: UI[Any],
+      html: Seq[UI[Any]],
+  ): UI[Any] =
+    val box = s"width:${width.f}px;height:${height.f}px"
     // An inline transform beats the fit class. CSS fit owns the transform when cssFit is set.
     val scalerStyle =
       if cssFit then box else s"$box;transform:scale(${Num.format(scale)})"
-    val floorDecl = scene.config.responsive.fit match
+    val floorDecl = config.responsive.fit match
       case ContainerFit.ToWidth(floor) => s";${HybridVar.ScaleFloor.cssName}:${Num.format(floor)}"
       case ContainerFit.Off            => ""
     val wrapStyle =
       if cssFit then
-        s"${HybridVar.SceneWidth.cssName}:${scene.width.f}px;${HybridVar.SceneHeight.cssName}:${scene.height.f}px$floorDecl;width:100%;max-width:100%"
-      else s"width:${(scene.width * scale).f}px;height:${(scene.height * scale).f}px"
+        s"${HybridVar.SceneWidth.cssName}:${width.f}px;${HybridVar.SceneHeight.cssName}:${height.f}px$floorDecl;width:100%;max-width:100%"
+      else s"width:${(width * scale).f}px;height:${(height * scale).f}px"
     val rootClass =
       if cssFit then s"${HybridClass.Root.cssName} ${HybridClass.Fit.cssName}"
       else HybridClass.Root.cssName
-
-    val styleEl =
+    val directionAttr = direction.toList.map(d => Attr.StaticAttr("data-mermoid-direction", AttrValue.Str(d)))
+    val styleEl       =
       if SvgBridge.cssIsEntitySafe(styleCss) then UI.Element("style", Vector.empty, Vector(UI.Text(styleCss)))
       else UI.Empty
 
@@ -100,15 +174,77 @@ private[ascent] object HybridPainter:
               AttrValue.Str(s"${HybridClass.Diagram.cssName} ${HybridClass.Scaler.cssName}"),
             ),
             Attr.StaticAttr("style", AttrValue.Str(scalerStyle)),
-            Attr.StaticAttr("data-mermoid-width", AttrValue.Str(scene.width.f)),
-            Attr.StaticAttr("data-mermoid-height", AttrValue.Str(scene.height.f)),
-            Attr.StaticAttr("data-mermoid-direction", AttrValue.Str(scene.direction.toString)),
-          ),
-          Vector(SvgBridge.toUi(edgeSvg)) ++ htmlNodes ++ htmlNotes,
+            Attr.StaticAttr("data-mermoid-width", AttrValue.Str(width.f)),
+            Attr.StaticAttr("data-mermoid-height", AttrValue.Str(height.f)),
+          ) ++ directionAttr,
+          Vector(layer) ++ html,
         ),
       ),
     )
-  end paint
+  end shell
+
+  private def actorButton(
+      person: PlacedParticipant,
+      selected: Option[String],
+      onSelect: String => UIO[Unit],
+  ): UI[Any] =
+    val box   = person.box
+    val isSel = selected.contains(person.id.value)
+    val kind  = person.kind match
+      case ParticipantKind.Participant => HybridClass.ActorBox.cssName
+      case ParticipantKind.Actor       => HybridClass.ActorPerson.cssName
+    val classes =
+      List(HybridClass.Actor.cssName, kind) ++ Option.when(isSel)(PaintClass.IsSelected.cssName)
+    val style          = s"left:${box.x.f}px;top:${box.y.f}px;width:${box.w.f}px;height:${box.h.f}px"
+    val label: UI[Any] = UI.Element(
+      "span",
+      Vector(Attr.StaticAttr("class", AttrValue.Str(HybridClass.ActorLabel.cssName))),
+      Vector(UI.Text(person.label)),
+    )
+    val kids: Vector[UI[Any]] = person.kind match
+      case ParticipantKind.Participant => Vector(label)
+      case ParticipantKind.Actor       =>
+        Vector(
+          UI.Element(
+            "span",
+            Vector(Attr.StaticAttr("class", AttrValue.Str(HybridClass.ActorHead.cssName))),
+            Vector.empty,
+          ),
+          UI.Element(
+            "span",
+            Vector(Attr.StaticAttr("class", AttrValue.Str(HybridClass.ActorStem.cssName))),
+            Vector.empty,
+          ),
+          label,
+        )
+    UI.Element(
+      "button",
+      Vector(
+        Attr.StaticAttr("type", AttrValue.Str("button")),
+        Attr.StaticAttr("id", AttrValue.Str(s"actor-${person.id.value}")),
+        Attr.StaticAttr("class", AttrValue.Str(classes.mkString(" "))),
+        Attr.StaticAttr("style", AttrValue.Str(style)),
+        Attr.StaticAttr("aria-label", AttrValue.Str(person.label)),
+        Events.onClick((_: AscentEvent) => onSelect(person.id.value)),
+      ),
+      kids,
+    )
+  end actorButton
+
+  private def sequenceNote(note: PlacedNote): UI[Any] =
+    val box   = note.box
+    val style = s"left:${box.x.f}px;top:${box.y.f}px;width:${box.w.f}px;min-height:${box.h.f}px"
+    UI.Element(
+      "div",
+      Vector(
+        Attr.StaticAttr("id", AttrValue.Str(s"note-${note.index}")),
+        Attr.StaticAttr("class", AttrValue.Str(HybridClass.Note.cssName)),
+        Attr.StaticAttr("style", AttrValue.Str(style)),
+        Attr.StaticAttr("role", AttrValue.Str("note")),
+      ),
+      Vector(UI.Text(note.lines.mkString("\n"))),
+    )
+  end sequenceNote
 
   private def arrowheadDefs(config: RenderConfig): SvgNode =
     val lc = config.layout

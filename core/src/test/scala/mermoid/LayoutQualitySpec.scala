@@ -50,8 +50,11 @@ object LayoutQualitySpec extends ZIOSpecDefault:
 
   private def sceneOf(src: String): DiagramScene =
     MermaidParser.parse(src) match
-      case Right(d)  => DiagramLayout.scene(d)
-      case Left(err) => throw new IllegalArgumentException(err)
+      case Right(d) =>
+        DiagramLayout.scene(d) match
+          case Scene.Ranked(scene) => scene
+          case Scene.Sequence(_)   => throw new IllegalArgumentException("expected a ranked scene")
+      case Left(err) => throw new IllegalArgumentException(err.message)
 
   /** Cluster centers that share a rank. Layer pitch is ~100px; same-rank height jitter stays under 30. */
   private def ranks(scene: DiagramScene, axis: LayoutNode => Double): Map[String, Int] =

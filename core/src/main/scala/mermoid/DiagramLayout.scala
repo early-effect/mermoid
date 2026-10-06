@@ -2,17 +2,18 @@ package mermoid
 
 import mermoid.css.PaintClass
 
-/** Builds a paint-ready [[DiagramScene]] from a parsed [[Diagram]]. */
+/** Builds a paint-ready [[Scene]] from a parsed [[Diagram]]. Sequence diagrams are a timeline, not a ranked graph. */
 object DiagramLayout:
 
   def scene(
       diagram: Diagram,
       config: RenderConfig = RenderConfig(),
       viewport: Option[Viewport] = None,
-  ): DiagramScene =
+  ): Scene =
     diagram match
-      case Diagram.Flowchart(dir, stmts)    => flowchartScene(dir, stmts, config, viewport)
-      case Diagram.StateDiagram(dir, stmts) => stateScene(dir, stmts, config, viewport)
+      case Diagram.Flowchart(dir, stmts)    => Scene.Ranked(flowchartScene(dir, stmts, config, viewport))
+      case Diagram.StateDiagram(dir, stmts) => Scene.Ranked(stateScene(dir, stmts, config, viewport))
+      case Diagram.Sequence(stmts)          => Scene.Sequence(SequenceLayout.place(stmts, config, viewport))
 
   private[mermoid] def effectiveDirection(
       author: Direction,

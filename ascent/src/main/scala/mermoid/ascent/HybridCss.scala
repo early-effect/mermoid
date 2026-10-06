@@ -28,6 +28,12 @@ enum HybridClass(val cssName: String, val description: String):
   case Scaler      extends HybridClass("mermoid-diagram-scaler", "transform origin for fit/scale")
   case Edges       extends HybridClass("mermoid-edges", "SVG layer for edges, frames, connectors")
   case Node        extends HybridClass("mermoid-node", "HTML button/link for a node")
+  case Actor       extends HybridClass("mermoid-actor", "HTML button for a sequence participant or actor")
+  case ActorBox    extends HybridClass("mermoid-actor-box", "participant header box")
+  case ActorPerson extends HybridClass("mermoid-actor-person", "stick-figure actor")
+  case ActorHead   extends HybridClass("mermoid-actor-head", "actor head")
+  case ActorStem   extends HybridClass("mermoid-actor-stem", "actor stem")
+  case ActorLabel  extends HybridClass("mermoid-actor-label", "participant or actor name")
   case DiamondFill extends HybridClass("mermoid-node-diamond-fill", "inner fill of a rhombus")
   case Tooltip     extends HybridClass("mermoid-tooltip", "hover label from a click tooltip")
   case Note        extends HybridClass("mermoid-note", "HTML card for a state note")
@@ -164,6 +170,60 @@ object HybridChrome
         S.padding(Length.px(4), Length.px(8)),
       ),
       HybridTokens.rule(HybridTokens.node.cls(PaintClass.IsSelected.cssName))(
+        S.outline.solid(Length.px(3), Color.keyword(HybridTokens.selectionStroke)),
+        S.outlineOffset.px(2),
+        S.zIndex(3),
+      ),
+      HybridTokens.rule(HybridClass.Actor.sel)(
+        S.position.absolute,
+        S.display.flex,
+        S.alignItems.center,
+        S.justifyContent.center,
+        S.boxSizing.borderBox,
+        S.margin.zero,
+        S.padding.zero,
+        S.cursor.pointer,
+        S.border.none,
+        S.background(Color.transparent),
+        S.fontFamily.inherit,
+        S.fontSize.inherit,
+        S.lineHeight(1.2),
+        S.textAlign.center,
+        S.color(HybridTokens.themeColor(ThemeVar.Text, "#333")),
+        S.zIndex(2),
+      ),
+      HybridTokens.rule(HybridClass.Actor.sel.cls(HybridClass.ActorBox.cssName))(
+        S.background(HybridTokens.themeColor(ThemeVar.MainBkg, "#ececff")),
+        S.border.solid(Length.px(2), HybridTokens.themeColor(ThemeVar.NodeBorder, "#9370db")),
+        S.borderRadius.px(8),
+      ),
+      HybridTokens.rule(HybridClass.Actor.sel.cls(HybridClass.ActorPerson.cssName))(
+        S.flexDirection.column,
+        S.justifyContent.flexStart,
+      ),
+      HybridTokens.rule(HybridClass.ActorHead.sel)(
+        S.display.block,
+        S.width.px(16),
+        S.height.px(16),
+        S.boxSizing.borderBox,
+        S.borderRadius.pct(50),
+        S.border.solid(Length.px(2), HybridTokens.themeColor(ThemeVar.NodeBorder, "#9370db")),
+        S.flexShrink(0),
+      ),
+      HybridTokens.rule(HybridClass.ActorStem.sel)(
+        S.display.block,
+        S.width.px(2),
+        S.height.px(18),
+        S.marginTop.px(4),
+        S.background(HybridTokens.themeColor(ThemeVar.NodeBorder, "#9370db")),
+        S.flexShrink(0),
+      ),
+      HybridTokens.rule(HybridClass.ActorPerson.sel.descendant(HybridClass.ActorLabel.sel))(
+        S.display.block,
+        S.marginTop.px(4),
+        S.lineHeight(Length.px(18)),
+      ),
+      HybridTokens.rule(HybridClass.Actor.sel.cls(PaintClass.IsSelected.cssName))(
         S.outline.solid(Length.px(3), Color.keyword(HybridTokens.selectionStroke)),
         S.outlineOffset.px(2),
         S.zIndex(3),

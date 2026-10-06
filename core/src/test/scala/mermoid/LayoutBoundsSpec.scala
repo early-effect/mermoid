@@ -27,7 +27,12 @@ object LayoutBoundsSpec extends ZIOSpecDefault:
   private def parse(src: String): Diagram =
     MermaidParser.parse(src) match
       case Right(d)  => d
-      case Left(err) => throw new IllegalArgumentException(err)
+      case Left(err) => throw new IllegalArgumentException(err.message)
+
+  private def ranked(d: Diagram): DiagramScene =
+    DiagramLayout.scene(d) match
+      case Scene.Ranked(scene) => scene
+      case Scene.Sequence(_)   => throw new IllegalArgumentException("expected a ranked scene")
 
   private def viewBoxSize(svg: String): (Double, Double) =
     val w = """width="([^"]+)"""".r.findFirstMatchIn(svg).map(_.group(1).toDouble).get
@@ -75,7 +80,7 @@ object LayoutBoundsSpec extends ZIOSpecDefault:
           |    Preparing --> Live: Published
           |    Live --> [*]
           |""".stripMargin
-      val scene     = DiagramLayout.scene(parse(src))
+      val scene     = ranked(parse(src))
       val svg       = SvgRenderer.render(parse(src))
       val (cw, ch)  = viewBoxSize(svg)
       val clipped   = labelBoxes(svg).filterNot((x, y, w, h) => inside(x, y, w, h, cw, ch))
@@ -104,7 +109,7 @@ object LayoutBoundsSpec extends ZIOSpecDefault:
           |    classDef fault fill:#3a2a10,stroke:#f59e0b
           |    class JourneyPreparationFaulted fault
           |""".stripMargin
-      val scene    = DiagramLayout.scene(parse(src))
+      val scene    = ranked(parse(src))
       val svg      = SvgRenderer.render(parse(src))
       val (cw, ch) = viewBoxSize(svg)
       val clipped  = labelBoxes(svg).filterNot((x, y, w, h) => inside(x, y, w, h, cw, ch))
@@ -117,7 +122,7 @@ object LayoutBoundsSpec extends ZIOSpecDefault:
       )
     },
     test("order FSM ranks start above end (split [*])") {
-      val scene   = DiagramLayout.scene(parse(orderFsm))
+      val scene   = ranked(parse(orderFsm))
       val pending = scene.nodeMap("Pending").center.y
       val paid    = scene.nodeMap("Paid").center.y
       val endY    = scene.nodeMap("[*]-end").center.y
