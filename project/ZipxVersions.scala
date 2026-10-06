@@ -23,19 +23,20 @@ object MyVersions extends ZipxVersions:
   val scalaJavaTime     = Lib("io.github.cquiroz", "scala-java-time", "2.7.0")
   val scalaJavaTimeTzdb = scalaJavaTime.mod("scala-java-time-tzdb")
 
-  val ascent     = Lib("rocks.earlyeffect", "ascent-core", "0.9.0")
+  val ascent     = Lib("rocks.earlyeffect", "ascent-core", "0.10.0-19667f3cf23f-SNAPSHOT")
   val ascentCss  = ascent.mod("ascent-css")
   val ascentHtml = ascent.mod("ascent-html")
-  val ascentJs   = ascent.mod("ascent-js")
+  // Own row: its line is not the core family's.
+  val ascentJs   = Lib("rocks.earlyeffect", "ascent-js", "0.11.0-19667f3cf23f-SNAPSHOT")
 
-  val specular        = Lib("rocks.earlyeffect", "specular-core", "0.18.1")
+  val specular        = Lib("rocks.earlyeffect", "specular-core", "0.19.0-c9e9026d8573-SNAPSHOT")
   val specularZioTest = specular.mod("specular-zio-test").test
   val specularTheme   = specular.mod("early-effect-docs-theme").test
 
   val scalajs        = Plugin("org.scala-js", "sbt-scalajs", "1.22.0")
   val scalafmt       = Plugin("org.scalameta", "sbt-scalafmt", "2.6.2")
   val assembly       = Plugin("com.eed3si9n", "sbt-assembly", "2.5.0")
-  val specularPlugin = Plugin("rocks.earlyeffect", "sbt-specular", "0.18.1")
+  val specularPlugin = Plugin("rocks.earlyeffect", "sbt-specular", "0.19.0-c9e9026d8573-SNAPSHOT")
 
   def zioTests      = library(zioTest.test, zioTestSbt.test)
   def zioLib        = library(zio)

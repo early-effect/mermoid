@@ -5,7 +5,7 @@ import mermoid.css.{Theme, ThemeColors, ThemeName}
 import mermoid.{RenderConfig, ResponsiveConfig, Viewport}
 import specular.*
 
-/** Every interactive / hybrid feature, exercisable via `docsPreview`.
+/** Every interactive / hybrid feature, exercisable via `docs/specularPreview`.
   *
   * Shared `DocSpec` (not `DocSpecSuite`) so docsJS can remount `.interactive` examples. JVM discovery is
   * [[InteractiveSuite]].
@@ -97,7 +97,7 @@ object Interactive extends DocSpec:
   def doc = page("Interactive")(
     md"""
 Hybrid HTML + SVG diagrams from **`mermoid-ascent`**: real HTML nodes (click, hover, tooltips), SVG edges/splines
-that **re-layout** when the viewport changes. Run `sbt docsPreview` and work through every section below.
+that **re-layout** when the viewport changes. Run `sbt docs/specularPreview` and work through every section below.
 
 ```scala
 libraryDependencies += "rocks.earlyeffect" %% "mermoid-ascent" % "<version>"   // JVM

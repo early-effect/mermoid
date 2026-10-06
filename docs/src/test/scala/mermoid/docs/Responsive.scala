@@ -41,7 +41,8 @@ all controlled by `ResponsiveConfig`:
 | **Container fit** | Hybrid paint scales nodes and edges down to the column, never below a floor | `fit` (`ContainerFit.ToWidth(0.5)` or `Off`) |
 
 Spacing compression and container fit are on by default. Direction is not. A viewport width changes spacing. It does
-not turn an authored `TD` into `LR`.
+not turn an authored `TD` into `LR`. A sequence diagram does not flip either: a narrow viewport compresses
+`SequenceConfig.columnGap` and `rowPitch`, then container fit scales the picture.
 """,
     section("Direction flip")(
       md"""
