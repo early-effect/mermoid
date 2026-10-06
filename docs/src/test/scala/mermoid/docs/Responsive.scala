@@ -1,7 +1,7 @@
 package mermoid.docs
 
 import mermoid.ascent.MermoidAscent
-import _root_.mermoid.{DiagramLayout, DiagramScene, MermaidParser, RenderConfig, ResponsiveConfig, Viewport}
+import _root_.mermoid.{DiagramLayout, DiagramScene, MermaidParser, RenderConfig, ResponsiveConfig, Scene, Viewport}
 import specular.*
 import specular.ziotest.DocSpecSuite
 import zio.test.*
@@ -22,10 +22,12 @@ object Responsive extends DocSpecSuite:
       viewport: Option[Viewport],
       config: RenderConfig = RenderConfig(),
   ): DiagramScene =
-    MermaidParser
-      .parse(src)
-      .map(d => DiagramLayout.scene(d, config, viewport))
-      .getOrElse(throw new AssertionError(s"unparseable: $src"))
+    MermaidParser.parse(src) match
+      case Right(d) =>
+        DiagramLayout.scene(d, config, viewport) match
+          case Scene.Ranked(scene) => scene
+          case Scene.Sequence(_)   => throw new AssertionError(s"expected a ranked scene: $src")
+      case Left(err) => throw new AssertionError(s"unparseable: ${err.message}\n$src")
 
   def doc = page("Responsive layout")(
     md"""
@@ -149,7 +151,7 @@ After layout, hybrid paint scales the scaler that holds the HTML nodes and the S
 `min(1, column / scene)`, and it never drops below the floor on `ContainerFit.ToWidth` (default 0.5). A scene that is
 already narrower than the column stays at scale 1. Below the floor the root scrolls horizontally.
 
-`DiagramScene.fitScale` is the same policy for a known width (the interactive reflow path). `ContainerFit.Off` leaves
+`Scene.fitScale` is the same policy for a known width (the interactive reflow path). `ContainerFit.Off` leaves
 the scene at scale 1.
 
 Spacing compression handles moderate overflows. A dense hub still exceeds its budget at minimum spacing, and that is
@@ -175,8 +177,8 @@ when the floor matters:
         List(
           s"Scene width: ${scene.width.toInt}",
           s"Viewport: 320",
-          s"fitScale(320): ${scene.fitScale(320)}",
-          s"Needs scaling: ${scene.fitScale(320) < 1.0}",
+          s"fitScale(320): ${Scene.Ranked(scene).fitScale(320)}",
+          s"Needs scaling: ${Scene.Ranked(scene).fitScale(320) < 1.0}",
         ).mkString("\n")
       }.assert(s =>
         assertTrue(
@@ -207,7 +209,7 @@ Three knobs to turn off. Omitting the `Viewport` altogether is the simplest appr
     ),
     section("In hybrid mode")(
       md"""
-`mermoid-ascent` recomputes the entire `DiagramScene` on every width change: geometry, edge routes, and, when
+`mermoid-ascent` recomputes the entire `Scene` on every width change: geometry, edge routes, and, when
 `flipDirectionBelow` is set, direction. Selection state is preserved by node id, so clicking a node before reflow
 keeps it selected after.
 

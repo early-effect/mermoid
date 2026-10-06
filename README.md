@@ -16,7 +16,7 @@ Two published artifacts:
 
 | Artifact | Role | Dependencies |
 |---|---|---|
-| **`mermoid`** | Parser, layout (`DiagramScene`), SVG painter | **fastparse only** |
+| **`mermoid`** | Parser, layout (`Scene`), SVG painter | **fastparse only** |
 | **`mermoid-ascent`** | Hybrid HTML nodes + SVG edges, selection, tooltips, reactive reflow | `mermoid` + [ascent](https://github.com/early-effect/ascent) + ZIO |
 
 > **Status: early / pre-1.0.** Published under [early-semver](https://www.scala-sbt.org/1.x/docs/Publishing.html#Version+scheme)
@@ -41,7 +41,7 @@ byte-identical SVG** for the same input and config. Render server-side and hydra
 ```scala
 import mermoid.*
 
-val svg: Either[String, String] =
+val svg: Either[ParseError, String] =
   MermaidParser.parse("""flowchart TD
       |  A[Start] --> B{OK?}
       |  B -->|yes| C((Done))
@@ -49,19 +49,19 @@ val svg: Either[String, String] =
     .map(SvgRenderer.render(_))
 ```
 
-`parse` returns `Either[String, Diagram]`. `render` returns a self-contained SVG string.
+`parse` returns `Either[ParseError, Diagram]`. Read `ParseError.message` when you surface a failure. `render` returns a self-contained SVG string.
 
 For the paint-agnostic tree (UI frameworks, post-processors):
 
 ```scala
-val tree: Either[String, SvgNode] =
+val tree: Either[ParseError, SvgNode] =
   MermaidParser.parse(source).map(SvgRenderer.renderTree(_))
 ```
 
 For layout without painting (metrics, custom painters, responsive hosts):
 
 ```scala
-val scene: Either[String, DiagramScene] =
+val scene: Either[ParseError, Scene] =
   MermaidParser.parse(source).map(d => DiagramLayout.scene(d, RenderConfig(), Some(Viewport(640))))
 ```
 
@@ -93,9 +93,9 @@ Mermaid `click` lines become tooltips, optional `href` links, and stored callbac
 | Styling | theme object + inline attributes | real CSS: classes, ids, custom properties |
 | Restyling | re-render | ship a different stylesheet |
 | Output | DOM it manages | `String`, `SvgNode`, or ascent `UI` |
-| Diagram coverage | complete | flowcharts and state diagrams (see below) |
+| Diagram coverage | complete | flowcharts, state diagrams, and sequence diagrams (see below) |
 
-If you need sequence, class, ER, or Gantt today, use mermaid.js. mermoid's trade is honest and deliberate.
+If you need class, ER, or Gantt today, use mermaid.js. mermoid's trade is honest and deliberate.
 
 ## Supported syntax
 
@@ -132,6 +132,25 @@ viewport stays left to right.
 | Note alignment | `style A noteAlign:center` (`left` / `center` / `right`) |
 | Note aliases | `note right of A as myNote` |
 
+### Sequence diagrams: `sequenceDiagram`
+
+Columns are participants in first-seen order. Rows are statements in source order. There is no ranker and no direction
+flip. A narrow viewport compresses `SequenceConfig.columnGap` and `rowPitch`, then container fit scales the picture.
+
+| Feature | Syntax |
+|---|---|
+| Headers | `participant Alice`, `actor Bob`, optional `as "Label"` |
+| Requests | `->>` solid head, `->` solid shaft, `-x` cross, `-)` open |
+| Replies | `-->>` dashed head, `-->` dashed shaft, `--x` cross, `--)` open |
+| Both directions | `<<->>` solid, `<<-->>` dashed |
+| Activation | `A->>+B` opens a bar on B, `B-->>-A` closes the bar on B |
+| Numbering | `autonumber`, `autonumber off`, `autonumber 3`, `autonumber 3 2` |
+| Notes | `note left of A: text`, `note right of A: text`, `note over A,B: text` |
+| Fragments | `loop`, `opt`, `critical`, `break`, `alt` / `else`, `par` / `and`, `rect rgb()` / `rgba()` |
+
+A second declare of the same id with a different label, or a switch between `participant` and `actor`, fails with
+`ParseError.ConflictingAlias`. `else` belongs to `alt`. `and` belongs to `par`.
+
 ### Special cases and limitations
 
 Documented so adopters are not surprised:
@@ -154,7 +173,8 @@ Documented so adopters are not surprised:
 
 **Not yet implemented** (parse-fail or ignored):
 
-- Diagram types: sequence, class, ER, Gantt, pie, journey, git graph
+- Diagram types: class, ER, Gantt, pie, journey, git graph
+- Sequence: `box` bands, `create` / `destroy`, stereotypes, `link` / `links`, `click` / `style` / `classDef`
 - State: composite states, concurrency (`--`), `state X as "…"`
 - Flowchart: `linkStyle`, Mermaid theme directives
 
@@ -182,8 +202,9 @@ val scene = DiagramLayout.scene(diagram, config, Some(Viewport(720)))
 val svg   = SvgRenderer.paint(scene)       // or SvgRenderer.render(diagram, config, Some(Viewport(720)))
 ```
 
-`DiagramScene` is the integration point for custom painters: nodes, edges, routes, notes, interactions, and effective
-direction after responsive flip.
+`Scene` is the integration point for custom painters. `Scene.Ranked` carries a `DiagramScene`: nodes, edges, routes,
+notes, interactions, and the effective direction after a responsive flip. `Scene.Sequence` carries columns, lifelines,
+messages, and fragments. `Scene.fitScale` is the container-fit policy for both.
 
 ## CSS theming
 
@@ -220,7 +241,8 @@ enum SvgNode:
 ```
 
 `SvgRenderer.render` is `SvgSerializer.render` over that tree. Stable ids: `node-{id}`, `edge-{alias|from-to-index}`,
-`note-{alias|state-index}`, `subgraph-{id}`. Edges also carry `data-from` / `data-to`.
+`note-{alias|state-index}`, `subgraph-{id}`. Edges also carry `data-from` / `data-to`. Sequence diagrams use
+`actor-{id}`, `lifeline-{id}`, `message-{index}`, `note-{index}`, `fragment-{index}`, and `activation-{index}`.
 
 ## CLI
 
@@ -257,13 +279,14 @@ Checked by the test suite (committed SVG must match the renderer):
 | State + note (interactive demo source) | [interactive-state.mmd](examples/interactive-state.mmd) | [interactive-state.svg](examples/interactive-state.svg) |
 | Reflow demo source | [interactive-reflow.mmd](examples/interactive-reflow.mmd) | [interactive-reflow.svg](examples/interactive-reflow.svg) |
 | Dense hub (interactive) | [interactive-hub.mmd](examples/interactive-hub.mmd) | [interactive-hub.svg](examples/interactive-hub.svg) |
+| Sequence span | [sequence-span.mmd](examples/sequence-span.mmd) | [sequence-span.svg](examples/sequence-span.svg) |
 
 ## Documentation
 
 **[earlyeffect.rocks/mermoid](https://www.earlyeffect.rocks/mermoid/):** every diagram on the site is rendered by the
 real renderer while the page is built, and asserted by `sbt test`.
 
-Guide path: Quick start → Flowcharts → State diagrams → **Interactive** → Responsive layout → Theming → Custom CSS → SVG structure → CLI.
+Guide path: Quick start → Flowcharts → State diagrams → Sequence diagrams → **Interactive** → Responsive layout → Theming → Custom CSS → SVG structure → CLI.
 
 ```
 sbt docsPreview   # live-reload docs (interactive remount needs the docsJS client)

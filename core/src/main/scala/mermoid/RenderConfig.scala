@@ -8,18 +8,10 @@ case class RenderConfig(
     customStylesheet: Option[Stylesheet] = None,
     resolveVariables: Boolean = true,
     responsive: ResponsiveConfig = ResponsiveConfig(),
+    sequence: SequenceConfig = SequenceConfig(),
 )
 
 object RenderConfig:
-  /** Binary-compatible with callers compiled against `RenderConfig` before [[ResponsiveConfig]]. */
-  def apply(
-      layout: LayoutConfig,
-      theme: ThemeName,
-      customStylesheet: Option[Stylesheet],
-      resolveVariables: Boolean,
-  ): RenderConfig =
-    new RenderConfig(layout, theme, customStylesheet, resolveVariables, ResponsiveConfig())
-
   def themeColors(config: RenderConfig): ThemeColors = Theme.colors(config.theme)
 
   def resolvedStylesheet(config: RenderConfig): Stylesheet =

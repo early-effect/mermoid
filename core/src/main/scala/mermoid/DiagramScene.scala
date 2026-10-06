@@ -67,16 +67,4 @@ case class DiagramScene(
   def visibleNodes: List[LayoutNode]          = nodes.filter(!_.dummy)
   def nodeMap: Map[String, LayoutNode]        = nodes.map(n => n.id -> n).toMap
   def visibleNodeMap: Map[String, LayoutNode] = visibleNodes.map(n => n.id -> n).toMap
-
-  /** Uniform scale so the scene fits `maxWidth`.
-    *
-    * `ContainerFit.Off` and a scene that is already narrower than `maxWidth` stay at 1. `ToWidth` never goes below its
-    * floor, so a very wide scene scrolls instead of shrinking labels without limit.
-    */
-  def fitScale(maxWidth: Double): Double =
-    config.responsive.fit match
-      case ContainerFit.Off            => 1.0
-      case ContainerFit.ToWidth(floor) =>
-        if width <= 0 || width <= maxWidth then 1.0
-        else Math.max(floor, Math.min(1.0, maxWidth / width))
 end DiagramScene

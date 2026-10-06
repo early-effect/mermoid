@@ -59,6 +59,18 @@ object ThemeSpec extends ZIOSpecDefault:
           PaintClass.EdgeLabelBg,
           PaintClass.NoteText,
           PaintClass.NoteConnector,
+          PaintClass.ActorBox,
+          PaintClass.ActorLabel,
+          PaintClass.ActorFigure,
+          PaintClass.Lifeline,
+          PaintClass.MessageLine,
+          PaintClass.MessageLabel,
+          PaintClass.Activation,
+          PaintClass.FragmentFrame,
+          PaintClass.FragmentLabel,
+          PaintClass.FragmentDivider,
+          PaintClass.ArrowOpen,
+          PaintClass.ArrowCross,
         ).map(_.cssName)
         assertTrue(expected.forall(selectorNames.contains))
       },

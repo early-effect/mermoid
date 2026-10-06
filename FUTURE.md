@@ -5,7 +5,7 @@ list is the public promise; this file is the plan behind it.
 
 ## Published artifacts
 
-- **`mermoid`** (core) — parser, `DiagramLayout.scene` / `DiagramScene`, SVG painter. fastparse only.
+- **`mermoid`** (core) — parser, `DiagramLayout.scene` / `Scene`, SVG painter. fastparse only.
 - **`mermoid-ascent`** — hybrid HTML+SVG ascent painter with Squawk selection, Mermaid `click` tooltips/links, and
   viewport-driven re-layout (routes/splines recomputed). Usable from Specular, Scala.js apps, or any ascent host.
 
@@ -23,7 +23,6 @@ list is the public promise; this file is the plan behind it.
 
 None of these parse today; the README says so explicitly.
 
-- Sequence diagrams
 - Class diagrams
 - ER diagrams
 - Gantt charts
@@ -32,6 +31,8 @@ None of these parse today; the README says so explicitly.
 ## Syntax Gaps in Supported Diagram Types
 
 - State diagrams: composite states, concurrency (`--`), `state X as "…"`
+- Sequence diagrams: `box` bands, `create` / `destroy`, stereotypes (`@{"type": ...}`), `link` / `links`, and
+  `click` / `style` / `classDef` inside the sequence. A lifeline is already one span from the header to the last row.
 
 ## Mermaid Compatibility
 

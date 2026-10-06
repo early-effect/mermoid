@@ -30,8 +30,8 @@ Pre-1.0 on early-semver: pin the exact version and read the release notes before
     ),
     section("Parse and render")(
       md"""
-`MermaidParser.parse` returns `Either[String, Diagram]` — the `Left` is the parse error, which you should surface rather
-than swallow. `SvgRenderer.render` turns a `Diagram` into the SVG document. Same source, rendered:
+`MermaidParser.parse` returns `Either[ParseError, Diagram]`. Surface `ParseError.message` rather than swallowing the
+`Left`. `SvgRenderer.render` turns a `Diagram` into the SVG document. Same source, rendered:
 """,
       example {
         MermoidAscent.svgDiagram("""flowchart LR
@@ -49,7 +49,7 @@ On the JVM, the whole job is one `Files.writeString`:
 import _root_.mermoid.*
 import java.nio.file.{Files, Path}
 
-def renderToFile(mmd: Path, svg: Path): Either[String, Unit] =
+def renderToFile(mmd: Path, svg: Path): Either[ParseError, Unit] =
   MermaidParser
     .parse(Files.readString(mmd))
     .map(d => Files.writeString(svg, SvgRenderer.render(d)))
@@ -103,13 +103,14 @@ See [Theming](theming.html) for themes and [Custom CSS](custom-css.html) for `cu
     ),
     section("Layout without painting")(
       md"""
-`DiagramLayout.scene` returns geometry, edge routes, notes, and click interactions without serializing SVG. Use it when
-you paint yourself (or when you only need metrics):
+`DiagramLayout.scene` returns a `Scene`: `Ranked` for a flowchart or state diagram (geometry, edge routes, notes, click
+interactions) and `Sequence` for a sequence diagram (columns, lifelines, messages). Use it when you paint yourself, or
+when you only need metrics:
 
 ```scala
 import _root_.mermoid.*
 
-val scene: Either[String, DiagramScene] =
+val scene: Either[ParseError, Scene] =
   MermaidParser.parse(source).map(d => DiagramLayout.scene(d, RenderConfig(), Some(Viewport(640))))
 ```
 
@@ -120,6 +121,7 @@ val scene: Either[String, DiagramScene] =
       md"""
 - [Flowcharts](flowcharts.html): shapes, edges, subgraphs, styling, clicks
 - [State diagrams](state-diagrams.html): transitions, notes, `[*]`
+- [Sequence diagrams](sequence-diagrams.html): participants, messages, fragments
 - [Interactive](interactive.html): hybrid HTML + SVG with reflow
 """
     ),

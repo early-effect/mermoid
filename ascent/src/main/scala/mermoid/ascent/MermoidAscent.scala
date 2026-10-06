@@ -30,7 +30,7 @@ object MermoidAscent:
     SvgRenderer.render(d, config)
 
   def fromScene(
-      scene: DiagramScene,
+      scene: Scene,
       selected: Option[String] = None,
       onSelect: String => UIO[Unit] = _ => ZIO.unit,
       containerWidth: Option[Double] = None,
@@ -45,8 +45,8 @@ object MermoidAscent:
   /** Interactive diagram: selection + viewport-driven re-layout.
     *
     * Width starts at `initialWidth`. Use the built-in Narrow/Wide controls (and optional external [[width]] source) to
-    * reflow; edges/splines are recomputed from a fresh [[DiagramScene]] on every width change. Selection id is
-    * preserved across reflow.
+    * reflow; edges and splines are recomputed from a fresh [[Scene]] on every width change. Selection id is preserved
+    * across reflow.
     */
   def diagramInteractive(
       mmd: String,
@@ -157,5 +157,6 @@ object MermoidAscent:
   private def parseOrThrow(mmd: String): Diagram =
     MermaidParser.parse(mmd) match
       case Right(d)  => d
-      case Left(err) => throw new IllegalArgumentException(s"mermoid could not parse this diagram: $err\n$mmd")
+      case Left(err) =>
+        throw new IllegalArgumentException(s"mermoid could not parse this diagram: ${err.message}\n$mmd")
 end MermoidAscent

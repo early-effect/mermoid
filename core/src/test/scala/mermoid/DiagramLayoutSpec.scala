@@ -22,13 +22,22 @@ object DiagramLayoutSpec extends ZIOSpecDefault:
   private def parse(src: String): Diagram =
     MermaidParser.parse(src) match
       case Right(d)  => d
-      case Left(err) => throw new IllegalArgumentException(err)
+      case Left(err) => throw new IllegalArgumentException(err.message)
+
+  private def ranked(
+      d: Diagram,
+      config: RenderConfig = RenderConfig(),
+      viewport: Option[Viewport] = None,
+  ): DiagramScene =
+    DiagramLayout.scene(d, config, viewport) match
+      case Scene.Ranked(scene) => scene
+      case Scene.Sequence(_)   => throw new IllegalArgumentException("expected a ranked scene")
 
   def spec = suite("DiagramLayout")(
     test("unconstrained scene matches SvgRenderer tree size") {
       val d     = parse(simpleFlow)
-      val scene = DiagramLayout.scene(d)
-      val svg   = SvgRenderer.paint(scene)
+      val scene = ranked(d)
+      val svg   = SvgRenderer.paint(Scene.Ranked(scene))
       assertTrue(
         scene.visibleNodes.size == 2,
         scene.edges.size == 1,
@@ -41,8 +50,8 @@ object DiagramLayoutSpec extends ZIOSpecDefault:
     },
     test("narrow viewport compresses spacing or flips direction") {
       val d      = parse(wideFlow)
-      val wide   = DiagramLayout.scene(d, viewport = None)
-      val narrow = DiagramLayout.scene(d, viewport = Some(Viewport(280)))
+      val wide   = ranked(d, viewport = None)
+      val narrow = ranked(d, viewport = Some(Viewport(280)))
       assertTrue(
         narrow.config.layout.hSpacing < wide.config.layout.hSpacing ||
           narrow.direction != wide.direction,
@@ -51,7 +60,7 @@ object DiagramLayoutSpec extends ZIOSpecDefault:
     },
     test("flipDirectionBelow swaps LR to TB when narrow") {
       val d     = parse(wideFlow)
-      val scene = DiagramLayout.scene(
+      val scene = ranked(
         d,
         RenderConfig(responsive = ResponsiveConfig(flipDirectionBelow = Some(640))),
         Some(Viewport(400)),
@@ -64,7 +73,7 @@ object DiagramLayoutSpec extends ZIOSpecDefault:
           |  A --> B
           |  B --> C
           |""".stripMargin
-      val scene = DiagramLayout.scene(parse(src), viewport = Some(Viewport(832)))
+      val scene = ranked(parse(src), viewport = Some(Viewport(832)))
       assertTrue(scene.direction == Direction.TD)
     },
     test("opt-in flip turns a wide TD into LR") {
@@ -73,7 +82,7 @@ object DiagramLayoutSpec extends ZIOSpecDefault:
           |  A --> B
           |  B --> C
           |""".stripMargin
-      val scene = DiagramLayout.scene(
+      val scene = ranked(
         parse(src),
         RenderConfig(responsive = ResponsiveConfig(flipDirectionBelow = Some(640))),
         Some(Viewport(832)),
@@ -81,21 +90,21 @@ object DiagramLayoutSpec extends ZIOSpecDefault:
       assertTrue(scene.direction == Direction.LR)
     },
     test("fitScale does not shrink a wide scene below one half") {
-      val wide  = DiagramLayout.scene(parse(simpleFlow)).copy(width = 3037)
+      val wide  = Scene.Ranked(ranked(parse(simpleFlow)).copy(width = 3037))
       val scale = wide.fitScale(961)
       assertTrue(scale == 0.5)
     },
     test("fitScale stays at 1 when the scene is narrower than the column") {
-      val scene = DiagramLayout.scene(parse(simpleFlow)).copy(width = 400)
+      val scene = Scene.Ranked(ranked(parse(simpleFlow)).copy(width = 400))
       assertTrue(scene.fitScale(961) == 1.0)
     },
     test("scale-to-fit off keeps scale at 1 for a wider scene") {
-      val scene = DiagramLayout
-        .scene(parse(simpleFlow))
-        .copy(
+      val scene = Scene.Ranked(
+        ranked(parse(simpleFlow)).copy(
           width = 3037,
           config = RenderConfig(responsive = ResponsiveConfig(fit = ContainerFit.Off)),
         )
+      )
       assertTrue(scene.fitScale(961) == 1.0)
     },
     test("narrow keeps vertical authors vertical") {
@@ -105,7 +114,7 @@ object DiagramLayoutSpec extends ZIOSpecDefault:
           |  Idle --> Done
           |  Done --> [*]
           |""".stripMargin
-      val scene = DiagramLayout.scene(parse(src), viewport = Some(Viewport(360)))
+      val scene = ranked(parse(src), viewport = Some(Viewport(360)))
       assertTrue(scene.direction == Direction.TB, scene.height > scene.width * 0.6)
     },
     test("opt-in flip turns a wide vertical state diagram horizontal") {
@@ -115,7 +124,7 @@ object DiagramLayoutSpec extends ZIOSpecDefault:
           |  Idle --> Done
           |  Done --> [*]
           |""".stripMargin
-      val scene = DiagramLayout.scene(
+      val scene = ranked(
         parse(src),
         RenderConfig(responsive = ResponsiveConfig(flipDirectionBelow = Some(640))),
         Some(Viewport(720)),
@@ -132,8 +141,8 @@ object DiagramLayoutSpec extends ZIOSpecDefault:
           |  E --> F
           |""".stripMargin
       val d      = parse(src)
-      val medium = DiagramLayout.scene(d, viewport = Some(Viewport(640)))
-      val wide   = DiagramLayout.scene(d, viewport = Some(Viewport(900)))
+      val medium = ranked(d, viewport = Some(Viewport(640)))
+      val wide   = ranked(d, viewport = Some(Viewport(900)))
       assertTrue(
         medium.direction == Direction.TD,
         wide.direction == Direction.TD,
@@ -149,8 +158,8 @@ object DiagramLayoutSpec extends ZIOSpecDefault:
           |""".stripMargin
       val d      = parse(src)
       val flip   = RenderConfig(responsive = ResponsiveConfig(flipDirectionBelow = Some(640)))
-      val medium = DiagramLayout.scene(d, flip, Some(Viewport(640)))
-      val wide   = DiagramLayout.scene(d, flip, Some(Viewport(900)))
+      val medium = ranked(d, flip, Some(Viewport(640)))
+      val wide   = ranked(d, flip, Some(Viewport(900)))
       assertTrue(
         medium.direction == Direction.LR,
         wide.direction == Direction.LR,
@@ -169,7 +178,7 @@ object DiagramLayoutSpec extends ZIOSpecDefault:
           |    Waiting for input
           |  end note
           |""".stripMargin
-      val scene = DiagramLayout.scene(
+      val scene = ranked(
         parse(src),
         RenderConfig(responsive = ResponsiveConfig(flipDirectionBelow = Some(640))),
         Some(Viewport(900)),
@@ -189,7 +198,7 @@ object DiagramLayoutSpec extends ZIOSpecDefault:
           |  click A callback "Hello A"
           |  click B href "https://example.com" "Go B" _blank
           |""".stripMargin
-      val scene = DiagramLayout.scene(parse(src))
+      val scene = ranked(parse(src))
       assertTrue(
         scene.interactions("A").tooltip.contains("Hello A"),
         scene.interactions("A").callbackName.contains("callback"),

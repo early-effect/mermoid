@@ -1,0 +1,15 @@
+sequenceDiagram
+    participant Alice
+    participant Bob
+    participant Carol
+    participant Dave
+    participant Eve
+    Alice->>Bob: place order
+    Bob->>Carol: reserve stock and write the durable record
+    Bob->>Carol: confirm the row after reserve completes
+    Bob->>Alice: order accepted
+    Alice->>Dave: ask status
+    Dave->>Carol: read hold
+    Dave-->>Alice: accepted or pending
+    Eve->>Dave: fetch snapshot
+    Dave-->>Eve: snapshot plus version

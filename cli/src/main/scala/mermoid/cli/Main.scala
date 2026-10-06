@@ -16,11 +16,14 @@ object MermoidCli extends ZIOAppDefault:
     val outputPath = inputPath.replaceAll("\\.mmd$", "") + ".svg"
     for
       input   <- ZIO.attempt(Files.readString(Path.of(inputPath)))
-      diagram <- ZIO.fromEither(MermaidParser.parse(input)).mapError(msg => new RuntimeException(s"Parse error: $msg"))
+      diagram <- ZIO
+        .fromEither(MermaidParser.parse(input))
+        .mapError(err => new RuntimeException(s"Parse error: ${err.message}"))
       svg = SvgRenderer.render(diagram)
       _ <- ZIO.attempt(Files.writeString(Path.of(outputPath), svg))
       _ <- Console.printLine(s"Generated SVG: $outputPath")
     yield ()
+  end processFile
 
   /** Writes `index.html` that embeds every example SVG for visual review (e.g. Playwright). */
   private def writeGallery(examplesDir: Path, outDir: Path): ZIO[Any, Throwable, Unit] =

@@ -88,7 +88,7 @@ object SvgOutputSpec extends ZIOSpecDefault:
         case other                   => throw new AssertionError(s"$name: malformed viewBox ${other.mkString}")
 
   private val rendered: List[Rendered] = examples.map { (name, source) =>
-    val diagram = MermaidParser.parse(source).fold(err => throw new AssertionError(s"$name: $err"), identity)
+    val diagram = MermaidParser.parse(source).fold(err => throw new AssertionError(s"$name: ${err.message}"), identity)
     val svg     = SvgRenderer.render(diagram)
     Rendered(name, diagram, svg, parse(svg))
   }
@@ -109,6 +109,7 @@ object SvgOutputSpec extends ZIOSpecDefault:
       val base = ends.toSet
       if hasStart && hasEnd then (base - "[*]") + "[*]" + "[*]-end"
       else base
+    case Diagram.Sequence(_) => Set.empty
 
   /** Attribute values that are meant to be numbers — the geometry we can check numerically. */
   private val numericAttrs =
@@ -156,9 +157,10 @@ object SvgOutputSpec extends ZIOSpecDefault:
           .map {
             case _: Diagram.Flowchart    => "flowchart"
             case _: Diagram.StateDiagram => "stateDiagram-v2"
+            case _: Diagram.Sequence     => "sequence"
           }
           .toSet
-        assertTrue(kinds == Set("flowchart", "stateDiagram-v2"))
+        assertTrue(kinds == Set("flowchart", "stateDiagram-v2", "sequence"))
       },
     ),
     forEachExample("is well-formed XML with a conforming root") { r =>
@@ -186,8 +188,15 @@ object SvgOutputSpec extends ZIOSpecDefault:
       assertTrue(numericValues(r).filter((_, v) => v.endsWith(".0")).isEmpty)
     },
     forEachExample("every declared node is rendered exactly once") { r =>
-      val expected = declaredNodeIds(r.diagram).map(id => s"node-$id")
-      val actual   = r.root.withClass("node").flatMap(_.attr("id"))
+      val expected = r.diagram match
+        case seq: Diagram.Sequence =>
+          SequenceModel.participantOrder(seq.statements).map(id => s"actor-${id.value}").toSet
+        case other =>
+          declaredNodeIds(other).map(id => s"node-$id")
+      val className = r.diagram match
+        case _: Diagram.Sequence => "actor"
+        case _                   => "node"
+      val actual = r.root.withClass(className).flatMap(_.attr("id"))
       assertTrue(actual.toSet == expected, actual.distinct.size == actual.size)
     },
     forEachExample("every rect and circle lies inside the canvas") { r =>
@@ -210,13 +219,17 @@ object SvgOutputSpec extends ZIOSpecDefault:
       }
       assertTrue((rects ++ circles).forall(identity))
     },
-    forEachExample("carries exactly one stylesheet and one arrowhead marker") { r =>
-      val styles  = r.root.byTag("style")
-      val markers = r.root.byTag("marker")
+    forEachExample("carries exactly one stylesheet and the markers for its diagram") { r =>
+      val styles   = r.root.byTag("style")
+      val markers  = r.root.byTag("marker").flatMap(_.attr("id"))
+      val css      = styles.flatMap(_.text).mkString
+      val expected = r.diagram match
+        case _: Diagram.Sequence => Set("seq-head", "seq-open", "seq-cross", "seq-tail")
+        case _                   => Set("arrowhead")
       assertTrue(
         styles.size == 1,
-        styles.head.text.contains("--mermoid"),
-        markers.flatMap(_.attr("id")) == List("arrowhead"),
+        css.contains("--mermoid"),
+        markers.toSet == expected,
       )
     },
     forEachExample("every element id is unique") { r =>
