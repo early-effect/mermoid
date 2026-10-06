@@ -47,8 +47,9 @@ Flowchart `click` lines (see [Flowcharts](flowcharts.html)) affect the node grou
 - tooltip → a child `<title>…</title>` (native SVG hover)
 - `href` → the node group is wrapped in `<a href="…" target="…">`
 
-Callback names are **not** written as attributes; hosts that need them read `DiagramScene.interactions` (or use
-[Interactive](interactive.html)). State diagrams have no `click` statement.
+Callback names are **not** written as attributes; hosts that need them read `DiagramScene.interactions` on
+`Scene.Ranked` (or use [Interactive](interactive.html)). State diagrams have no `click` statement. Sequence diagrams
+use `actor-{id}`, `lifeline-{id}`, `message-{index}`, `note-{index}`, `fragment-{index}`, and `activation-{index}`.
 
 Hover the first node for the native SVG tooltip; the second is a link.
 """,

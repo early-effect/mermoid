@@ -32,7 +32,7 @@ Two published artifacts:
 The diagram below is not a screenshot. It was parsed and rendered by mermoid while this page was being built, and the
 same call is asserted by the test suite.
 
-For hover, selection, tooltips, and **reactive reflow**, open [Interactive](interactive.html) (or run `sbt docsPreview`
+For hover, selection, tooltips, and **reactive reflow**, open [Interactive](interactive.html) (or run `sbt docs/specularPreview`
 and click through that page).
 """,
     example {

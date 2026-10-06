@@ -8,8 +8,8 @@ import java.nio.file.{Files, Path, Paths, StandardCopyOption}
 
 /** Docs-as-tests site builder (Test classpath; `docs/specularSite`).
   *
-  * Every diagram on the site is rendered by the real renderer while the page is built, and asserted by `sbt test` — so
-  * a diagram that stops parsing or stops producing the expected structure is a red check, not a broken picture.
+  * Every diagram on the site is rendered by the real renderer while the page is built, and asserted by `sbt testFull`,
+  * so a diagram that stops parsing or stops producing the expected structure is a red check, not a broken picture.
   *
   * Interactive remount: `specularJsLink` writes `target/specular-client-js.path`; [[afterBuild]] copies that bundle to
   * `assets/client.js` (Specular dogfood pattern).
@@ -48,7 +48,7 @@ contracts. **`mermoid-ascent`** paints hybrid HTML+SVG with reactive reflow for 
 
 fastparse is the only dependency of `mermoid` core; `mermoid-ascent` adds ascent.
 
-Guide: Quick start → Flowcharts → State diagrams → Interactive → Responsive layout → Theming → Custom CSS → SVG structure → CLI.
+Guide: Quick start → Flowcharts → State diagrams → Sequence diagrams → Interactive → Responsive layout → Theming → Custom CSS → SVG structure → CLI.
 """
       ),
       installSnippets = Vector(

@@ -223,6 +223,4 @@ lazy val docs = (projectMatrix in file("docs"))
       ),
   )
 
-// The plugin's preview rebuilds and reloads on its own; it must not run under `~`.
-addCommandAlias("docsPreview", "docs/specularPreview")
 addCommandAlias("release", "; publishSigned; sonaRelease")

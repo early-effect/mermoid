@@ -52,4 +52,4 @@ ZIO is a `cli`/test-only dependency of core; ascent/specular are `docs` test-onl
 - Tasks that write files need `Def.uncached` (otherwise sbt asks for `HashWriter` evidence)
 - CI is generated from the build graph by zipx — `sbt zipxWorkflowGenerate`, and `zipxWorkflowCheck`
   fails if the committed workflow drifts
-- `sbt docsPreview` serves the docs site with live reload
+- `sbt docs/specularPreview` serves the docs site with live reload (do not `~`). Stop with `docs/specularPreviewStop`

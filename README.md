@@ -82,7 +82,7 @@ val interactive = MermoidAscent.diagramInteractive(source, initialWidth = 720)
 ```
 
 Mermaid `click` lines become tooltips, optional `href` links, and stored callback names for the host. See the
-[Interactive](https://www.earlyeffect.rocks/mermoid/interactive.html) docs page (`sbt docsPreview`).
+[Interactive](https://www.earlyeffect.rocks/mermoid/interactive.html) docs page (`sbt docs/specularPreview`).
 
 ## Why not mermaid.js
 
@@ -284,13 +284,13 @@ Checked by the test suite (committed SVG must match the renderer):
 ## Documentation
 
 **[earlyeffect.rocks/mermoid](https://www.earlyeffect.rocks/mermoid/):** every diagram on the site is rendered by the
-real renderer while the page is built, and asserted by `sbt test`.
+real renderer while the page is built, and asserted by `sbt testFull`.
 
 Guide path: Quick start → Flowcharts → State diagrams → Sequence diagrams → **Interactive** → Responsive layout → Theming → Custom CSS → SVG structure → CLI.
 
 ```
-sbt docsPreview   # live-reload docs (interactive remount needs the docsJS client)
-sbt testFull      # core JVM+JS, ascent, cli, docs assertions
+sbt docs/specularPreview      # live-reload docs (do not ~). Stop with docs/specularPreviewStop
+sbt testFull                   # core JVM+JS, ascent, cli, docs assertions
 ```
 
 ## Contributing
