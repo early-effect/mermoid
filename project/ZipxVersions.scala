@@ -20,8 +20,7 @@ object MyVersions extends ZipxVersions:
 
   val fastparse = Lib("com.lihaoyi", "fastparse", "3.1.1")
 
-  val scalaJavaTime     = Lib("io.github.cquiroz", "scala-java-time", "2.7.0")
-  val scalaJavaTimeTzdb = scalaJavaTime.mod("scala-java-time-tzdb")
+  val scalaJavaTime = Lib("io.github.cquiroz", "scala-java-time", "2.7.0")
 
   val ascent     = Lib("rocks.earlyeffect", "ascent-core", "0.10.0-19667f3cf23f-SNAPSHOT")
   val ascentCss  = ascent.mod("ascent-css")
@@ -41,7 +40,7 @@ object MyVersions extends ZipxVersions:
   def zioTests      = library(zioTest.test, zioTestSbt.test)
   def zioLib        = library(zio)
   def parserLib     = library(fastparse)
-  def javaTime      = library(scalaJavaTime, scalaJavaTimeTzdb)
+  def javaTime      = library(scalaJavaTime)
   def ascentLib     = library(ascent, ascentCss, zio)
   def ascentHtmlLib = library(ascentHtml)
   def ascentJsLib   = library(ascentJs)

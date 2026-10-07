@@ -96,6 +96,8 @@ lazy val core = (projectMatrix in file("core"))
   .jvmPlatform(scalaVersions = scalaVersions)
   .jsPlatform(scalaVersions = scalaVersions)
 
+// ZIO's JS runtime references java.time (FiberRuntime metrics), so a linked app needs the classes. No mermoid code
+// resolves a time zone, so the tzdb data stays out.
 val javaTimePolyfill = MyVersions.javaTime
 
 // --- mermoid-ascent : hybrid HTML+SVG ascent painter with reactive reflow. Published; depends on ascent.
@@ -215,8 +217,9 @@ lazy val docs = (projectMatrix in file("docs"))
     Nil,
     (p: Project) =>
       p.settings(
-        javaTimePolyfill,
         MyVersions.docsJs,
+        // ascent-core and specular-core JS still publish scala-java-time-tzdb. The client resolves no time zones.
+        excludeDependencies += ExclusionRule("io.github.cquiroz", "scala-java-time-tzdb_sjs1_3"),
         // Share Interactive DocSpec + registry with the JVM Test CP (Specular LibraryAuthors pattern).
         Compile / unmanagedSources ++= {
           val dir = (ThisBuild / baseDirectory).value / "docs" / "src" / "test" / "scala" / "mermoid" / "docs"
