@@ -189,7 +189,7 @@ private[ascent] object HybridPainter:
       onSelect: NodeId => UIO[Unit],
   ): UI[Any] =
     val box   = person.box
-    val isSel = selected.contains(NodeId.ofParticipant(person.id))
+    val isSel = selected.contains(person.id)
     val kind  = person.kind match
       case ParticipantKind.Participant => HybridClass.ActorBox.cssName
       case ParticipantKind.Actor       => HybridClass.ActorPerson.cssName
@@ -225,7 +225,7 @@ private[ascent] object HybridPainter:
         Attr.StaticAttr("class", AttrValue.Str(classes.mkString(" "))),
         Attr.StaticAttr("style", AttrValue.Str(style)),
         Attr.StaticAttr("aria-label", AttrValue.Str(person.label)),
-        Events.onClick((_: AscentEvent) => onSelect(NodeId.ofParticipant(person.id))),
+        Events.onClick((_: AscentEvent) => onSelect(person.id)),
       ),
       kids,
     )

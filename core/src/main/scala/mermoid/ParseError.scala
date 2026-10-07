@@ -6,7 +6,7 @@ import fastparse.Parsed
 enum ParseError:
   /** `index` is the failure offset. `expected` is the parser label stack, not a prose sentence. */
   case Failed(index: Int, expected: List[String])
-  case ConflictingAlias(id: ParticipantId, existing: String, duplicate: String)
+  case ConflictingAlias(id: NodeId, existing: String, duplicate: String)
   case BadColor(raw: String)
 
   def message: String = this match

@@ -2,7 +2,7 @@ package mermoid
 
 import scala.quoted.*
 
-/** A flowchart node or state id, as written in the source (`A`, `Idle`, `[*]`). */
+/** A flowchart node, state, or sequence participant id, as written in the source (`A`, `Idle`, `[*]`, `Alice`). */
 opaque type NodeId = String
 
 object NodeId:
@@ -27,9 +27,6 @@ object NodeId:
 
   /** The parser's ids and the ids layout makes up (dummy waypoints, the split `[*]` end marker). */
   private[mermoid] def trusted(raw: String): NodeId = raw
-
-  /** A sequence participant, where a host selects by node id. Both ids share Mermaid's identifier grammar. */
-  private[mermoid] def ofParticipant(id: ParticipantId): NodeId = id.value
 
   extension (id: NodeId) def value: String = id
 

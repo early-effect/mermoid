@@ -65,7 +65,7 @@ private[mermoid] object SequenceLayout:
       declared: List[DeclaredParticipant],
       charWidth: Double,
   ): Measured =
-    val indexOf: Map[ParticipantId, Int] =
+    val indexOf: Map[NodeId, Int] =
       declared.zipWithIndex.map((d, i) => d.id -> i).toMap
 
     def walk(stmts: List[SequenceStatement], state: NumState, acc: Measured): (NumState, Measured) =
@@ -92,7 +92,7 @@ private[mermoid] object SequenceLayout:
   end measure
 
   private case class Column(
-      id: ParticipantId,
+      id: NodeId,
       label: String,
       kind: ParticipantKind,
       boxW: Double,
@@ -204,15 +204,15 @@ private[mermoid] object SequenceLayout:
       lc: LayoutConfig,
       rowPitch: Double,
   ):
-    val byId: Map[ParticipantId, Column] = layout.columns.map(c => c.id -> c).toMap
-    def headerBand: Double               = layout.headerBand
-    def lineH: Double                    = lc.lineHeight
-    def frameLeft: Double                = layout.columns.headOption.map(_.boxLeft - 8).getOrElse(0.0)
-    def frameRight: Double               =
+    val byId: Map[NodeId, Column] = layout.columns.map(c => c.id -> c).toMap
+    def headerBand: Double        = layout.headerBand
+    def lineH: Double             = lc.lineHeight
+    def frameLeft: Double         = layout.columns.headOption.map(_.boxLeft - 8).getOrElse(0.0)
+    def frameRight: Double        =
       layout.columns.lastOption.map(c => c.boxLeft + c.boxW + 8).getOrElse(180.0) max (frameLeft + 120)
   end Env
 
-  private case class OpenBar(id: ParticipantId, depth: Int, y0: Double)
+  private case class OpenBar(id: NodeId, depth: Int, y0: Double)
 
   private case class Cursor(
       y: Double,
@@ -250,12 +250,12 @@ private[mermoid] object SequenceLayout:
       case SequenceStatement.Group(kind, sections) =>
         placeGroup(cursor, kind, sections, env)
 
-  private def pushBar(open: List[OpenBar], id: ParticipantId, y0: Double): List[OpenBar] =
+  private def pushBar(open: List[OpenBar], id: NodeId, y0: Double): List[OpenBar] =
     OpenBar(id, open.count(_.id == id), y0) :: open
 
   private def popBar(
       open: List[OpenBar],
-      id: ParticipantId,
+      id: NodeId,
       y1: Double,
       env: Env,
   ): (List[ActivationBar], List[OpenBar]) =
@@ -279,8 +279,8 @@ private[mermoid] object SequenceLayout:
 
   private def placeMessage(
       cursor: Cursor,
-      from: ParticipantId,
-      to: ParticipantId,
+      from: NodeId,
+      to: NodeId,
       arrow: SequenceArrow,
       text: Option[String],
       control: MessageControl,

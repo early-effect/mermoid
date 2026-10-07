@@ -19,9 +19,6 @@ private[mermoid] object MermaidLift:
     val fields = Expr(Tuple.fromProductTyped(x))
     '{ scala.compiletime.summonInline[Mirror.ProductOf[T]].fromProduct($fields) }
 
-  given ToExpr[ParticipantId] with
-    def apply(x: ParticipantId)(using Quotes): Expr[ParticipantId] = '{ ParticipantId(${ Expr(x.value) }) }
-
   given ToExpr[NodeId] with
     def apply(x: NodeId)(using Quotes): Expr[NodeId] = '{ NodeId.trusted(${ Expr(x.value) }) }
 

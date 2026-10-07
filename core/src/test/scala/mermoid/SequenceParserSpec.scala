@@ -84,7 +84,7 @@ object SequenceParserSpec extends ZIOSpecDefault:
           |participant Alice as Two
           |""".stripMargin
       assertTrue(
-        MermaidParser.parse(src) == Left(ParseError.ConflictingAlias(ParticipantId("Alice"), "One", "Two"))
+        MermaidParser.parse(src) == Left(ParseError.ConflictingAlias(NodeId("Alice"), "One", "Two"))
       )
     },
     test("changing participant to actor is a conflicting alias") {
@@ -95,7 +95,7 @@ object SequenceParserSpec extends ZIOSpecDefault:
           |""".stripMargin
       assertTrue(
         MermaidParser.parse(src) == Left(
-          ParseError.ConflictingAlias(ParticipantId("Alice"), "a participant", "an actor")
+          ParseError.ConflictingAlias(NodeId("Alice"), "a participant", "an actor")
         )
       )
     },

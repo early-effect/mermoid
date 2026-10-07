@@ -35,8 +35,8 @@ private[mermoid] object SequenceParser:
         case None    => Fail
     }
 
-  private def id(using P[Any]): P[ParticipantId] =
-    P(MermaidParser.identifier).map(ParticipantId(_))
+  private def id(using P[Any]): P[NodeId] =
+    P(MermaidParser.identifier).map(NodeId.trusted(_))
 
   private def declare(using P[Any]): P[SequenceStatement.Declare] =
     P(keywordKind ~ MermaidParser.ws ~ id ~ alias.?).map { case (kind, pid, label) =>
