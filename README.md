@@ -103,6 +103,10 @@ val interactive = MermoidAscent.diagramInteractive(source, initialWidth = 720)
 Mermaid `click` lines become tooltips, optional `href` links, and stored callback names for the host. See the
 [Interactive](https://www.earlyeffect.rocks/mermoid/interactive.html) docs page (`sbt docs/specularPreview`).
 
+In a [Specular](https://www.earlyeffect.rocks/specular/) site, `MermoidAscent.diagram(Mermaid("..."))` goes straight into
+`illustration { ... }`, with no adapter on either side. See
+[Specular illustrations](https://www.earlyeffect.rocks/mermoid/specular-illustrations.html).
+
 ## Why not mermaid.js
 
 |  | mermaid.js | mermoid |

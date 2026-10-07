@@ -220,10 +220,10 @@ lazy val docs = (projectMatrix in file("docs"))
         MyVersions.docsJs,
         // ascent-core and specular-core JS still publish scala-java-time-tzdb. The client resolves no time zones.
         excludeDependencies += ExclusionRule("io.github.cquiroz", "scala-java-time-tzdb_sjs1_3"),
-        // Share Interactive DocSpec + registry with the JVM Test CP (Specular LibraryAuthors pattern).
+        // The DocSpecs the client remounts, shared with the JVM Test classpath.
         Compile / unmanagedSources ++= {
           val dir = (ThisBuild / baseDirectory).value / "docs" / "src" / "test" / "scala" / "mermoid" / "docs"
-          Seq(dir / "Interactive.scala", dir / "ExampleRegistry.scala")
+          Seq(dir / "Interactive.scala", dir / "SpecularIllustrations.scala")
         },
         scalaJSUseMainModuleInitializer := true,
         scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.ESModule)),

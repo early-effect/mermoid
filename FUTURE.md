@@ -11,8 +11,9 @@ list is the public promise; this file is the plan behind it.
 
 ## Downstream Integrations
 
-- Specular does not ship a mermoid module. A host paints with published `mermoid-ascent` (hybrid) or embeds `SvgNode`
-  where an inert SVG tree is intentional.
+- Specular does not ship a mermoid module, and mermoid ships no specular module. A Specular page passes
+  `MermoidAscent.diagram(Mermaid("..."))` to `illustration`; the docs page "Specular illustrations" is the worked
+  example. An inert SVG tree (`SvgNode`) is the other option when that is intentional.
 - **`marklit-mermoid`** (in [early-effect/marklit](https://github.com/early-effect/marklit)) — blocked
   on a raw/verbatim output modifier: `Passthrough` re-wraps content in a fence, so a block cannot emit
   an image link or inline SVG into rendered markdown. GitHub strips inline SVG from READMEs, so
