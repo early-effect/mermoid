@@ -18,18 +18,16 @@ object SequenceParserSpec extends ZIOSpecDefault:
       |A--)B: dashed open
       |""".stripMargin
 
-  private def messages(src: String): Either[String, List[SequenceStatement.Message]] =
-    MermaidParser.parse(src) match
-      case Right(Diagram.Sequence(stmts)) =>
-        Right(stmts.collect { case m: SequenceStatement.Message => m })
-      case Right(_)  => Left("not a sequence")
-      case Left(err) => Left(err.message)
+  private def messages(src: String): Option[List[SequenceStatement.Message]] =
+    MermaidParser.parse(src).toOption.collect { case Diagram.Sequence(stmts) =>
+      stmts.collect { case m: SequenceStatement.Message => m }
+    }
 
   def spec = suite("SequenceParser")(
     test("the ten arrows keep line, head, and tail apart") {
       val got = messages(arrows).map(_.map(_.arrow))
       assertTrue(
-        got == Right(
+        got == Some(
           List(
             SequenceArrow.Solid,
             SequenceArrow.Dashed,
@@ -170,7 +168,7 @@ object SequenceParserSpec extends ZIOSpecDefault:
           |Bob-->>-Alice: close
           |""".stripMargin
       val got = messages(src).map(_.map(_.control))
-      assertTrue(got == Right(List(MessageControl.Activate, MessageControl.Deactivate)))
+      assertTrue(got == Some(List(MessageControl.Activate, MessageControl.Deactivate)))
     },
     test("alt else and par and are sections, and a note names its place") {
       val src =

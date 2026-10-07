@@ -5,6 +5,7 @@ import specular.site.*
 import zio.*
 
 import java.nio.file.{Files, Path, Paths, StandardCopyOption}
+import scala.jdk.OptionConverters.*
 
 /** Docs-as-tests site builder (Test classpath; `docs/specularSite`).
   *
@@ -87,19 +88,21 @@ val svg = MermaidParser.parse("flowchart TD\\n  A[Start] --> B[Done]")
     val _ = result
     EarlyEffectTheme.writeLogo(out) *> copyClientBundle(out)
 
+  /** `afterBuild` is a `Task` in Specular's API, so the missing bundle travels as an exception value. */
+  final case class ClientBundleMissing(marker: Path, searched: Path)
+      extends Exception(
+        s"JS client not linked; run docs/specularSite (or docsJS/fastLinkJS) first. Looked for marker $marker and under $searched"
+      )
+
   private def copyClientBundle(out: Path): Task[Unit] =
-    ZIO.attempt {
-      val dest = out.resolve("assets/client.js")
-      val src  = findClientJs.getOrElse {
-        throw new RuntimeException(
-          "JS client not linked; run docs/specularSite (or docsJS/fastLinkJS) first. " +
-            s"Looked for marker ${clientJsMarker} and under ${repoRoot.resolve("target/out")}"
-        )
+    val dest = out.resolve("assets/client.js")
+    for
+      src <- ZIO.attempt(findClientJs).someOrFail(ClientBundleMissing(clientJsMarker, repoRoot.resolve("target/out")))
+      _   <- ZIO.attempt {
+        Files.createDirectories(dest.getParent)
+        Files.copy(src, dest, StandardCopyOption.REPLACE_EXISTING)
       }
-      Files.createDirectories(dest.getParent)
-      Files.copy(src, dest, StandardCopyOption.REPLACE_EXISTING)
-      ()
-    }
+    yield ()
 
   private def clientJsMarker: Path =
     repoRoot.resolve("target/specular-client-js.path")
@@ -111,7 +114,7 @@ val svg = MermaidParser.parse("flowchart TD\\n  A[Start] --> B[Done]")
     val marker = clientJsMarker
     if !Files.isRegularFile(marker) then None
     else
-      val line = Files.readString(marker).nn.trim
+      val line = Files.readString(marker).trim
       if line.isEmpty then None
       else
         val path = Paths.get(line)
@@ -129,15 +132,14 @@ val svg = MermaidParser.parse("flowchart TD\\n  A[Start] --> B[Done]")
             s.endsWith("mermoid-docs-fastopt/main.js")
           }
           .findFirst()
-        if found.isPresent then Some(found.get.nn) else None
+        found.toScala
       finally stream.close()
     end if
   end walkTargetOut
 
   private def repoRoot: Path =
     Iterator
-      .iterate(Paths.get("").toAbsolutePath.nn)(p => Option(p.getParent).orNull)
-      .takeWhile(_ != null)
+      .unfold(Option(Paths.get("").toAbsolutePath))(_.map(p => (p, Option(p.getParent))))
       .find(p => Files.exists(p.resolve("build.sbt")))
-      .getOrElse(Paths.get("").toAbsolutePath.nn)
+      .getOrElse(Paths.get("").toAbsolutePath)
 end BuildSite

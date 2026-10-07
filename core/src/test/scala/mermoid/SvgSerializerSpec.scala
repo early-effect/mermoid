@@ -166,7 +166,7 @@ object SvgSerializerSpec extends ZIOSpecDefault:
       },
       test("non-self edges have selfLoopIndex 0") {
         val built = SvgRenderer.buildLayoutEdges(List(Edge(NodeId("A"), NodeId("B"), EdgeStyle.Arrow, None)))
-        assertTrue(built.head.selfLoopIndex == 0)
+        assertTrue(built.map(_.selfLoopIndex) == List(0))
       },
     ),
     suite("longestPathLayers")(

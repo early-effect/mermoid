@@ -21,10 +21,10 @@ object Responsive extends DocSpecSuite:
       src: Mermaid,
       viewport: Option[Viewport],
       config: RenderConfig = RenderConfig(),
-  ): DiagramScene =
+  ): Option[DiagramScene] =
     DiagramLayout.scene(src.diagram, config, viewport) match
-      case Scene.Ranked(scene) => scene
-      case Scene.Sequence(_)   => throw new AssertionError(s"expected a ranked scene: ${src.source}")
+      case Scene.Ranked(scene) => Some(scene)
+      case Scene.Sequence(_)   => None
 
   def doc = page("Responsive layout")(
     md"""
@@ -64,14 +64,15 @@ direction. A static embed does not know the reader's window, so it does not flip
 That is the authored layout: five nodes in a horizontal chain. The same chain with the flip opted in at 640px:
 """,
       exampleValue {
-        val flip   = RenderConfig(responsive = ResponsiveConfig(flipDirectionBelow = Some(640)))
-        val wide   = sceneOf(chain, Some(Viewport(900)), flip)
-        val narrow = sceneOf(chain, Some(Viewport(400)), flip)
-        List(
+        val flip = RenderConfig(responsive = ResponsiveConfig(flipDirectionBelow = Some(640)))
+        (for
+          wide   <- sceneOf(chain, Some(Viewport(900)), flip)
+          narrow <- sceneOf(chain, Some(Viewport(400)), flip)
+        yield List(
           s"Wide (${wide.width.toInt}×${wide.height.toInt}) direction: ${wide.direction}",
           s"Narrow (${narrow.width.toInt}×${narrow.height.toInt}) direction: ${narrow.direction}",
           s"Flipped: ${wide.direction != narrow.direction}",
-        ).mkString("\n")
+        ).mkString("\n")).getOrElse("not a ranked diagram")
       }.assert(s =>
         assertTrue(
           s.contains("Wide"),
@@ -88,8 +89,7 @@ Without that opt-in, a `flowchart TD` laid out for a 900px column stays top to b
             |  A --> B
             |  B --> C
             |""".stripMargin)
-        val scene = sceneOf(src, Some(Viewport(900)))
-        s"Direction: ${scene.direction}"
+        sceneOf(src, Some(Viewport(900))).fold("not a ranked diagram")(scene => s"Direction: ${scene.direction}")
       }.assert(s => assertTrue(s.contains("Direction: TD"))),
     ),
     section("Spacing compression")(
@@ -101,13 +101,14 @@ spacing, padding, and parallel edge offset toward the viewport target. The scale
 A diagram that needs 960px of width in a 320px viewport compresses aggressively but never below 45% of default spacing.
 """,
       exampleValue {
-        val big   = sceneOf(chain, Some(Viewport(1200)))
-        val small = sceneOf(chain, Some(Viewport(320)))
-        List(
+        (for
+          big   <- sceneOf(chain, Some(Viewport(1200)))
+          small <- sceneOf(chain, Some(Viewport(320)))
+        yield List(
           s"Wide width: ${big.width.toInt}",
           s"Narrow width: ${small.width.toInt}",
           s"Compression ratio: ${(small.width / big.width).toString.take(4)}",
-        ).mkString("\n")
+        ).mkString("\n")).getOrElse("not a ranked diagram")
       }.assert(s =>
         assertTrue(
           s.contains("Wide"),
@@ -121,7 +122,8 @@ A diagram that needs 960px of width in a 320px viewport compresses aggressively 
 Disable compression to keep the author's geometry intact regardless of viewport:
 """,
       exampleValue {
-        val compressed = sceneOf(chain, Some(Viewport(320))) // default compressSpacing = true
+        val compressed =
+          DiagramLayout.scene(chain.diagram, RenderConfig(), Some(Viewport(320))) // compressSpacing = true
         val noCompress = DiagramLayout.scene(
           chain.diagram,
           RenderConfig(responsive = ResponsiveConfig(compressSpacing = false)),
@@ -166,12 +168,12 @@ when the floor matters:
             |  F --> H
             |  G --> H
             |""".stripMargin)
-        val scene = sceneOf(hub, Some(Viewport(320)))
+        val scene = DiagramLayout.scene(hub.diagram, RenderConfig(), Some(Viewport(320)))
         List(
           s"Scene width: ${scene.width.toInt}",
           s"Viewport: 320",
-          s"fitScale(320): ${Scene.Ranked(scene).fitScale(320)}",
-          s"Needs scaling: ${Scene.Ranked(scene).fitScale(320) < 1.0}",
+          s"fitScale(320): ${scene.fitScale(320)}",
+          s"Needs scaling: ${scene.fitScale(320) < 1.0}",
         ).mkString("\n")
       }.assert(s =>
         assertTrue(
@@ -185,8 +187,8 @@ when the floor matters:
 Three knobs to turn off. Omitting the `Viewport` altogether is the simplest approach — layout runs unconstrained.
 """,
       exampleValue {
-        val constrained   = sceneOf(chain, Some(Viewport(320)))
-        val unconstrained = sceneOf(chain, None)
+        val constrained   = DiagramLayout.scene(chain.diagram, RenderConfig(), Some(Viewport(320)))
+        val unconstrained = DiagramLayout.scene(chain.diagram, RenderConfig(), None)
         List(
           s"Constrained: ${constrained.width.toInt}×${constrained.height.toInt}",
           s"Unconstrained: ${unconstrained.width.toInt}×${unconstrained.height.toInt}",

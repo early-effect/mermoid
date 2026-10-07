@@ -2,12 +2,13 @@ package mermoid.cli
 
 import mermoid.*
 import org.w3c.dom.{Element, Node}
+import zio.*
 import zio.test.*
 
-import java.io.ByteArrayInputStream
+import java.io.{ByteArrayInputStream, IOException}
 import java.nio.file.{Files, Path}
 import javax.xml.parsers.DocumentBuilderFactory
-import scala.annotation.tailrec
+import scala.jdk.CollectionConverters.*
 
 /** Validates rendered SVG against the format's own rules rather than against a recorded snapshot.
   *
@@ -16,7 +17,7 @@ import scala.annotation.tailrec
   * size, finite coordinates, every declared node present, every drawn shape inside the canvas — so they catch real
   * regressions while staying indifferent to cosmetic churn like indentation.
   */
-object SvgOutputSpec extends ZIOSpecDefault:
+object SvgOutputSpec extends ZIOSpec[SvgOutputSpec.Corpus]:
 
   // ---- an immutable view of a parsed document ---------------------------------
 
@@ -25,7 +26,7 @@ object SvgOutputSpec extends ZIOSpecDefault:
     * The JDK's `Document` expands nodes lazily and is not thread-safe, so sharing one across ZIO Test's parallel tests
     * hands back nulls. Reading the whole tree once, on one thread, removes the hazard entirely.
     */
-  private case class Elem(
+  final case class Elem(
       tag: String,
       namespace: Option[String],
       attrs: List[(String, String)],
@@ -40,7 +41,7 @@ object SvgOutputSpec extends ZIOSpecDefault:
     def withClass(c: String): List[Elem]   = descendants.filter(_.classes.contains(c))
   end Elem
 
-  private object Elem:
+  object Elem:
     def from(e: Element): Elem =
       val kids = (0 until e.getChildNodes.getLength).toList
         .map(e.getChildNodes.item)
@@ -56,42 +57,81 @@ object SvgOutputSpec extends ZIOSpecDefault:
     factory.setNamespaceAware(true)
     Elem.from(factory.newDocumentBuilder().parse(new ByteArrayInputStream(svg.getBytes("UTF-8"))).getDocumentElement)
 
-  // ---- locating the examples --------------------------------------------------
+  // ---- loading the corpus ----------------------------------------------------
+
+  /** Why the examples could not be loaded and rendered. */
+  enum CorpusError:
+    case NoExamplesDirectory(start: Path)
+    case Unreadable(path: Path, cause: IOException)
+    case Unparseable(name: String, error: ParseError)
+    case NotXml(name: String, cause: Throwable)
+    case MalformedViewBox(name: String, raw: Option[String])
+
+  final case class Example(name: String, source: String)
+
+  final case class Rendered(
+      name: String,
+      diagram: Diagram,
+      svg: String,
+      root: Elem,
+      /** `viewBox="minX minY width height"`. */
+      viewBox: (Double, Double, Double, Double),
+  )
+
+  final case class Corpus(root: Path, examples: List[Example], rendered: List[Rendered])
 
   /** Tests run with an unspecified working directory, so walk up to the directory holding `examples/`. */
-  private def repoRoot: Path =
-    @tailrec def up(p: Path): Path =
-      if Files.isDirectory(p.resolve("examples")) then p
-      else
-        Option(p.getParent) match
-          case Some(parent) => up(parent)
-          case None         => throw new IllegalStateException("could not locate the examples/ directory")
-    up(Path.of(sys.props.getOrElse("user.dir", ".")).toAbsolutePath)
+  private def repoRoot: IO[CorpusError, Path] =
+    def up(p: Path): UIO[Option[Path]] =
+      ZIO.succeedBlocking(Files.isDirectory(p.resolve("examples"))).flatMap {
+        case true  => ZIO.some(p)
+        case false => Option(p.getParent).fold(ZIO.none)(up)
+      }
+    for
+      dir <- System.propertyOrElse("user.dir", ".").orDie
+      from = Path.of(dir).toAbsolutePath
+      root <- up(from).someOrFail(CorpusError.NoExamplesDirectory(from))
+    yield root
+  end repoRoot
 
-  private def examples: List[(String, String)] =
-    import scala.jdk.CollectionConverters.*
-    val stream = Files.list(repoRoot.resolve("examples"))
-    try
-      stream.iterator.asScala.toList
-        .filter(_.getFileName.toString.endsWith(".mmd"))
-        .sortBy(_.getFileName.toString)
-        .map(p => p.getFileName.toString -> Files.readString(p))
-    finally stream.close()
+  private def read(path: Path): IO[CorpusError, String] =
+    ZIO.attemptBlockingIO(Files.readString(path)).mapError(CorpusError.Unreadable(path, _))
 
-  // ---- the rendered corpus ----------------------------------------------------
+  private def examplesIn(root: Path): IO[CorpusError, List[Example]] =
+    val dir = root.resolve("examples")
+    for
+      paths <- ZIO
+        .scoped(
+          ZIO
+            .fromAutoCloseable(ZIO.attemptBlockingIO(Files.list(dir)))
+            .flatMap(listing => ZIO.attemptBlockingIO(listing.iterator.asScala.toList))
+        )
+        .mapError(CorpusError.Unreadable(dir, _))
+      mmd = paths.filter(_.getFileName.toString.endsWith(".mmd")).sortBy(_.getFileName.toString)
+      examples <- ZIO.foreach(mmd)(p => read(p).map(Example(p.getFileName.toString, _)))
+    yield examples
+    end for
+  end examplesIn
 
-  private case class Rendered(name: String, diagram: Diagram, svg: String, root: Elem):
-    /** `viewBox="minX minY width height"`. */
-    val viewBox: (Double, Double, Double, Double) =
-      root.attr("viewBox").map(_.trim.split("\\s+").flatMap(_.toDoubleOption)) match
-        case Some(Array(a, b, c, d)) => (a, b, c, d)
-        case other                   => throw new AssertionError(s"$name: malformed viewBox ${other.mkString}")
+  private def render(example: Example): IO[CorpusError, Rendered] =
+    for
+      mermaid <- ZIO.fromEither(Mermaid.from(example.source)).mapError(CorpusError.Unparseable(example.name, _))
+      svg = SvgRenderer.render(mermaid.diagram)
+      root <- ZIO.attempt(parse(svg)).mapError(CorpusError.NotXml(example.name, _))
+      raw = root.attr("viewBox")
+      viewBox <- raw.map(_.trim.split("\\s+").toList.flatMap(_.toDoubleOption)) match
+        case Some(List(a, b, c, d)) => ZIO.succeed((a, b, c, d))
+        case _                      => ZIO.fail(CorpusError.MalformedViewBox(example.name, raw))
+    yield Rendered(example.name, mermaid.diagram, svg, root, viewBox)
 
-  private val rendered: List[Rendered] = examples.map { (name, source) =>
-    val diagram = MermaidParser.parse(source).fold(err => throw new AssertionError(s"$name: ${err.message}"), identity)
-    val svg     = SvgRenderer.render(diagram)
-    Rendered(name, diagram, svg, parse(svg))
-  }
+  private val corpus: IO[CorpusError, Corpus] =
+    for
+      root     <- repoRoot
+      examples <- examplesIn(root)
+      rendered <- ZIO.foreach(examples)(render)
+    yield Corpus(root, examples, rendered)
+
+  override val bootstrap: ZLayer[Any, CorpusError, Corpus] = ZLayer(corpus)
 
   /** Node ids the diagram declares, as the renderer keys them. */
   private def declaredNodeIds(diagram: Diagram): Set[String] = diagram match
@@ -118,43 +158,52 @@ object SvgOutputSpec extends ZIOSpecDefault:
 
   /** One test per example, so a failure names the file that broke. */
   private def forEachExample(label: String)(check: Rendered => TestResult) =
-    suite(label)(rendered.map(r => test(r.name)(check(r)))*)
+    suite(label)(ZIO.serviceWith[Corpus](_.rendered.map(r => test(r.name)(check(r)))))
 
   def spec = suite("rendered SVG")(
     test("the examples directory is non-empty") {
-      assertTrue(rendered.nonEmpty)
+      for corpus <- ZIO.service[Corpus]
+      yield assertTrue(corpus.rendered.nonEmpty)
     },
     suite("the corpus itself")(
       test("no two examples have identical source") {
         // Duplicates make the suite look broader than it is: N files, fewer than N distinct cases.
-        val dupes = examples
-          .groupBy((_, src) => src.trim)
-          .filter((_, fs) => fs.size > 1)
-          .map((_, fs) => fs.map((name, _) => name).mkString(" == "))
-        assertTrue(dupes.isEmpty)
+        for corpus <- ZIO.service[Corpus]
+        yield
+          val dupes = corpus.examples
+            .groupBy(_.source.trim)
+            .filter((_, fs) => fs.size > 1)
+            .map((_, fs) => fs.map(_.name).mkString(" == "))
+          assertTrue(dupes.isEmpty)
       },
       test("the committed .svg beside each .mmd is current") {
         // The CLI writes a sibling .svg, and rendering is deterministic — so a stale committed file
         // means someone changed the renderer without regenerating, and the gallery lies.
-        val stale = examples.flatMap { (name, source) =>
-          val svgPath  = repoRoot.resolve("examples").resolve(name.replaceAll("\\.mmd$", ".svg"))
-          val expected = MermaidParser.parse(source).map(SvgRenderer.render(_))
-          if !Files.exists(svgPath) then Some(s"$name: no committed .svg")
-          else if expected != Right(Files.readString(svgPath)) then Some(s"$name: committed .svg is out of date")
-          else None
-        }
-        assertTrue(stale.isEmpty)
+        for
+          corpus <- ZIO.service[Corpus]
+          stale  <- ZIO.foreach(corpus.rendered) { r =>
+            val svgPath = corpus.root.resolve("examples").resolve(r.name.replaceAll("\\.mmd$", ".svg"))
+            ZIO.ifZIO(ZIO.succeedBlocking(Files.exists(svgPath)))(
+              onTrue = read(svgPath).map(committed =>
+                Option.when(committed != r.svg)(s"${r.name}: committed .svg is out of date")
+              ),
+              onFalse = ZIO.some(s"${r.name}: no committed .svg"),
+            )
+          }
+        yield assertTrue(stale.flatten.isEmpty)
       },
       test("the corpus covers both diagram types") {
-        val kinds = rendered
-          .map(_.diagram)
-          .map {
-            case _: Diagram.Flowchart    => "flowchart"
-            case _: Diagram.StateDiagram => "stateDiagram-v2"
-            case _: Diagram.Sequence     => "sequence"
-          }
-          .toSet
-        assertTrue(kinds == Set("flowchart", "stateDiagram-v2", "sequence"))
+        for corpus <- ZIO.service[Corpus]
+        yield
+          val kinds = corpus.rendered
+            .map(_.diagram)
+            .map {
+              case _: Diagram.Flowchart    => "flowchart"
+              case _: Diagram.StateDiagram => "stateDiagram-v2"
+              case _: Diagram.Sequence     => "sequence"
+            }
+            .toSet
+          assertTrue(kinds == Set("flowchart", "stateDiagram-v2", "sequence"))
       },
     ),
     forEachExample("is well-formed XML with a conforming root") { r =>

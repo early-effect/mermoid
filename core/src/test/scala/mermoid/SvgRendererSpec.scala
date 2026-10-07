@@ -31,11 +31,8 @@ object SvgRendererSpec extends ZIOSpecDefault:
             NodeDef(NodeId("B"), None, NodeShape.Rect),
           ),
         )
-        val nodes = StyleResolver.collectNodes(stmts)
-        assertTrue(
-          nodes(NodeId("A")).label == Some("Hello"),
-          nodes(NodeId("A")).shape == NodeShape.Round,
-        )
+        val a = StyleResolver.collectNodes(stmts).get(NodeId("A"))
+        assertTrue(a.flatMap(_.label).contains("Hello"), a.map(_.shape).contains(NodeShape.Round))
       },
       test("collects nodes from subgraphs") {
         val stmts = List(
@@ -92,16 +89,10 @@ object SvgRendererSpec extends ZIOSpecDefault:
           NodeId("A") -> NodeDef(NodeId("A"), Some("Start"), NodeShape.Rect),
           NodeId("B") -> NodeDef(NodeId("B"), Some("End"), NodeShape.Rect),
         )
-        val edges = List(Edge(NodeId("A"), NodeId("B"), EdgeStyle.Arrow, None))
-        val laid  = Layout.layout(config.layout, Direction.TB, nodes, edges).visibleNodes
-        assertTrue(
-          laid.size == 2,
-          laid.find(_.id == NodeId("A")).get.center.y < laid
-            .find(_.id == NodeId("B"))
-            .get
-            .center
-            .y,
-        )
+        val edges          = List(Edge(NodeId("A"), NodeId("B"), EdgeStyle.Arrow, None))
+        val laid           = Layout.layout(config.layout, Direction.TB, nodes, edges).visibleNodes
+        def at(id: NodeId) = laid.find(_.id == id).map(_.center)
+        assertTrue(laid.size == 2, at(NodeId("A")).zip(at(NodeId("B"))).exists((a, b) => a.y < b.y))
       },
       test("positions nodes horizontally for LR direction") {
         val config = RenderConfig()
@@ -109,20 +100,10 @@ object SvgRendererSpec extends ZIOSpecDefault:
           NodeId("A") -> NodeDef(NodeId("A"), None, NodeShape.Rect),
           NodeId("B") -> NodeDef(NodeId("B"), None, NodeShape.Rect),
         )
-        val edges = List(Edge(NodeId("A"), NodeId("B"), EdgeStyle.Arrow, None))
-        val laid  = Layout.layout(config.layout, Direction.LR, nodes, edges).visibleNodes
-        assertTrue(
-          laid
-            .find(_.id == NodeId("A"))
-            .get
-            .center
-            .x < laid.find(_.id == NodeId("B")).get.center.x,
-          laid.find(_.id == NodeId("A")).get.center.y == laid
-            .find(_.id == NodeId("B"))
-            .get
-            .center
-            .y,
-        )
+        val edges          = List(Edge(NodeId("A"), NodeId("B"), EdgeStyle.Arrow, None))
+        val laid           = Layout.layout(config.layout, Direction.LR, nodes, edges).visibleNodes
+        def at(id: NodeId) = laid.find(_.id == id).map(_.center)
+        assertTrue(at(NodeId("A")).zip(at(NodeId("B"))).exists((a, b) => a.x < b.x && a.y == b.y))
       },
     ),
     suite("findLabelPosition")(
@@ -275,11 +256,11 @@ object SvgRendererSpec extends ZIOSpecDefault:
       },
       test("edge labels paint at LayoutConfig.edgeLabelFontSize") {
         val src =
-          """flowchart LR
+          Mermaid("""flowchart LR
             |  A -->|go| B
-            |""".stripMargin
+            |""".stripMargin)
         val svg = SvgRenderer.render(
-          MermaidParser.parse(src).toOption.get,
+          src.diagram,
           RenderConfig(layout = LayoutConfig(edgeLabelFontSize = 18)),
         )
         assertTrue(svg.contains("""class="edge-label""""), svg.contains("font-size: 18px"))
@@ -451,11 +432,11 @@ object SvgRendererSpec extends ZIOSpecDefault:
       },
       test("::: class suffix adds CSS classes to flowchart nodes") {
         val src =
-          """flowchart LR
+          Mermaid("""flowchart LR
             |  classDef hot fill:#ffdddd,stroke:#cc0000
             |  A[Start]:::hot --> B[End]
-            |""".stripMargin
-        val svg = SvgRenderer.render(MermaidParser.parse(src).toOption.get)
+            |""".stripMargin)
+        val svg = SvgRenderer.render(src.diagram)
         assertTrue(
           svg.contains("""class="node node-rect hot" id="node-A""""),
           svg.contains(".hot"),
@@ -464,13 +445,13 @@ object SvgRendererSpec extends ZIOSpecDefault:
       },
       test("state classDef and class paint like flowcharts") {
         val src =
-          """stateDiagram-v2
+          Mermaid("""stateDiagram-v2
             |  classDef happy fill:#1f4a35,stroke:#7dcea0
             |  [*] --> Green
             |  Green --> Yellow: Timer
             |  class Green happy
-            |""".stripMargin
-        val svg = SvgRenderer.render(MermaidParser.parse(src).toOption.get)
+            |""".stripMargin)
+        val svg = SvgRenderer.render(src.diagram)
         assertTrue(
           svg.contains("""class="node node-round happy" id="node-Green""""),
           svg.contains(".happy"),
@@ -481,11 +462,11 @@ object SvgRendererSpec extends ZIOSpecDefault:
       },
       test("state ::: class suffix paints the target state") {
         val src =
-          """stateDiagram-v2
+          Mermaid("""stateDiagram-v2
             |  classDef warn fill:#4a4030,stroke:#e0c070
             |  [*] --> Yellow:::warn
-            |""".stripMargin
-        val svg = SvgRenderer.render(MermaidParser.parse(src).toOption.get)
+            |""".stripMargin)
+        val svg = SvgRenderer.render(src.diagram)
         assertTrue(svg.contains("""class="node node-round warn" id="node-Yellow""""))
       },
       test("custom stylesheet merges into <style> block") {
