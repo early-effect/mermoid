@@ -22,11 +22,11 @@ object MyVersions extends ZipxVersions:
 
   val scalaJavaTime = Lib("io.github.cquiroz", "scala-java-time", "2.7.0")
 
-  val ascent     = Lib("rocks.earlyeffect", "ascent-core", "0.10.0-19667f3cf23f-SNAPSHOT")
+  val ascent     = Lib("rocks.earlyeffect", "ascent-core", "0.10.1")
   val ascentCss  = ascent.mod("ascent-css")
-  val ascentHtml = ascent.mod("ascent-html")
+  val ascentHtml = Lib("rocks.earlyeffect", "ascent-html", "0.10.0")
   // Own row: its line is not the core family's.
-  val ascentJs   = Lib("rocks.earlyeffect", "ascent-js", "0.11.0-19667f3cf23f-SNAPSHOT")
+  val ascentJs   = Lib("rocks.earlyeffect", "ascent-js", "0.11.0")
 
   val specular        = Lib("rocks.earlyeffect", "specular-core", "0.19.0-9fcecea9bd79-SNAPSHOT")
   val specularZioTest = specular.mod("specular-zio-test").test
