@@ -4,6 +4,8 @@ import zio.test.*
 
 object SvgSerializerSpec extends ZIOSpecDefault:
 
+  private val (a, b, c) = (NodeId("A"), NodeId("B"), NodeId("C"))
+
   private def compact(node: SvgNode): String = SvgSerializer.renderCompact(node)
 
   def spec = suite("SvgSerializer")(
@@ -36,7 +38,7 @@ object SvgSerializerSpec extends ZIOSpecDefault:
       },
       test("a quote in a node id cannot break out of the attribute") {
         val node = ShapeRenderer.nodeToSvg(
-          LayoutNode("""evil" onload="x""", "L", NodeShape.Rect, Point(0, 0), 10, 10),
+          LayoutNode(NodeId.trusted("""evil" onload="x"""), "L", NodeShape.Rect, Point(0, 0), 10, 10),
           RenderConfig(),
         )
         val out = compact(node)
@@ -79,9 +81,9 @@ object SvgSerializerSpec extends ZIOSpecDefault:
           Direction.TD,
           List(
             FlowStatement.EdgeSt(
-              Edge("A", "B", EdgeStyle.Arrow, Some("go")),
-              NodeDef("A", None, NodeShape.Rect),
-              NodeDef("B", None, NodeShape.Circle),
+              Edge(NodeId("A"), NodeId("B"), EdgeStyle.Arrow, Some("go")),
+              NodeDef(NodeId("A"), None, NodeShape.Rect),
+              NodeDef(NodeId("B"), None, NodeShape.Circle),
             )
           ),
         )
@@ -90,7 +92,7 @@ object SvgSerializerSpec extends ZIOSpecDefault:
       },
       test("the root is an svg element with viewBox") {
         val diagram =
-          Diagram.Flowchart(Direction.TD, List(FlowStatement.NodeSt(NodeDef("A", Some("Hi"), NodeShape.Rect))))
+          Diagram.Flowchart(Direction.TD, List(FlowStatement.NodeSt(NodeDef(NodeId("A"), Some("Hi"), NodeShape.Rect))))
         SvgRenderer.renderTree(diagram) match
           case SvgNode.Element(tag, attrs, children) =>
             assertTrue(
@@ -105,8 +107,8 @@ object SvgSerializerSpec extends ZIOSpecDefault:
         val diagram = Diagram.StateDiagram(
           Direction.TB,
           List(
-            StateStatement.TransitionSt(StateTransition("[*]", "Idle", None)),
-            StateStatement.NoteSt(NotePosition.RightOf, "Idle", "hello"),
+            StateStatement.TransitionSt(StateTransition(NodeId("[*]"), NodeId("Idle"), None)),
+            StateStatement.NoteSt(NotePosition.RightOf, NodeId("Idle"), "hello"),
           ),
         )
         val tree = SvgRenderer.renderTree(diagram)
@@ -130,9 +132,9 @@ object SvgSerializerSpec extends ZIOSpecDefault:
           Direction.TD,
           List(
             FlowStatement.EdgeSt(
-              Edge("A", "B", EdgeStyle.Arrow, Some("go")),
-              NodeDef("A", Some("Start"), NodeShape.Circle),
-              NodeDef("B", Some("End"), NodeShape.Rect),
+              Edge(NodeId("A"), NodeId("B"), EdgeStyle.Arrow, Some("go")),
+              NodeDef(NodeId("A"), Some("Start"), NodeShape.Circle),
+              NodeDef(NodeId("B"), Some("End"), NodeShape.Rect),
             )
           ),
         )
@@ -143,9 +145,9 @@ object SvgSerializerSpec extends ZIOSpecDefault:
     suite("buildLayoutEdges")(
       test("indexes parallel edges between the same pair") {
         val edges = List(
-          Edge("A", "B", EdgeStyle.Arrow, None),
-          Edge("A", "B", EdgeStyle.Arrow, None),
-          Edge("A", "C", EdgeStyle.Arrow, None),
+          Edge(NodeId("A"), NodeId("B"), EdgeStyle.Arrow, None),
+          Edge(NodeId("A"), NodeId("B"), EdgeStyle.Arrow, None),
+          Edge(NodeId("A"), NodeId("C"), EdgeStyle.Arrow, None),
         )
         val built = SvgRenderer.buildLayoutEdges(edges)
         assertTrue(
@@ -155,31 +157,31 @@ object SvgSerializerSpec extends ZIOSpecDefault:
       },
       test("indexes self-loops per node") {
         val edges = List(
-          Edge("A", "A", EdgeStyle.Arrow, Some("one")),
-          Edge("A", "A", EdgeStyle.Arrow, Some("two")),
-          Edge("B", "B", EdgeStyle.Arrow, Some("three")),
+          Edge(NodeId("A"), NodeId("A"), EdgeStyle.Arrow, Some("one")),
+          Edge(NodeId("A"), NodeId("A"), EdgeStyle.Arrow, Some("two")),
+          Edge(NodeId("B"), NodeId("B"), EdgeStyle.Arrow, Some("three")),
         )
         val built = SvgRenderer.buildLayoutEdges(edges)
         assertTrue(built.map(_.selfLoopIndex) == List(0, 1, 0))
       },
       test("non-self edges have selfLoopIndex 0") {
-        val built = SvgRenderer.buildLayoutEdges(List(Edge("A", "B", EdgeStyle.Arrow, None)))
+        val built = SvgRenderer.buildLayoutEdges(List(Edge(NodeId("A"), NodeId("B"), EdgeStyle.Arrow, None)))
         assertTrue(built.head.selfLoopIndex == 0)
       },
     ),
     suite("longestPathLayers")(
       test("a chain layers sequentially") {
-        val layers = Layout.longestPathLayers(List("A", "B", "C"), Map("B" -> List("A"), "C" -> List("B")))
-        assertTrue(layers == Map("A" -> 0, "B" -> 1, "C" -> 2))
+        val layers = Layout.longestPathLayers(List(a, b, c), Map(b -> List(a), c -> List(b)))
+        assertTrue(layers == Map(a -> 0, b -> 1, c -> 2))
       },
       test("a node takes its deepest predecessor's layer plus one") {
         // A -> B -> C and A -> C: C must land below B, not beside it
-        val layers = Layout.longestPathLayers(List("A", "B", "C"), Map("B" -> List("A"), "C" -> List("A", "B")))
-        assertTrue(layers("C") == 2)
+        val layers = Layout.longestPathLayers(List(a, b, c), Map(b -> List(a), c -> List(a, b)))
+        assertTrue(layers.get(c).contains(2))
       },
       test("a cycle terminates rather than recursing forever") {
-        val layers = Layout.longestPathLayers(List("A", "B"), Map("A" -> List("B"), "B" -> List("A")))
-        assertTrue(layers.keySet == Set("A", "B"))
+        val layers = Layout.longestPathLayers(List(a, b), Map(a -> List(b), b -> List(a)))
+        assertTrue(layers.keySet == Set(a, b))
       },
     ),
   )

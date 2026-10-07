@@ -6,7 +6,7 @@ enum SelfLoopSide:
 case class Point(x: Double, y: Double)
 
 case class LayoutNode(
-    id: String,
+    id: NodeId,
     label: String,
     shape: NodeShape,
     center: Point,
@@ -19,8 +19,8 @@ case class LayoutNode(
 )
 
 case class LayoutEdge(
-    from: String,
-    to: String,
+    from: NodeId,
+    to: NodeId,
     style: EdgeStyle,
     label: Option[String],
     selfLoopIndex: Int = 0,
@@ -31,7 +31,7 @@ case class LayoutEdge(
 
 case class StateNote(
     position: NotePosition,
-    stateId: String,
+    stateId: NodeId,
     text: String,
     textAlign: NoteTextAlign = NoteTextAlign.Left,
     alias: Option[String] = None,

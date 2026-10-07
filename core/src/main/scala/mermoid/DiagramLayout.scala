@@ -154,22 +154,22 @@ object DiagramLayout:
 
     // Mermaid draws start and end as separate markers. A single shared `[*]` node makes a cycle through
     // the marker and longest-path ranking flips the diagram. Split when both roles appear.
-    val endId             = "[*]-end"
-    val hasStart          = transitions.exists(_.from == "[*]")
-    val hasEnd            = transitions.exists(_.to == "[*]")
+    val endId             = NodeId.stateEnd
+    val hasStart          = transitions.exists(_.from == NodeId.stateMarker)
+    val hasEnd            = transitions.exists(_.to == NodeId.stateMarker)
     val splitStartEnd     = hasStart && hasEnd
     val nodeClasses       = StyleResolver.collectStateClasses(stmts, splitStartEnd, endId)
     val inlineStyles      = StyleResolver.collectStateInlineStyles(stmts)
     val classDefRules     = StyleResolver.stateClassDefsToRules(stmts)
     val edges: List[Edge] =
       transitions.map { t =>
-        val to = if splitStartEnd && t.to == "[*]" then endId else t.to
+        val to = if splitStartEnd && t.to == NodeId.stateMarker then endId else t.to
         Edge(t.from, to, EdgeStyle.Arrow, t.label)
       }
     val stateIds = (edges.map(_.from) ++ edges.map(_.to)).distinct
     val nodeDefs = stateIds.map { id =>
-      if id == "[*]" || id == endId then id -> NodeDef(id, Some(""), NodeShape.Circle)
-      else id                               -> NodeDef(id, Some(id), NodeShape.Round)
+      if id == NodeId.stateMarker || id == endId then id -> NodeDef(id, Some(""), NodeShape.Circle)
+      else id                                            -> NodeDef(id, Some(id.value), NodeShape.Round)
     }.toMap
 
     val lc          = compressLayout(config.layout, config.responsive, viewport, nodeDefs.size, dir)
@@ -178,7 +178,7 @@ object DiagramLayout:
     val layoutNodes = laid.nodes.map { n =>
       val user   = nodeClasses.getOrElse(n.id, Nil)
       val styles = inlineStyles.getOrElse(n.id, Map.empty)
-      if n.id == "[*]" || n.id == endId then
+      if n.id == NodeId.stateMarker || n.id == endId then
         n.copy(
           width = 16,
           height = 16,

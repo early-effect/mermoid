@@ -9,10 +9,10 @@ object CrossingMinimizer:
     * adjacent layer, then break ties by prior order. Runs `iterations` full round-trips.
     */
   private[mermoid] def orderLayers(
-      layers: List[List[String]],
-      edges: List[(String, String)],
+      layers: List[List[NodeId]],
+      edges: List[(NodeId, NodeId)],
       iterations: Int,
-  ): List[List[String]] =
+  ): List[List[NodeId]] =
     if layers.size < 2 then layers
     else
       val adj = undirectedAdj(edges)
@@ -22,20 +22,20 @@ object CrossingMinimizer:
       }
   end orderLayers
 
-  private def undirectedAdj(edges: List[(String, String)]): Map[String, List[String]] =
+  private def undirectedAdj(edges: List[(NodeId, NodeId)]): Map[NodeId, List[NodeId]] =
     edges
       .filter((a, b) => a != b)
-      .foldLeft(Map.empty[String, List[String]]) { case (acc, (a, b)) =>
+      .foldLeft(Map.empty[NodeId, List[NodeId]]) { case (acc, (a, b)) =>
         acc
           .updated(a, (b :: acc.getOrElse(a, Nil)).distinct)
           .updated(b, (a :: acc.getOrElse(b, Nil)).distinct)
       }
 
   private def sweepForward(
-      layers: List[List[String]],
-      adj: Map[String, List[String]],
-  ): List[List[String]] =
-    layers.zipWithIndex.foldLeft(List.empty[List[String]]) { case (acc, (layer, idx)) =>
+      layers: List[List[NodeId]],
+      adj: Map[NodeId, List[NodeId]],
+  ): List[List[NodeId]] =
+    layers.zipWithIndex.foldLeft(List.empty[List[NodeId]]) { case (acc, (layer, idx)) =>
       if idx == 0 then acc :+ layer
       else
         val prev = acc.last
@@ -44,11 +44,11 @@ object CrossingMinimizer:
     }
 
   private def sweepBackward(
-      layers: List[List[String]],
-      adj: Map[String, List[String]],
-  ): List[List[String]] =
+      layers: List[List[NodeId]],
+      adj: Map[NodeId, List[NodeId]],
+  ): List[List[NodeId]] =
     val indexed = layers.zipWithIndex
-    indexed.foldRight(List.empty[List[String]]) { case ((layer, idx), acc) =>
+    indexed.foldRight(List.empty[List[NodeId]]) { case ((layer, idx), acc) =>
       if idx == layers.size - 1 then layer :: acc
       else
         val next = acc.head
@@ -59,10 +59,10 @@ object CrossingMinimizer:
 
   /** Stable sort by mean neighbor position; nodes with no neighbors keep relative order via index. */
   private def sortByBarycenter(
-      layer: List[String],
-      neighborPos: Map[String, Int],
-      adj: Map[String, List[String]],
-  ): List[String] =
+      layer: List[NodeId],
+      neighborPos: Map[NodeId, Int],
+      adj: Map[NodeId, List[NodeId]],
+  ): List[NodeId] =
     layer.zipWithIndex
       .map { case (id, idx) =>
         val neighbors = adj.getOrElse(id, Nil).flatMap(neighborPos.get)

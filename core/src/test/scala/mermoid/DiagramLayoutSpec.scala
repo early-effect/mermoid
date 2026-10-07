@@ -184,7 +184,7 @@ object DiagramLayoutSpec extends ZIOSpecDefault:
         Some(Viewport(900)),
       )
       val gap   = 10.0
-      val clear = (scene.nodeMap.get("Idle"), scene.nodeMap.get("Active"), scene.notes) match
+      val clear = (scene.nodeMap.get(NodeId("Idle")), scene.nodeMap.get(NodeId("Active")), scene.notes) match
         case (Some(idle), Some(active), note :: Nil) =>
           val box = NoteRenderer.placeNote(scene.config, note, idle, scene.visibleNodes)
           !box.overlaps(active, gap) && !box.overlaps(idle, gap)
@@ -200,11 +200,11 @@ object DiagramLayoutSpec extends ZIOSpecDefault:
           |""".stripMargin
       val scene = ranked(parse(src))
       assertTrue(
-        scene.interactions("A").tooltip.contains("Hello A"),
-        scene.interactions("A").callbackName.contains("callback"),
-        scene.interactions("B").href.contains("https://example.com"),
-        scene.interactions("B").tooltip.contains("Go B"),
-        scene.interactions("B").linkTarget.contains("_blank"),
+        scene.interactions(NodeId("A")).tooltip.contains("Hello A"),
+        scene.interactions(NodeId("A")).callbackName.contains("callback"),
+        scene.interactions(NodeId("B")).href.contains("https://example.com"),
+        scene.interactions(NodeId("B")).tooltip.contains("Go B"),
+        scene.interactions(NodeId("B")).linkTarget.contains("_blank"),
       )
     },
     test("SVG paint emits title for tooltips") {

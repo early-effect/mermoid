@@ -44,7 +44,7 @@ object EdgeRenderer:
   private[mermoid] def edgeInk(
       config: RenderConfig,
       edge: LayoutEdge,
-      nodeMap: Map[String, LayoutNode],
+      nodeMap: Map[NodeId, LayoutNode],
       waypoints: List[Point],
       loopSide: SelfLoopSide,
   ): List[InkBox] =
@@ -135,7 +135,7 @@ object EdgeRenderer:
       edge: LayoutEdge,
       from: LayoutNode,
       to: LayoutNode,
-      nodeMap: Map[String, LayoutNode],
+      nodeMap: Map[NodeId, LayoutNode],
       waypoints: List[Point],
   ): List[InkBox] =
     val offset =
@@ -233,7 +233,7 @@ object EdgeRenderer:
   def edgeToSvg(
       config: RenderConfig,
       edge: LayoutEdge,
-      nodeMap: Map[String, LayoutNode],
+      nodeMap: Map[NodeId, LayoutNode],
       selfLoopSide: SelfLoopSide = SelfLoopSide.Top,
       waypoints: List[Point] = Nil,
   ): SvgNode =
@@ -252,8 +252,8 @@ object EdgeRenderer:
       List(
         "class"     -> s"${WrapperClass.Edge.cssName} ${edge.style.wrapperClass}$selfLoopClass",
         "id"        -> s"edge-${edgeId(edge)}",
-        "data-from" -> edge.from,
-        "data-to"   -> edge.to,
+        "data-from" -> edge.from.value,
+        "data-to"   -> edge.to.value,
       ),
       children,
     )
@@ -349,7 +349,7 @@ object EdgeRenderer:
       edge: LayoutEdge,
       from: LayoutNode,
       to: LayoutNode,
-      nodeMap: Map[String, LayoutNode],
+      nodeMap: Map[NodeId, LayoutNode],
       marker: List[(String, String)],
       waypoints: List[Point],
   ): List[SvgNode] =

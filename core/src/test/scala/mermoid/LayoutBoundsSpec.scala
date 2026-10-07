@@ -84,9 +84,9 @@ object LayoutBoundsSpec extends ZIOSpecDefault:
       val svg       = SvgRenderer.render(parse(src))
       val (cw, ch)  = viewBoxSize(svg)
       val clipped   = labelBoxes(svg).filterNot((x, y, w, h) => inside(x, y, w, h, cw, ch))
-      val draft     = scene.nodeMap("Draft").center.x
-      val preparing = scene.nodeMap("Preparing").center.x
-      val live      = scene.nodeMap("Live").center.x
+      val draft     = scene.nodeMap(NodeId("Draft")).center.x
+      val preparing = scene.nodeMap(NodeId("Preparing")).center.x
+      val live      = scene.nodeMap(NodeId("Live")).center.x
       assertTrue(
         scene.direction == Direction.LR,
         scene.width > scene.height,
@@ -123,10 +123,10 @@ object LayoutBoundsSpec extends ZIOSpecDefault:
     },
     test("order FSM ranks start above end (split [*])") {
       val scene   = ranked(parse(orderFsm))
-      val pending = scene.nodeMap("Pending").center.y
-      val paid    = scene.nodeMap("Paid").center.y
-      val endY    = scene.nodeMap("[*]-end").center.y
-      val startY  = scene.nodeMap("[*]").center.y
+      val pending = scene.nodeMap(NodeId("Pending")).center.y
+      val paid    = scene.nodeMap(NodeId("Paid")).center.y
+      val endY    = scene.nodeMap(NodeId.stateEnd).center.y
+      val startY  = scene.nodeMap(NodeId("[*]")).center.y
       assertTrue(startY < pending, pending < paid, paid < endY)
     },
     test("fit shifts negative ink and pads the far edge") {

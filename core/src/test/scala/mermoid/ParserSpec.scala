@@ -143,31 +143,31 @@ object ParserSpec extends ZIOSpecDefault:
     suite("nodeDef")(
       test("parses bare identifier as rect node") {
         val result = fastparse.parse("A", MermaidParser.nodeDef(using _))
-        assertTrue(result.get.value == NodeDef("A", None, NodeShape.Rect))
+        assertTrue(result.get.value == NodeDef(NodeId("A"), None, NodeShape.Rect))
       },
       test("parses node with label") {
         val result = fastparse.parse("A[Hello World]", MermaidParser.nodeDef(using _))
-        assertTrue(result.get.value == NodeDef("A", Some("Hello World"), NodeShape.Rect))
+        assertTrue(result.get.value == NodeDef(NodeId("A"), Some("Hello World"), NodeShape.Rect))
       },
       test("parses node with round shape") {
         val result = fastparse.parse("B(Round Node)", MermaidParser.nodeDef(using _))
-        assertTrue(result.get.value == NodeDef("B", Some("Round Node"), NodeShape.Round))
+        assertTrue(result.get.value == NodeDef(NodeId("B"), Some("Round Node"), NodeShape.Round))
       },
       test("parses node with quoted slash in label") {
         val result = fastparse.parse("""A["a / b"]""", MermaidParser.nodeDef(using _))
-        assertTrue(result.get.value == NodeDef("A", Some("a / b"), NodeShape.Rect))
+        assertTrue(result.get.value == NodeDef(NodeId("A"), Some("a / b"), NodeShape.Rect))
       },
       test("parses node with unquoted slash in label") {
         val result = fastparse.parse("A[a / b]", MermaidParser.nodeDef(using _))
-        assertTrue(result.get.value == NodeDef("A", Some("a / b"), NodeShape.Rect))
+        assertTrue(result.get.value == NodeDef(NodeId("A"), Some("a / b"), NodeShape.Rect))
       },
       test("parses ::: class suffix on a bare id") {
         val result = fastparse.parse("A:::hot", MermaidParser.nodeDef(using _))
-        assertTrue(result.get.value == NodeDef("A", None, NodeShape.Rect, List("hot")))
+        assertTrue(result.get.value == NodeDef(NodeId("A"), None, NodeShape.Rect, List("hot")))
       },
       test("parses ::: class suffix after a labelled shape") {
         val result = fastparse.parse("A[Hello]:::hot,cold", MermaidParser.nodeDef(using _))
-        assertTrue(result.get.value == NodeDef("A", Some("Hello"), NodeShape.Rect, List("hot", "cold")))
+        assertTrue(result.get.value == NodeDef(NodeId("A"), Some("Hello"), NodeShape.Rect, List("hot", "cold")))
       },
     ),
     suite("edgeStyle")(
@@ -200,54 +200,54 @@ object ParserSpec extends ZIOSpecDefault:
       test("parses simple edge") {
         val result   = fastparse.parse("A --> B", MermaidParser.edgeSt(using _))
         val expected = FlowStatement.EdgeSt(
-          Edge("A", "B", EdgeStyle.Arrow, None),
-          NodeDef("A", None, NodeShape.Rect),
-          NodeDef("B", None, NodeShape.Rect),
+          Edge(NodeId("A"), NodeId("B"), EdgeStyle.Arrow, None),
+          NodeDef(NodeId("A"), None, NodeShape.Rect),
+          NodeDef(NodeId("B"), None, NodeShape.Rect),
         )
         assertTrue(result.get.value == expected)
       },
       test("parses edge with labeled target node") {
         val result   = fastparse.parse("A --> B[Hello]", MermaidParser.edgeSt(using _))
         val expected = FlowStatement.EdgeSt(
-          Edge("A", "B", EdgeStyle.Arrow, None),
-          NodeDef("A", None, NodeShape.Rect),
-          NodeDef("B", Some("Hello"), NodeShape.Rect),
+          Edge(NodeId("A"), NodeId("B"), EdgeStyle.Arrow, None),
+          NodeDef(NodeId("A"), None, NodeShape.Rect),
+          NodeDef(NodeId("B"), Some("Hello"), NodeShape.Rect),
         )
         assertTrue(result.get.value == expected)
       },
       test("parses edge with label") {
         val result   = fastparse.parse("A --> |yes| B", MermaidParser.edgeSt(using _))
         val expected = FlowStatement.EdgeSt(
-          Edge("A", "B", EdgeStyle.Arrow, Some("yes")),
-          NodeDef("A", None, NodeShape.Rect),
-          NodeDef("B", None, NodeShape.Rect),
+          Edge(NodeId("A"), NodeId("B"), EdgeStyle.Arrow, Some("yes")),
+          NodeDef(NodeId("A"), None, NodeShape.Rect),
+          NodeDef(NodeId("B"), None, NodeShape.Rect),
         )
         assertTrue(result.get.value == expected)
       },
       test("parses edge with labeled source node") {
         val result   = fastparse.parse("A[Start] --> B[End]", MermaidParser.edgeSt(using _))
         val expected = FlowStatement.EdgeSt(
-          Edge("A", "B", EdgeStyle.Arrow, None),
-          NodeDef("A", Some("Start"), NodeShape.Rect),
-          NodeDef("B", Some("End"), NodeShape.Rect),
+          Edge(NodeId("A"), NodeId("B"), EdgeStyle.Arrow, None),
+          NodeDef(NodeId("A"), Some("Start"), NodeShape.Rect),
+          NodeDef(NodeId("B"), Some("End"), NodeShape.Rect),
         )
         assertTrue(result.get.value == expected)
       },
       test("parses edge with alias") {
         val result   = fastparse.parse("A --> B as myEdge", MermaidParser.edgeSt(using _))
         val expected = FlowStatement.EdgeSt(
-          Edge("A", "B", EdgeStyle.Arrow, None, Some("myEdge")),
-          NodeDef("A", None, NodeShape.Rect),
-          NodeDef("B", None, NodeShape.Rect),
+          Edge(NodeId("A"), NodeId("B"), EdgeStyle.Arrow, None, Some("myEdge")),
+          NodeDef(NodeId("A"), None, NodeShape.Rect),
+          NodeDef(NodeId("B"), None, NodeShape.Rect),
         )
         assertTrue(result.get.value == expected)
       },
       test("parses edge with label and alias") {
         val result   = fastparse.parse("A -->|fast| B as fastEdge", MermaidParser.edgeSt(using _))
         val expected = FlowStatement.EdgeSt(
-          Edge("A", "B", EdgeStyle.Arrow, Some("fast"), Some("fastEdge")),
-          NodeDef("A", None, NodeShape.Rect),
-          NodeDef("B", None, NodeShape.Rect),
+          Edge(NodeId("A"), NodeId("B"), EdgeStyle.Arrow, Some("fast"), Some("fastEdge")),
+          NodeDef(NodeId("A"), None, NodeShape.Rect),
+          NodeDef(NodeId("B"), None, NodeShape.Rect),
         )
         assertTrue(result.get.value == expected)
       },
@@ -349,8 +349,8 @@ object ParserSpec extends ZIOSpecDefault:
         assertTrue(result.isRight)
         val nodes = StyleResolver.collectNodes(result.toOption.get.asInstanceOf[Diagram.Flowchart].statements)
         assertTrue(
-          nodes("Shell").label.contains("zipx-shell · Script / Command / Word / ShTest"),
-          nodes("Steps2").label.contains("Step.run"),
+          nodes(NodeId("Shell")).label.contains("zipx-shell · Script / Command / Word / ShTest"),
+          nodes(NodeId("Steps2")).label.contains("Step.run"),
         )
       },
       test("parses flowchart with quoted slashes and pipes in node labels") {
@@ -363,10 +363,10 @@ object ParserSpec extends ZIOSpecDefault:
         assertTrue(result.isRight)
         val nodes = StyleResolver.collectNodes(result.toOption.get.asInstanceOf[Diagram.Flowchart].statements)
         assertTrue(
-          nodes("A").label.contains("a / b"),
-          nodes("B").label.contains("c | d"),
-          nodes("C").label.contains("a \\ b"),
-          nodes("D").label.contains("a / b"),
+          nodes(NodeId("A")).label.contains("a / b"),
+          nodes(NodeId("B")).label.contains("c | d"),
+          nodes(NodeId("C")).label.contains("a \\ b"),
+          nodes(NodeId("D")).label.contains("a / b"),
         )
       },
       test("parse failure after a valid header points past line 1") {
@@ -382,18 +382,18 @@ object ParserSpec extends ZIOSpecDefault:
       test("parses simple state transition") {
         val result = fastparse.parse("Created --> PaymentProcessing", MermaidParser.stateTransition(using _))
         val t      = result.get.value.transition
-        assertTrue(t.from == "Created", t.to == "PaymentProcessing", t.label.isEmpty)
+        assertTrue(t.from == NodeId("Created"), t.to == NodeId("PaymentProcessing"), t.label.isEmpty)
       },
       test("parses state transition with label") {
         val result =
           fastparse.parse("Created --> PaymentProcessing: InitiatePayment", MermaidParser.stateTransition(using _))
         val t = result.get.value.transition
-        assertTrue(t.from == "Created", t.to == "PaymentProcessing", t.label == Some("InitiatePayment"))
+        assertTrue(t.from == NodeId("Created"), t.to == NodeId("PaymentProcessing"), t.label == Some("InitiatePayment"))
       },
       test("parses [*] start state") {
         val result = fastparse.parse("[*] --> Created", MermaidParser.stateTransition(using _))
         val t      = result.get.value.transition
-        assertTrue(t.from == "[*]", t.to == "Created")
+        assertTrue(t.from == NodeId("[*]"), t.to == NodeId("Created"))
       },
       test("parses full state diagram") {
         val input =
@@ -426,7 +426,7 @@ object ParserSpec extends ZIOSpecDefault:
       test("parses self-transition") {
         val result = fastparse.parse("Processing --> Processing: Retry", MermaidParser.stateTransition(using _))
         val t      = result.get.value.transition
-        assertTrue(t.from == "Processing", t.to == "Processing", t.label == Some("Retry"))
+        assertTrue(t.from == NodeId("Processing"), t.to == NodeId("Processing"), t.label == Some("Retry"))
       },
       test("parses note with alias") {
         val input =
@@ -436,7 +436,7 @@ object ParserSpec extends ZIOSpecDefault:
         val result = fastparse.parse(input, MermaidParser.noteSt(using _))
         val note   = result.get.value
         assertTrue(
-          note.stateId == "Processing",
+          note.stateId == NodeId("Processing"),
           note.alias == Some("procNote"),
           note.text == "timeout: 5m",
         )
@@ -477,7 +477,7 @@ object ParserSpec extends ZIOSpecDefault:
         val stmts = result.toOption.get.asInstanceOf[Diagram.StateDiagram].statements
         val defs  = stmts.collect { case StateStatement.ClassDefSt(name, styles) => name -> styles }
         val cls   = stmts.collect { case StateStatement.ClassSt(ids, name) => ids -> name }
-        val green = stmts.collect { case StateStatement.TransitionSt(t) if t.to == "Green" => t }.head
+        val green = stmts.collect { case StateStatement.TransitionSt(t) if t.to == NodeId("Green") => t }.head
         assertTrue(
           defs.head._1 == "happy",
           defs.head._2(css.CssProperty.Fill) == "#1f4a35",
@@ -497,7 +497,7 @@ object ParserSpec extends ZIOSpecDefault:
           .statements
           .collect { case StateStatement.StyleSt(id, s) => id -> s }
         assertTrue(
-          styles.head._1 == "Ready",
+          styles.head._1 == NodeId("Ready"),
           styles.head._2.noteAlign.contains(NoteTextAlign.Center),
           styles.head._2.paint(css.CssProperty.Fill) == "#ddeeff",
         )
@@ -606,7 +606,9 @@ object ParserSpec extends ZIOSpecDefault:
         val subs  = stmts.collect { case s: FlowStatement.SubgraphSt => s }
         assertTrue(
           subs.size == 1,
-          subs.head.statements == List(FlowStatement.NodeSt(NodeDef("endpoint", Some("Endpoint"), NodeShape.Rect))),
+          subs.head.statements == List(
+            FlowStatement.NodeSt(NodeDef(NodeId("endpoint"), Some("Endpoint"), NodeShape.Rect))
+          ),
         )
       },
       test("parses nested subgraphs") {
@@ -670,7 +672,7 @@ object ParserSpec extends ZIOSpecDefault:
             |""".stripMargin
         val stmts = MermaidParser.parse(input).toOption.get.asInstanceOf[Diagram.Flowchart].statements
         assertTrue(
-          StyleResolver.collectNodes(stmts).keySet == Set("A", "B"),
+          StyleResolver.collectNodes(stmts).keySet == Set(NodeId("A"), NodeId("B")),
           StyleResolver.collectEdges(stmts).size == 1,
           StyleResolver.collectSubgraphs(stmts).map(_.nodeIds) == List(Set("A", "B")),
         )
@@ -688,7 +690,7 @@ object ParserSpec extends ZIOSpecDefault:
           case Right(Diagram.Flowchart(_, stmts)) =>
             val click = stmts.collect { case FlowStatement.ClickSt(b) => b }.head
             assertTrue(
-              click.nodeId == "A",
+              click.nodeId == NodeId("A"),
               click.callbackName.contains("callback"),
               click.tooltip.contains("Tip A"),
             )

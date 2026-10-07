@@ -39,7 +39,7 @@ object NodeShape:
 end NodeShape
 
 case class NodeDef(
-    id: String,
+    id: NodeId,
     label: Option[String],
     shape: NodeShape,
     /** Classes from the `:::` suffix (`A:::hot` / `A[Label]:::hot,cold`). */
@@ -67,11 +67,11 @@ object EdgeStyle:
     s"| Syntax | `EdgeStyle` | CSS class | Arrowhead |\n|---|---|---|\n$rows"
 end EdgeStyle
 
-case class Edge(from: String, to: String, style: EdgeStyle, label: Option[String], alias: Option[String] = None)
+case class Edge(from: NodeId, to: NodeId, style: EdgeStyle, label: Option[String], alias: Option[String] = None)
 
 /** A Mermaid `click` binding: tooltip and/or link and/or opaque callback name. */
 case class ClickBinding(
-    nodeId: String,
+    nodeId: NodeId,
     tooltip: Option[String] = None,
     href: Option[String] = None,
     linkTarget: Option[String] = None,
@@ -82,9 +82,9 @@ enum FlowStatement:
   case NodeSt(node: NodeDef)
   case EdgeSt(edge: Edge, fromNode: NodeDef, toNode: NodeDef)
   case SubgraphSt(id: String, label: Option[String], direction: Option[Direction], statements: List[FlowStatement])
-  case StyleSt(nodeId: String, styles: Map[css.CssProperty, String])
+  case StyleSt(nodeId: NodeId, styles: Map[css.CssProperty, String])
   case ClassDefSt(className: String, styles: Map[css.CssProperty, String])
-  case ClassSt(nodeIds: List[String], className: String)
+  case ClassSt(nodeIds: List[NodeId], className: String)
   case ClickSt(binding: ClickBinding)
 
 // -- State Diagram ------------------------------------------------------------
@@ -96,8 +96,8 @@ enum NoteTextAlign:
   case Left, Center, Right
 
 case class StateTransition(
-    from: String,
-    to: String,
+    from: NodeId,
+    to: NodeId,
     label: Option[String],
     fromClasses: List[String] = Nil,
     toClasses: List[String] = Nil,
@@ -124,7 +124,7 @@ end StateStyle
 
 enum StateStatement:
   case TransitionSt(transition: StateTransition)
-  case NoteSt(position: NotePosition, stateId: String, text: String, alias: Option[String] = None)
-  case StyleSt(stateId: String, style: StateStyle)
+  case NoteSt(position: NotePosition, stateId: NodeId, text: String, alias: Option[String] = None)
+  case StyleSt(stateId: NodeId, style: StateStyle)
   case ClassDefSt(className: String, styles: Map[css.CssProperty, String])
-  case ClassSt(stateIds: List[String], className: String)
+  case ClassSt(stateIds: List[NodeId], className: String)

@@ -45,7 +45,7 @@ object MermoidAscentSpec extends ZIOSpecDefault:
     },
     test("interactive rebuilds at different widths") {
       for
-        ui   <- MermoidAscent.diagramInteractive(flow, initialWidth = 800, showWidthControls = true)
+        ui   <- MermoidAscent.diagramInteractive(flow, initialWidth = 800, widthControls = WidthControls.Shown)
         html <- Html.render(ui)
       // scene at narrow vs wide should differ in direction or spacing — check controls present
       yield assertTrue(
@@ -54,6 +54,12 @@ object MermoidAscentSpec extends ZIOSpecDefault:
         html.contains("mermoid-diagram"),
         html.contains("viewport"),
       )
+    },
+    test("interactive diagrams can hide the width controls") {
+      for
+        ui   <- MermoidAscent.diagramInteractive(flow, widthControls = WidthControls.Hidden)
+        html <- Html.render(ui)
+      yield assertTrue(html.contains("mermoid-diagram"), !html.contains("Narrow"), !html.contains("viewport "))
     },
     test("svgDiagram still embeds svg root") {
       val ui = MermoidAscent.svgDiagram(flow)
@@ -71,9 +77,9 @@ object MermoidAscentSpec extends ZIOSpecDefault:
     test("diagramControlled paints the host-selected node") {
       import _root_.ascent.squawk.sq
       for
-        selected <- sq(Option.empty[String])
+        selected <- sq(Option.empty[NodeId])
         width    <- sq(640.0)
-        _        <- selected.set(Some("A"))
+        _        <- selected.set(Some(NodeId("A")))
         html     <- Html.render(
           MermoidAscent.diagramControlled(flow, selected, _ => ZIO.unit, width)
         )

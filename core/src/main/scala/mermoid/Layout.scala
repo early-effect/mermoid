@@ -5,7 +5,7 @@ object Layout:
   private[mermoid] def layout(
       config: LayoutConfig,
       direction: Direction,
-      nodes: Map[String, NodeDef],
+      nodes: Map[NodeId, NodeDef],
       edges: List[Edge],
   ): LayoutResult =
     val isVertical = direction match
@@ -48,7 +48,7 @@ object Layout:
     val nodeSizes = allNodeDefs.map { case (id, nd) =>
       if dummyIds.contains(id) then id -> (0.0, 0.0)
       else
-        val label = nd.label.getOrElse(id)
+        val label = nd.label.getOrElse(id.value)
         id -> SvgUtil.computeNodeSize(label, nd.shape, config)
     }
 
@@ -120,18 +120,18 @@ object Layout:
     * A left/right degree peel is the wrong greedy choice here: it can reverse a forward pipeline edge that happens to
     * point at a node the peel placed early, and the fault leaves rank as roots again.
     */
-  private[mermoid] def feedbackEdges(nodeIds: List[String], edges: List[(String, String)]): Set[(String, String)] =
+  private[mermoid] def feedbackEdges(nodeIds: List[NodeId], edges: List[(NodeId, NodeId)]): Set[(NodeId, NodeId)] =
     val known = nodeIds.toSet
     val uniq  = edges.filter((a, b) => a != b && known.contains(a) && known.contains(b)).distinct
     if uniq.isEmpty || nodeIds.isEmpty then Set.empty
     else
       val succ = uniq.groupBy(_._1).map((from, es) => from -> es.map(_._2))
 
-      def reaches(from: String, to: String): Boolean =
+      def reaches(from: NodeId, to: NodeId): Boolean =
         if from == to then true
         else
           @annotation.tailrec
-          def bfs(queue: List[String], seen: Set[String]): Boolean =
+          def bfs(queue: List[NodeId], seen: Set[NodeId]): Boolean =
             queue match
               case Nil          => false
               case head :: tail =>
@@ -143,11 +143,11 @@ object Layout:
           bfs(List(from), Set.empty)
 
       // 0 white, 1 on the stack, 2 finished. Local to this search.
-      val color    = scala.collection.mutable.Map.empty[String, Int]
-      val feedback = scala.collection.mutable.Set.empty[(String, String)]
+      val color    = scala.collection.mutable.Map.empty[NodeId, Int]
+      val feedback = scala.collection.mutable.Set.empty[(NodeId, NodeId)]
       nodeIds.foreach(id => color(id) = 0)
 
-      def dfs(id: String): Unit =
+      def dfs(id: NodeId): Unit =
         color(id) = 1
         succ.getOrElse(id, Nil).foreach { next =>
           color(next) match
@@ -177,10 +177,10 @@ object Layout:
     * resolved contributes nothing to its own depth, so a cyclic graph layers rather than recursing forever.
     */
   private[mermoid] def longestPathLayers(
-      nodeIds: List[String],
-      reverseAdj: Map[String, List[String]],
-  ): Map[String, Int] =
-    def visit(id: String, memo: Map[String, Int], onPath: Set[String]): Map[String, Int] =
+      nodeIds: List[NodeId],
+      reverseAdj: Map[NodeId, List[NodeId]],
+  ): Map[NodeId, Int] =
+    def visit(id: NodeId, memo: Map[NodeId, Int], onPath: Set[NodeId]): Map[NodeId, Int] =
       if memo.contains(id) || onPath.contains(id) then memo
       else
         val parents  = reverseAdj.getOrElse(id, Nil)
@@ -188,7 +188,7 @@ object Layout:
         val layer    = parents.flatMap(resolved.get).map(_ + 1).maxOption.getOrElse(0)
         resolved.updated(id, layer)
 
-    nodeIds.foldLeft(Map.empty[String, Int])((memo, id) => visit(id, memo, Set.empty))
+    nodeIds.foldLeft(Map.empty[NodeId, Int])((memo, id) => visit(id, memo, Set.empty))
   end longestPathLayers
 
   /** Main-axis gap after layer `layerIdx`; the last layer falls back to the default spacing. */
@@ -197,13 +197,13 @@ object Layout:
 
   private def layoutVertical(
       config: LayoutConfig,
-      orderedLayers: List[List[String]],
-      nodes: Map[String, NodeDef],
-      nodeSizes: Map[String, (Double, Double)],
-      selfLoopExtra: Map[String, (Double, Double)],
+      orderedLayers: List[List[NodeId]],
+      nodes: Map[NodeId, NodeDef],
+      nodeSizes: Map[NodeId, (Double, Double)],
+      selfLoopExtra: Map[NodeId, (Double, Double)],
       gapSpacing: List[Double],
-      chainEdges: List[(String, String)],
-      dummyIds: Set[String],
+      chainEdges: List[(NodeId, NodeId)],
+      dummyIds: Set[NodeId],
   ): List[LayoutNode] =
     val adj                = neighborPositions(chainEdges)
     val (mainPositions, _) =
@@ -230,7 +230,7 @@ object Layout:
         val isDummy = dummyIds.contains(id)
         LayoutNode(
           id,
-          nd.label.getOrElse(id),
+          nd.label.getOrElse(id.value),
           nd.shape,
           Point(cross, main + extraUp + (if isDummy then 0.0 else h / 2)),
           w,
@@ -244,13 +244,13 @@ object Layout:
 
   private def layoutHorizontal(
       config: LayoutConfig,
-      orderedLayers: List[List[String]],
-      nodes: Map[String, NodeDef],
-      nodeSizes: Map[String, (Double, Double)],
-      selfLoopExtra: Map[String, (Double, Double)],
+      orderedLayers: List[List[NodeId]],
+      nodes: Map[NodeId, NodeDef],
+      nodeSizes: Map[NodeId, (Double, Double)],
+      selfLoopExtra: Map[NodeId, (Double, Double)],
       gapSpacing: List[Double],
-      chainEdges: List[(String, String)],
-      dummyIds: Set[String],
+      chainEdges: List[(NodeId, NodeId)],
+      dummyIds: Set[NodeId],
   ): List[LayoutNode] =
     val adj                = neighborPositions(chainEdges)
     val (mainPositions, _) =
@@ -285,7 +285,7 @@ object Layout:
         val isDummy = dummyIds.contains(id)
         LayoutNode(
           id,
-          nd.label.getOrElse(id),
+          nd.label.getOrElse(id.value),
           nd.shape,
           Point(main + layerMaxW / 2, cross + extraUp + (if isDummy then 0.0 else h / 2)),
           w,
@@ -299,9 +299,9 @@ object Layout:
 
   /** Main-axis offset of each layer's leading edge, and per-layer thickness. */
   private def layerMainAxis(
-      orderedLayers: List[List[String]],
-      nodeSizes: Map[String, (Double, Double)],
-      selfLoopExtra: Map[String, (Double, Double)],
+      orderedLayers: List[List[NodeId]],
+      nodeSizes: Map[NodeId, (Double, Double)],
+      selfLoopExtra: Map[NodeId, (Double, Double)],
       gapSpacing: List[Double],
       config: LayoutConfig,
       vertical: Boolean,
@@ -336,8 +336,8 @@ object Layout:
     end match
   end layerMainAxis
 
-  private def neighborPositions(edges: List[(String, String)]): Map[String, List[String]] =
-    edges.foldLeft(Map.empty[String, List[String]]) { case (acc, (a, b)) =>
+  private def neighborPositions(edges: List[(NodeId, NodeId)]): Map[NodeId, List[NodeId]] =
+    edges.foldLeft(Map.empty[NodeId, List[NodeId]]) { case (acc, (a, b)) =>
       if a == b then acc
       else
         acc
@@ -347,16 +347,16 @@ object Layout:
 
   /** Cross-axis positions via iterative median-of-neighbors with min-separation packing. */
   private def medianCrossPositions(
-      layers: List[List[String]],
-      nodeSizes: Map[String, (Double, Double)],
-      selfLoopExtra: Map[String, (Double, Double)],
-      adj: Map[String, List[String]],
+      layers: List[List[NodeId]],
+      nodeSizes: Map[NodeId, (Double, Double)],
+      selfLoopExtra: Map[NodeId, (Double, Double)],
+      adj: Map[NodeId, List[NodeId]],
       spacing: Double,
       padding: Double,
       vertical: Boolean,
       iterations: Int,
-  ): Map[String, Double] =
-    def halfExtent(id: String): Double =
+  ): Map[NodeId, Double] =
+    def halfExtent(id: NodeId): Double =
       val (w, h) = nodeSizes(id)
       if vertical then
         val extraRight = selfLoopExtra.get(id).map(_._1).getOrElse(0.0)
@@ -365,7 +365,7 @@ object Layout:
         val extraUp = selfLoopExtra.get(id).map(_._2).getOrElse(0.0)
         (h + extraUp) / 2
 
-    def packLayer(layer: List[String], desired: Map[String, Double]): Map[String, Double] =
+    def packLayer(layer: List[NodeId], desired: Map[NodeId, Double]): Map[NodeId, Double] =
       if layer.isEmpty then Map.empty
       else
         val sorted = layer.sortBy(id => desired.getOrElse(id, 0.0))
@@ -373,7 +373,7 @@ object Layout:
         // the mean desired position. Using Math.max(cursor, target) alone walks the whole layer
         // to the right when every node shares a large median (hub / fan layouts).
         val packed = sorted
-          .foldLeft((0.0, List.empty[(String, Double, Double)])) { case ((cursor, acc), id) =>
+          .foldLeft((0.0, List.empty[(NodeId, Double, Double)])) { case ((cursor, acc), id) =>
             val half = halfExtent(id)
             val x    = cursor + half
             (x + half + spacing, (id, x, half) :: acc)
@@ -392,12 +392,12 @@ object Layout:
         packed.map((id, x, _) => id -> (x + shift)).toMap
     end packLayer
 
-    def initialPack: Map[String, Double] =
-      layers.foldLeft(Map.empty[String, Double]) { (acc, layer) =>
+    def initialPack: Map[NodeId, Double] =
+      layers.foldLeft(Map.empty[NodeId, Double]) { (acc, layer) =>
         acc ++ packLayer(layer, layer.map(id => id -> 0.0).toMap)
       }
 
-    def medianOf(id: String, pos: Map[String, Double]): Option[Double] =
+    def medianOf(id: NodeId, pos: Map[NodeId, Double]): Option[Double] =
       val ns = adj.getOrElse(id, Nil).flatMap(pos.get).sorted
       if ns.isEmpty then None
       else

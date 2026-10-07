@@ -4,9 +4,11 @@ import zio.test.*
 
 object LayoutQualitySpec extends ZIOSpecDefault:
 
-  private def rect(id: String) = id -> NodeDef(id, Some(id), NodeShape.Rect)
+  private def node(raw: String): NodeId = NodeId.trusted(raw)
 
-  private def edge(from: String, to: String) = Edge(from, to, EdgeStyle.Arrow, None)
+  private def rect(id: String) = node(id) -> NodeDef(node(id), Some(id), NodeShape.Rect)
+
+  private def edge(from: String, to: String) = Edge(node(from), node(to), EdgeStyle.Arrow, None)
 
   /** Issue 48: a pipeline with one Retry per fault leaf and two cycle-closers. */
   private val initiativeMachine =
@@ -57,9 +59,9 @@ object LayoutQualitySpec extends ZIOSpecDefault:
       case Left(err) => throw new IllegalArgumentException(err.message)
 
   /** Cluster centers that share a rank. Layer pitch is ~100px; same-rank height jitter stays under 30. */
-  private def ranks(scene: DiagramScene, axis: LayoutNode => Double): Map[String, Int] =
+  private def ranks(scene: DiagramScene, axis: LayoutNode => Double): Map[NodeId, Int] =
     val sorted = scene.visibleNodes.map(n => n.id -> axis(n)).sortBy(_._2)
-    val groups = sorted.foldLeft(List.empty[List[(String, Double)]]) {
+    val groups = sorted.foldLeft(List.empty[List[(NodeId, Double)]]) {
       case (Nil, item)             => List(List(item))
       case (current :: rest, item) =>
         val anchor = current.map(_._2).min
@@ -69,7 +71,8 @@ object LayoutQualitySpec extends ZIOSpecDefault:
     groups.reverse.zipWithIndex.flatMap((group, idx) => group.map((id, _) => id -> idx)).toMap
   end ranks
 
-  private def rankOk(layer: Map[String, Int]): Boolean =
+  private def rankOk(ranked: Map[NodeId, Int]): Boolean =
+    val layer   = ranked.map((id, rank) => id.value -> rank)
     val draft   = layer("Draft")
     val others  = layer.filter((id, _) => id != "[*]" && id != "Draft")
     val faults  = faultOf.forall((fault, hop) => layer(fault) == layer(hop) + 1)
@@ -105,8 +108,8 @@ object LayoutQualitySpec extends ZIOSpecDefault:
     ((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) && ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0))
 
   /** Classic crossing: A→D and B→C with layers [A,B] / [C,D] in wrong order. */
-  private val crossedLayers = List(List("A", "B"), List("C", "D"))
-  private val crossedEdges  = List(("A", "D"), ("B", "C"))
+  private val crossedLayers = List(List("A", "B"), List("C", "D")).map(_.map(node))
+  private val crossedEdges  = List(("A", "D"), ("B", "C")).map((a, b) => (node(a), node(b)))
 
   def spec = suite("LayoutQuality")(
     suite("CrossingMinimizer")(
@@ -114,28 +117,32 @@ object LayoutQualitySpec extends ZIOSpecDefault:
         val before  = LayoutMetrics.totalCrossings(crossedLayers, crossedEdges)
         val after   = CrossingMinimizer.orderLayers(crossedLayers, crossedEdges, iterations = 4)
         val reduced = LayoutMetrics.totalCrossings(after, crossedEdges)
-        assertTrue(before == 1, reduced == 0, after(1) == List("D", "C") || after(0) == List("B", "A"))
+        assertTrue(
+          before == 1,
+          reduced == 0,
+          after(1) == List(node("D"), node("C")) || after(0) == List(node("B"), node("A")),
+        )
       },
       test("ordering is idempotent on an already-sorted layering") {
-        val good  = List(List("A", "B"), List("C", "D"))
-        val edges = List(("A", "C"), ("B", "D"))
+        val good  = List(List("A", "B"), List("C", "D")).map(_.map(node))
+        val edges = List(("A", "C"), ("B", "D")).map((a, b) => (node(a), node(b)))
         val once  = CrossingMinimizer.orderLayers(good, edges, 4)
         assertTrue(LayoutMetrics.totalCrossings(once, edges) == 0)
       },
     ),
     suite("DummyVertices")(
       test("a two-layer span inserts no dummies") {
-        val layers   = List(List("A"), List("B"))
+        val layers   = List(List(node("A")), List(node("B")))
         val expanded = DummyVertices.expand(layers, List(edge("A", "B")))
         assertTrue(expanded.dummies.isEmpty, expanded.routes.isEmpty)
       },
       test("a long-span edge inserts one dummy per intermediate layer") {
-        val layers   = List(List("A"), List("B"), List("C"))
+        val layers   = List(List(node("A")), List(node("B")), List(node("C")))
         val expanded = DummyVertices.expand(layers, List(edge("A", "C")))
         assertTrue(
           expanded.dummies.size == 1,
-          expanded.routes(("A", "C")).size == 1,
-          expanded.layers(1).exists(_.startsWith("__dummy_")),
+          expanded.routes((NodeId("A"), NodeId("C"))).size == 1,
+          expanded.layers(1).exists(_.value.startsWith("__dummy_")),
         )
       },
     ),
@@ -147,9 +154,9 @@ object LayoutQualitySpec extends ZIOSpecDefault:
         assertTrue(!LayoutMetrics.anyNodeOverlap(laid.visibleNodes, gap = 1.0))
       },
       test("forward edges are layer-monotonic after longest-path ranking") {
-        val reverseAdj = Map("B" -> List("A"), "C" -> List("B"))
-        val layers     = Layout.longestPathLayers(List("A", "B", "C"), reverseAdj)
-        assertTrue(layers("A") < layers("B"), layers("B") < layers("C"))
+        val reverseAdj = Map(node("B") -> List(node("A")), node("C") -> List(node("B")))
+        val layers     = Layout.longestPathLayers(List("A", "B", "C").map(node), reverseAdj)
+        assertTrue(layers(node("A")) < layers(node("B")), layers(node("B")) < layers(node("C")))
       },
       test("diamond layout has no geometric edge crossings") {
         val nodes = Map(rect("A"), rect("B"), rect("C"), rect("D"))
@@ -162,8 +169,8 @@ object LayoutQualitySpec extends ZIOSpecDefault:
         val edges = List(edge("A", "B"), edge("B", "C"), edge("A", "C"))
         val laid  = Layout.layout(LayoutConfig(), Direction.TB, nodes, edges)
         assertTrue(
-          laid.routes.contains(("A", "C")),
-          laid.routes(("A", "C")).nonEmpty,
+          laid.routes.contains((NodeId("A"), NodeId("C"))),
+          laid.routes((NodeId("A"), NodeId("C"))).nonEmpty,
           laid.nodes.exists(_.dummy),
           !laid.visibleNodes.exists(_.dummy),
         )
@@ -202,13 +209,13 @@ object LayoutQualitySpec extends ZIOSpecDefault:
         assertTrue(paths.size >= 3, paths.count(d => d.contains("Q") || d.contains("C")) >= 2)
       },
       test("a two-cycle ranks the forward node first for either id order") {
-        def ys(ids: List[String]): Map[String, Double] =
-          val nodes = ids.map(id => id -> NodeDef(id, Some(id), NodeShape.Rect)).toMap
+        def ys(ids: List[String]): Map[NodeId, Double] =
+          val nodes = ids.map(rect).toMap
           val edges = List(edge("A", "B"), edge("B", "A"))
           Layout.layout(LayoutConfig(), Direction.TB, nodes, edges).visibleNodes.map(n => n.id -> n.center.y).toMap
         val ab = ys(List("A", "B"))
         val ba = ys(List("B", "A"))
-        assertTrue(ab("A") < ab("B"), ba("A") < ba("B"))
+        assertTrue(ab(node("A")) < ab(node("B")), ba(node("A")) < ba(node("B")))
       },
       test("state retry edges sit one rank after their hop, not on the first rank") {
         val tb = sceneOf(initiativeMachine)
