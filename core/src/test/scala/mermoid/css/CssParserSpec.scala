@@ -281,6 +281,23 @@ object CssParserSpec extends ZIOSpecDefault:
         )
       },
     ),
+    suite("errors")(
+      test("a stylesheet failure is typed and carries the parser labels") {
+        // No cuts in the grammar, so an unclosed rule backtracks to the start of the stylesheet.
+        assertTrue(CssParser.parse(".a { fill: #f00; ").swap.exists { case CssParseError.Failed(index, expected) =>
+          index == 0 && expected.nonEmpty
+        })
+      },
+      test("value and selector failures are typed too") {
+        assertTrue(
+          CssParser.parseValue(")").swap.exists { case CssParseError.Failed(index, _) => index == 0 },
+          CssParser.parseSelector(".a {").swap.exists { case CssParseError.Failed(index, _) => index == 2 },
+        )
+      },
+      test("message names the offset") {
+        assertTrue(CssParseError.Failed(4, List("rule")).message == "CSS parse error at 4: expected rule")
+      },
+    ),
     suite("integration")(
       test("parsed stylesheet can be used as custom stylesheet") {
         val css    = """.my-highlight { fill: #ff0; stroke: #f00; }"""

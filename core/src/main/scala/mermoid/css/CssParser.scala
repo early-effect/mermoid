@@ -171,21 +171,20 @@ object CssParser:
 
   // -- Public API --------------------------------------------------------------
 
-  def parse(input: String): Either[String, Stylesheet] =
-    fastparse.parse(input, stylesheet(using _)) match
-      case Parsed.Success(result, _) => Right(result)
-      case f: Parsed.Failure         => Left(f.msg)
+  def parse(input: String): Either[CssParseError, Stylesheet] =
+    run(input, stylesheet(using _))
 
-  def parseValue(input: String): Either[String, CssValue] =
-    fastparse.parse(input, cssValue(using _)) match
-      case Parsed.Success(result, _) => Right(result)
-      case f: Parsed.Failure         => Left(f.msg)
+  def parseValue(input: String): Either[CssParseError, CssValue] =
+    run(input, cssValue(using _))
 
   private def selectorFull(using P[Any]): P[CssSelector] =
     P(selector ~ End)
 
-  def parseSelector(input: String): Either[String, CssSelector] =
-    fastparse.parse(input, selectorFull(using _)) match
+  def parseSelector(input: String): Either[CssParseError, CssSelector] =
+    run(input, selectorFull(using _))
+
+  private def run[A](input: String, parser: P[?] => P[A]): Either[CssParseError, A] =
+    fastparse.parse(input, parser) match
       case Parsed.Success(result, _) => Right(result)
-      case f: Parsed.Failure         => Left(f.msg)
+      case f: Parsed.Failure         => Left(CssParseError.fromFastparse(f))
 end CssParser

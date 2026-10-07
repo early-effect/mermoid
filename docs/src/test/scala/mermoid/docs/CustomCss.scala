@@ -36,13 +36,16 @@ object to subclass and no per-shape configuration knobs — you write CSS, and i
 """,
     section("From a CSS string")(
       md"""
-`CssParser.parse` returns `Either[String, Stylesheet]`. It handles `:root` variable blocks, class/id/element/compound/
+`CssParser.parse` returns `Either[CssParseError, Stylesheet]`; `CssParseError.message` says where it stopped and what it
+expected. It handles `:root` variable blocks, class/id/element/compound/
 descendant selectors, pseudo-classes, hex colours, lengths, numbers, quoted strings, `var()` with fallbacks, composite
 values, and `/* comments */`.
 """,
       example {
-        val sheet = CssParser.parse(overrides).getOrElse(throw new AssertionError("bad css"))
-        MermoidAscent.svgDiagram(pipeline, RenderConfig(customStylesheet = Some(sheet), resolveVariables = false))
+        CssParser.parse(overrides) match
+          case Right(sheet) =>
+            MermoidAscent.svgDiagram(pipeline, RenderConfig(customStylesheet = Some(sheet), resolveVariables = false))
+          case Left(error) => _root_.ascent.ast.UI.Text(error.message)
       },
       md"""
 That is the same diagram as the Default theme renders — only the stylesheet changed. Note `resolveVariables = false`
@@ -65,8 +68,9 @@ The second diagram below only adds `stroke-width: 4` on `.node-shape`. The rest 
         MermoidAscent.svgDiagram(pipeline)
       },
       example {
-        val mine = CssParser.parse(".node-shape { stroke-width: 4; }").getOrElse(Stylesheet.empty)
-        MermoidAscent.svgDiagram(pipeline, RenderConfig(customStylesheet = Some(mine)))
+        CssParser.parse(".node-shape { stroke-width: 4; }") match
+          case Right(mine) => MermoidAscent.svgDiagram(pipeline, RenderConfig(customStylesheet = Some(mine)))
+          case Left(error) => _root_.ascent.ast.UI.Text(error.message)
       },
     ),
     section("Building the AST directly")(
