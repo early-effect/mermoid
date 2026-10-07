@@ -136,15 +136,13 @@ object MermoidAscentSpec extends ZIOSpecDefault:
           |    classDef fault fill:#2e2410,stroke:#f59e0b,color:#fde68a
           |    class PredictionsFaulted fault
           |""".stripMargin)
-      val custom = CssParser
-        .parse(
-          """.mermoid-node .node-shape { background: #123040 }
-            |.node-shape { background: #000 }
-            |""".stripMargin
-        )
-        .fold(err => throw new IllegalArgumentException(err), identity)
-      val ui = MermoidAscent.diagram(src, RenderConfig(customStylesheet = Some(custom)))
-      for html <- Html.render(ui)
+      val css =
+        """.mermoid-node .node-shape { background: #123040 }
+          |.node-shape { background: #000 }
+          |""".stripMargin
+      for
+        custom <- ZIO.fromEither(CssParser.parse(css))
+        html   <- Html.render(MermoidAscent.diagram(src, RenderConfig(customStylesheet = Some(custom))))
       yield assertTrue(
         html.contains(".mermoid-node.fault .node-shape"),
         html.contains("background: #2e2410") || html.contains("background:#2e2410"),
@@ -154,6 +152,7 @@ object MermoidAscentSpec extends ZIOSpecDefault:
         html.contains(":where(.mermoid-node) .node-shape"),
         html.contains("""class="mermoid-node node-round fault""""),
       )
+      end for
     },
     test("style fill and color beat the theme on the shape and the button") {
       val src =

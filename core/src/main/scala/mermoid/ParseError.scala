@@ -21,6 +21,9 @@ end ParseError
 
 object ParseError:
   private[mermoid] def fromFastparse(failure: Parsed.Failure): ParseError =
+    ParseError.Failed(failure.index, expectedLabels(failure))
+
+  /** The fastparse label stack at a failure, outermost first, without blanks or repeats. */
+  private[mermoid] def expectedLabels(failure: Parsed.Failure): List[String] =
     val traced = failure.trace()
-    val labels = (traced.stack.map(_._1) :+ traced.label).filter(_.nonEmpty).distinct
-    ParseError.Failed(failure.index, labels)
+    (traced.stack.map(_._1) :+ traced.label).filter(_.nonEmpty).distinct
