@@ -15,9 +15,9 @@ import zio.test.*
   */
 object DocPagesSpec extends ZIOSpecDefault:
 
-  private def examplesOf(nodes: Vector[DocNode]): Vector[Example[Any]] = nodes.flatMap {
+  private def examplesOf(nodes: Vector[DocNode]): Vector[Example] = nodes.flatMap {
     case Section(_, children) => examplesOf(children)
-    case ex: Example[?]       => Vector(ex.asInstanceOf[Example[Any]])
+    case ex: Example          => Vector(ex)
     case _                    => Vector.empty
   }
 

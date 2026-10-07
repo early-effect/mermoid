@@ -1,38 +1,18 @@
 package mermoid.docs
 
-import ascent.*
-import ascent.dom
+import specular.client.SpecularClient
 import zio.*
 
-/** Browser entry: mount each interactive example into its SSR `#<page-slug>-ex-N` wrapper.
+/** Browser entry: remount every `.interactive` example and `.live` illustration on the current page.
   *
-  * Only mounts nodes present on the current page (other pages' ids are absent by design). Registry ↔ site-map drift is
-  * guarded by [[InteractiveContractSpec]] on the JVM.
+  * The one `ZIO.scoped` is the page lifetime the mounters share, so a width source a diagram allocates stays alive.
+  * Registry-to-site-map drift is guarded by [[InteractiveContractSpec]] on the JVM.
   */
 object ClientMain extends ZIOAppDefault:
 
-  private val pages = Vector(Interactive.doc)
+  val pages = Vector(Interactive.doc, SpecularIllustrations.doc)
 
-  def run =
-    val examples = ExampleRegistry.fromPages(pages*)
-    for
-      _ <- ZIO.foreachDiscard(examples.toList) { case (id, body) =>
-        mountExample(id, body)
-      }
-      _ <- ZIO.never
-    yield ()
-  end run
-
-  private def mountExample(id: String, body: URIO[Scope, ascent.ast.UI[Any]]): UIO[Unit] =
-    ZIO.foreachDiscard(Dom.document.getElementById(id)) { el =>
-      for
-        _  <- ZIO.succeed(clearChildren(el))
-        ui <- ZIO.scoped(body)
-        _  <- AscentApp.mount(ui, el)
-      yield ()
-    }
-  end mountExample
-
-  private def clearChildren(el: dom.Element): Unit =
-    el.innerHTML = ""
+  def run = ZIO.scoped {
+    SpecularClient.mountAll(SpecularClient.fromPages(pages*)) *> ZIO.never
+  }
 end ClientMain

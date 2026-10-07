@@ -4,7 +4,7 @@ import earlyeffect.docs.EarlyEffectTheme
 import specular.site.*
 import zio.*
 
-import java.nio.file.{Files, Path, Paths, StandardCopyOption}
+import java.nio.file.{Files, Path, Paths}
 import scala.jdk.OptionConverters.*
 
 /** Docs-as-tests site builder (Test classpath; `docs/specularSite`).
@@ -25,15 +25,16 @@ object BuildSite extends DocsSite:
     SequenceDiagrams.doc,
     Interactive.doc,
     Responsive.doc,
+    SpecularIllustrations.doc,
     Theming.doc,
     CustomCss.doc,
     SvgStructure.doc,
     Cli.doc,
   )
 
-  override def site: SiteModel =
-    val m       = meta
-    val branded = EarlyEffectTheme.brand(super.site)
+  override def site(settings: DocsSettings): SiteModel =
+    val m       = settings.meta
+    val branded = EarlyEffectTheme.brand(super.site(settings))
     branded.copy(
       clientScript = Some("assets/client.js"),
       summaryMarkdown = Some(
@@ -57,12 +58,12 @@ Guide: Quick start → Flowcharts → State diagrams → Sequence diagrams → I
         CodeSnippet(
           "Scala.js",
           s"""// the same artifact cross-builds for Scala.js
-libraryDependencies += "${m.organization}" %%% "${m.name}" % "${m.version}"""",
+libraryDependencies += "${m.organization}" %%% "${m.name}" % "${m.docsVersion}"""",
         ),
         CodeSnippet(
           "mermoid-ascent (hybrid / interactive)",
-          s"""libraryDependencies += "${m.organization}" %% "mermoid-ascent" % "${m.version}"
-libraryDependencies += "${m.organization}" %%% "mermoid-ascent" % "${m.version}"""",
+          s"""libraryDependencies += "${m.organization}" %% "mermoid-ascent" % "${m.docsVersion}"
+libraryDependencies += "${m.organization}" %%% "mermoid-ascent" % "${m.docsVersion}"""",
         ),
         CodeSnippet(
           "Render a diagram",
@@ -84,25 +85,17 @@ val svg = MermaidParser.parse("flowchart TD\\n  A[Start] --> B[Done]")
   override def layers: ZLayer[Any, Nothing, SiteBuilder] =
     EarlyEffectTheme.layers
 
-  override def afterBuild(out: Path, result: SiteOutput): Task[Unit] =
+  override def afterBuild(out: Path, result: SiteOutput): IO[SiteError, Unit] =
     val _ = result
     EarlyEffectTheme.writeLogo(out) *> copyClientBundle(out)
 
-  /** `afterBuild` is a `Task` in Specular's API, so the missing bundle travels as an exception value. */
-  final case class ClientBundleMissing(marker: Path, searched: Path)
-      extends Exception(
-        s"JS client not linked; run docs/specularSite (or docsJS/fastLinkJS) first. Looked for marker $marker and under $searched"
-      )
-
-  private def copyClientBundle(out: Path): Task[Unit] =
-    val dest = out.resolve("assets/client.js")
-    for
-      src <- ZIO.attempt(findClientJs).someOrFail(ClientBundleMissing(clientJsMarker, repoRoot.resolve("target/out")))
-      _   <- ZIO.attempt {
-        Files.createDirectories(dest.getParent)
-        Files.copy(src, dest, StandardCopyOption.REPLACE_EXISTING)
-      }
-    yield ()
+  /** The linked client named by [[clientJsMarker]], else the first fastopt bundle under `target/out`. */
+  private def copyClientBundle(out: Path): IO[SiteError, Unit] =
+    ZIO
+      .attemptBlocking(findClientJs)
+      .orElseSucceed(None)
+      .map(_.getOrElse(clientJsMarker))
+      .flatMap(SiteAssets.copyFile(_, out.resolve("assets/client.js")))
 
   private def clientJsMarker: Path =
     repoRoot.resolve("target/specular-client-js.path")
