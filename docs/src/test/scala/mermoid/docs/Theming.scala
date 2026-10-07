@@ -1,7 +1,7 @@
 package mermoid.docs
 
 import mermoid.ascent.MermoidAscent
-import _root_.mermoid.RenderConfig
+import _root_.mermoid.{Mermaid, RenderConfig}
 import _root_.mermoid.css.{ThemeName, ThemeVar}
 import specular.*
 import specular.ziotest.DocSpecSuite
@@ -10,11 +10,11 @@ import specular.ziotest.DocSpecSuite
 object Theming extends DocSpecSuite:
 
   private val sample =
-    """flowchart LR
+    Mermaid("""flowchart LR
       |    A[(Source)] --> B{Route}
       |    B -->|hot| C([Cache])
       |    B -.->|cold| D[[Compute]]
-      |""".stripMargin
+      |""".stripMargin)
 
   private def themed(theme: ThemeName) = MermoidAscent.svgDiagram(sample, RenderConfig(theme = theme))
 

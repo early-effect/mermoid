@@ -1,6 +1,7 @@
 package mermoid.docs
 
 import mermoid.ascent.MermoidAscent
+import _root_.mermoid.Mermaid
 import specular.*
 import specular.ziotest.DocSpecSuite
 
@@ -8,7 +9,7 @@ import specular.ziotest.DocSpecSuite
 object StateDiagrams extends DocSpecSuite:
 
   private val orderFsm =
-    """stateDiagram-v2
+    Mermaid("""stateDiagram-v2
       |    [*] --> Pending
       |    Pending --> Paid: payment captured
       |    Pending --> Cancelled: customer cancels
@@ -16,7 +17,7 @@ object StateDiagrams extends DocSpecSuite:
       |    Shipped --> Delivered: scan
       |    Delivered --> [*]
       |    Cancelled --> [*]
-      |""".stripMargin
+      |""".stripMargin)
 
   def doc = page("State diagrams")(
     md"""
@@ -34,10 +35,10 @@ the diagram keeps the direction it names.
 transition becomes a state, rendered as a `Round` node labelled with its own id.
 """,
       example {
-        MermoidAscent.svgDiagram("""stateDiagram-v2
+        MermoidAscent.svgDiagram(Mermaid("""stateDiagram-v2
                             |    Idle --> Running: start
                             |    Running --> Idle: stop
-                            |""".stripMargin)
+                            |""".stripMargin))
       },
       md"""
 That is a two-state cycle, and it lays out rather than looping forever — layering breaks cycles.
@@ -52,10 +53,10 @@ When a diagram uses both, mermoid paints **two** markers (start keeps id `[*]`, 
 cycle through a shared node and flip the layout. A diagram that only has one role still uses a single `[*]` node.
 """,
       example {
-        MermoidAscent.svgDiagram("""stateDiagram-v2
+        MermoidAscent.svgDiagram(Mermaid("""stateDiagram-v2
                             |    [*] --> Active
                             |    Active --> [*]
-                            |""".stripMargin)
+                            |""".stripMargin))
       },
     ),
     section("Notes")(
@@ -74,7 +75,7 @@ When the preferred side would overlap another node (common in horizontal / flipp
 side and then a vertical offset before settling.
 """,
       example {
-        MermoidAscent.svgDiagram("""stateDiagram-v2
+        MermoidAscent.svgDiagram(Mermaid("""stateDiagram-v2
                             |    [*] --> Idle
                             |    Idle --> Running: start
                             |    Running --> Idle: finish
@@ -85,7 +86,7 @@ side and then a vertical offset before settling.
                             |    note left of Running
                             |      at most one job
                             |    end note
-                            |""".stripMargin)
+                            |""".stripMargin))
       },
     ),
     section("Styling from the diagram source")(
@@ -95,7 +96,7 @@ a CSS rule, `class` / `:::` put the name on the state's node, and `style` can st
 stroke.
 """,
       example {
-        MermoidAscent.svgDiagram("""stateDiagram-v2
+        MermoidAscent.svgDiagram(Mermaid("""stateDiagram-v2
                             |    classDef happy fill:#1f4a35,stroke:#7dcea0
                             |    classDef warn fill:#4a4030,stroke:#e0c070
                             |    classDef sad fill:#5c2a2a,stroke:#f0a0a0
@@ -106,7 +107,7 @@ stroke.
                             |    class Green happy
                             |    class Yellow warn
                             |    class Red sad
-                            |""".stripMargin)
+                            |""".stripMargin))
       },
       md"""
 `Green:::happy --> Yellow:::warn` is the same assignment written on the transition.
@@ -117,7 +118,7 @@ stroke.
 `style <state> noteAlign: left | center | right` sets how that state's note text is aligned. The default is `left`.
 """,
       example {
-        MermoidAscent.svgDiagram("""stateDiagram-v2
+        MermoidAscent.svgDiagram(Mermaid("""stateDiagram-v2
                             |    [*] --> Ready
                             |    Ready --> Done: go
                             |    style Ready noteAlign: center
@@ -125,7 +126,7 @@ stroke.
                             |      centered
                             |      note text
                             |    end note
-                            |""".stripMargin)
+                            |""".stripMargin))
       },
     ),
     section("Note aliases")(
@@ -134,13 +135,13 @@ Like edges, notes take `as <name>` to pin their element id. Without it a note is
 earlier note on the same state renumbers the later ones.
 """,
       example {
-        MermoidAscent.svgDiagram("""stateDiagram-v2
+        MermoidAscent.svgDiagram(Mermaid("""stateDiagram-v2
                             |    [*] --> Idle
                             |    Idle --> Done: go
                             |    note right of Idle as caveat
                             |      do not skip idle
                             |    end note
-                            |""".stripMargin)
+                            |""".stripMargin))
       },
     ),
     section("Self-transitions")(
@@ -149,12 +150,12 @@ A state can transition to itself, and stacked self-transitions stack their label
 loops, and for notes pushed below them.
 """,
       example {
-        MermoidAscent.svgDiagram("""stateDiagram-v2
+        MermoidAscent.svgDiagram(Mermaid("""stateDiagram-v2
                             |    [*] --> Retrying
                             |    Retrying --> Retrying: attempt failed
                             |    Retrying --> Retrying: backoff elapsed
                             |    Retrying --> Done: succeeded
-                            |""".stripMargin)
+                            |""".stripMargin))
       },
     ),
     section("Direction")(
@@ -171,13 +172,13 @@ stateDiagram-v2
 ```
 """,
       example {
-        MermoidAscent.svgDiagram("""stateDiagram-v2
+        MermoidAscent.svgDiagram(Mermaid("""stateDiagram-v2
                             |    direction LR
                             |    [*] --> Draft
                             |    Draft --> Preparing: Launch
                             |    Preparing --> Live: Published
                             |    Live --> [*]
-                            |""".stripMargin)
+                            |""".stripMargin))
       },
     ),
     section("Back edges")(
@@ -188,14 +189,14 @@ fault back to the hop. A second forward parent, such as two states that both arc
 sink lands on the last rank.
 """,
       example {
-        MermoidAscent.svgDiagram("""stateDiagram-v2
+        MermoidAscent.svgDiagram(Mermaid("""stateDiagram-v2
                             |    [*] --> Preparing
                             |    Preparing --> Live: published
                             |    Preparing --> Faulted: failed
                             |    Faulted --> Preparing: Retry
                             |    Live --> Archived: archive
                             |    Preparing --> Archived: archive
-                            |""".stripMargin)
+                            |""".stripMargin))
       },
     ),
     section("Not yet implemented")(

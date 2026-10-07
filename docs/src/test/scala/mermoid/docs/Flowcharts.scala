@@ -3,7 +3,7 @@ package mermoid.docs
 import mermoid.ascent.MermoidAscent
 import specular.*
 import specular.ziotest.DocSpecSuite
-import _root_.mermoid.{EdgeStyle, NodeShape}
+import _root_.mermoid.{EdgeStyle, Mermaid, NodeShape}
 
 /** Every flowchart construct mermoid implements, rendered live. */
 object Flowcharts extends DocSpecSuite:
@@ -19,25 +19,25 @@ Five directions: `TB` (top-to-bottom), `TD` (a synonym for `TB`), `BT`, `LR`, `R
 axis and where self-loops attach.
 """,
       example {
-        MermoidAscent.svgDiagram("""flowchart LR
+        MermoidAscent.svgDiagram(Mermaid("""flowchart LR
                             |    A[Read] --> B[Transform]
                             |    B --> C[Write]
-                            |""".stripMargin)
+                            |""".stripMargin))
       },
       example {
-        MermoidAscent.svgDiagram("""flowchart TD
+        MermoidAscent.svgDiagram(Mermaid("""flowchart TD
                             |    A[Read] --> B[Transform]
                             |    B --> C[Write]
-                            |""".stripMargin)
+                            |""".stripMargin))
       },
       md"""
 Chained `A --> B --> C` is one hop per pair, same as writing each edge on its own line. `%%` comments are ignored.
 """,
       example {
-        MermoidAscent.svgDiagram("""flowchart LR
+        MermoidAscent.svgDiagram(Mermaid("""flowchart LR
                             |    %% pipeline sketch
                             |    A[Read] --> B[Transform] --> C[Write]
-                            |""".stripMargin)
+                            |""".stripMargin))
       },
     ),
     section("Node shapes")(
@@ -47,29 +47,29 @@ ${NodeShape.values.size} shapes (`NodeShape`). A bare id with no bracket syntax 
 ${NodeShape.markdownTable}
 """,
       example {
-        MermoidAscent.svgDiagram("""flowchart LR
+        MermoidAscent.svgDiagram(Mermaid("""flowchart LR
                             |    R[Rect]
                             |    O(Round)
                             |    S([Stadium])
                             |    U[[Subroutine]]
                             |    Y[(Cylinder)]
-                            |""".stripMargin)
+                            |""".stripMargin))
       },
       example {
-        MermoidAscent.svgDiagram("""flowchart LR
+        MermoidAscent.svgDiagram(Mermaid("""flowchart LR
                             |    C((Circle))
                             |    D(((Double)))
                             |    H{Rhombus}
                             |    X{{Hexagon}}
-                            |""".stripMargin)
+                            |""".stripMargin))
       },
       example {
-        MermoidAscent.svgDiagram("""flowchart LR
+        MermoidAscent.svgDiagram(Mermaid("""flowchart LR
                             |    P[/Parallelogram/]
                             |    Q[\ParallelogramAlt\]
                             |    T[/Trapezoid\]
                             |    V[\TrapezoidAlt/]
-                            |""".stripMargin)
+                            |""".stripMargin))
       },
       md"""
 The shape name lands in the wrapper's class list, so `.node-rhombus .node-shape { fill: gold }` restyles every decision
@@ -83,13 +83,13 @@ ${EdgeStyle.values.size} edge styles (`EdgeStyle`). Each contributes a class to 
 ${EdgeStyle.markdownTable}
 """,
       example {
-        MermoidAscent.svgDiagram("""flowchart LR
+        MermoidAscent.svgDiagram(Mermaid("""flowchart LR
                             |    A1[Arrow] --> A2[ ]
                             |    B1[Open] --- B2[ ]
                             |    C1[Dotted] -.-> C2[ ]
                             |    D1[DottedOpen] -.- D2[ ]
                             |    E1[Thick] ==> E2[ ]
-                            |""".stripMargin)
+                            |""".stripMargin))
       },
     ),
     section("Edge labels")(
@@ -98,10 +98,10 @@ Two spellings, both supported: `-->|label|` and `-- label -->`. Labels get a bac
 they cross an edge, and the layout widens the gap between layers to fit them.
 """,
       example {
-        MermoidAscent.svgDiagram("""flowchart TD
+        MermoidAscent.svgDiagram(Mermaid("""flowchart TD
                             |    Check{Valid?} -->|yes| Save[(Database)]
                             |    Check -- no --> Reject[/Error response/]
-                            |""".stripMargin)
+                            |""".stripMargin))
       },
     ),
     section("Self-loops")(
@@ -111,11 +111,11 @@ one node stack their labels rather than overlapping, and the layout reserves roo
 flowchart, above in a horizontal one.
 """,
       example {
-        MermoidAscent.svgDiagram("""flowchart TD
+        MermoidAscent.svgDiagram(Mermaid("""flowchart TD
                             |    Poll[Poll queue] -->|empty| Poll
                             |    Poll -->|error| Poll
                             |    Poll -->|message| Handle[Handle]
-                            |""".stripMargin)
+                            |""".stripMargin))
       },
     ),
     section("Cycles")(
@@ -125,12 +125,12 @@ nothing to its own depth. Within each layer, a barycenter sweep reorders nodes t
 through invisible waypoints so they do not slice intermediate nodes. A graph with a back edge lays out fine.
 """,
       example {
-        MermoidAscent.svgDiagram("""flowchart TD
+        MermoidAscent.svgDiagram(Mermaid("""flowchart TD
                             |    A[Attempt] --> B{Succeeded?}
                             |    B -->|no| C[Back off]
                             |    C --> A
                             |    B -->|yes| D([Done])
-                            |""".stripMargin)
+                            |""".stripMargin))
       },
     ),
     section("Subgraphs")(
@@ -139,13 +139,13 @@ through invisible waypoints so they do not slice intermediate nodes. A graph wit
 is a `<g class="subgraph" id="subgraph-{id}">` rendered behind the edges and nodes.
 """,
       example {
-        MermoidAscent.svgDiagram("""flowchart TD
+        MermoidAscent.svgDiagram(Mermaid("""flowchart TD
                             |    subgraph ingest [Ingest]
                             |        direction LR
                             |        Fetch[Fetch] --> Parse[Parse]
                             |    end
                             |    Parse --> Store[(Store)]
-                            |""".stripMargin)
+                            |""".stripMargin))
       },
     ),
     section("Styling from the diagram source")(
@@ -161,13 +161,13 @@ Three statements (and one suffix), all of which end up as CSS rather than as bak
 on [state diagrams](state-diagrams.html).
 """,
       example {
-        MermoidAscent.svgDiagram("""flowchart LR
+        MermoidAscent.svgDiagram(Mermaid("""flowchart LR
                             |    classDef hot fill:#ffdddd,stroke:#cc0000
                             |    A[Cold] --> B[Hot]:::hot
                             |    B --> C[Hot too]
                             |    class C hot
                             |    style A fill:#ddeeff
-                            |""".stripMargin)
+                            |""".stripMargin))
       },
       md"""
 Note where each landed: `classDef` in the `<style>` block, `class` in the class attribute, `style` inline. See
@@ -182,10 +182,10 @@ Without an alias an edge is `edge-{from}-{to}-{index}`, so inserting an earlier 
 or test that selected `#edge-A-B-1` silently moves. An alias pins it:
 """,
       example {
-        MermoidAscent.svgDiagram("""flowchart LR
+        MermoidAscent.svgDiagram(Mermaid("""flowchart LR
                             |    A[Start] --> B[Finish] as happy
                             |    A --> B
-                            |""".stripMargin)
+                            |""".stripMargin))
       },
       md"""
 The first edge is `#edge-happy` no matter how many siblings appear later; the unaliased one keeps its positional id
@@ -210,13 +210,13 @@ click A "https://example.com"
 Link targets: `_blank`, `_self`, `_parent`, `_top`.
 """,
       example {
-        MermoidAscent.svgDiagram("""flowchart LR
+        MermoidAscent.svgDiagram(Mermaid("""flowchart LR
                             |    A[Parse] --> B[Layout]
                             |    B --> C[Paint]
                             |    click A callback "Mermaid → AST"
                             |    click B callback "DiagramScene + routes"
                             |    click C href "https://www.earlyeffect.rocks" "Open Early Effect" _blank
-                            |""".stripMargin)
+                            |""".stripMargin))
       },
       md"""
 Try the same source under hybrid selection and hover on [Interactive](interactive.html).
@@ -236,11 +236,11 @@ Try the same source under hybrid selection and hover on [Interactive](interactiv
 | `end` vs `endpoint` | Bare `end` closes a subgraph; ids like `endpoint` are fine. |
 """,
       example {
-        MermoidAscent.svgDiagram("""flowchart TD
+        MermoidAscent.svgDiagram(Mermaid("""flowchart TD
                             |    A[Source] --> B[Sink]
                             |    A --> B
                             |    A -.-> B as dotted
-                            |""".stripMargin)
+                            |""".stripMargin))
       },
     ),
   )

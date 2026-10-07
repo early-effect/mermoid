@@ -8,7 +8,7 @@ import zio.test.*
 object SequenceHybridSpec extends ZIOSpecDefault:
 
   private val span =
-    """sequenceDiagram
+    Mermaid("""sequenceDiagram
       |    participant Alice
       |    participant Bob
       |    participant Carol
@@ -23,16 +23,16 @@ object SequenceHybridSpec extends ZIOSpecDefault:
       |    Dave-->>Alice: accepted or pending
       |    Eve->>Dave: fetch snapshot
       |    Dave-->>Eve: snapshot plus version
-      |""".stripMargin
+      |""".stripMargin)
 
   private val mixed =
-    """sequenceDiagram
+    Mermaid("""sequenceDiagram
       |    actor Alice
       |    participant Bob
       |    Alice->>+Bob: ask
       |    note right of Bob: held the lock
       |    Bob-->>-Alice: yes
-      |""".stripMargin
+      |""".stripMargin)
 
   def spec = suite("sequence hybrid")(
     test("headers are buttons and the message text is in the page") {

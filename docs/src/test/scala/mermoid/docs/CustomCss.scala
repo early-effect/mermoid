@@ -1,7 +1,7 @@
 package mermoid.docs
 
 import mermoid.ascent.MermoidAscent
-import _root_.mermoid.RenderConfig
+import _root_.mermoid.{Mermaid, RenderConfig}
 import _root_.mermoid.css.{CssParser, PaintClass, Stylesheet}
 import specular.*
 import specular.ziotest.DocSpecSuite
@@ -10,12 +10,12 @@ import specular.ziotest.DocSpecSuite
 object CustomCss extends DocSpecSuite:
 
   private val pipeline =
-    """flowchart LR
+    Mermaid("""flowchart LR
       |    classDef io fill:#fff7ed,stroke:#c2410c
       |    In[(Read)] --> Map[Transform]
       |    Map --> Out[(Write)]
       |    class In,Out io
-      |""".stripMargin
+      |""".stripMargin)
 
   private val overrides =
     """:root {
@@ -87,13 +87,13 @@ over, or derived from application data.
           )
         }
         MermoidAscent.svgDiagram(
-          """flowchart LR
+          Mermaid("""flowchart LR
             |    A[Healthy] --> B[Degraded]
             |    B --> C[Down]
             |    class A ok
             |    class B warn
             |    class C fail
-            |""".stripMargin,
+            |""".stripMargin),
           RenderConfig(customStylesheet = Some(Stylesheet(rules = rules))),
         )
       },
@@ -120,11 +120,11 @@ the `[*]` marker keeps `.mermoid-node.start-end .node-shape`. `style` on a rhomb
 """,
       example {
         MermoidAscent.diagram(
-          """flowchart LR
+          Mermaid("""flowchart LR
             |  classDef warn fill:#4a4030,stroke:#e0c070
             |  A[Tired] --> B[Zipx]
             |  class A warn
-            |""".stripMargin
+            |""".stripMargin)
         )
       },
     ),

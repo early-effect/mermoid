@@ -1,7 +1,7 @@
 package mermoid.docs
 
 import mermoid.ascent.MermoidAscent
-import _root_.mermoid.{DiagramLayout, DiagramScene, MermaidParser, RenderConfig, ResponsiveConfig, Scene, Viewport}
+import _root_.mermoid.{DiagramLayout, DiagramScene, Mermaid, RenderConfig, ResponsiveConfig, Scene, Viewport}
 import specular.*
 import specular.ziotest.DocSpecSuite
 import zio.test.*
@@ -10,24 +10,21 @@ import zio.test.*
 object Responsive extends DocSpecSuite:
 
   private val chain =
-    """flowchart LR
+    Mermaid("""flowchart LR
       |  A[One] --> B[Two]
       |  B --> C[Three]
       |  C --> D[Four]
       |  D --> E[Five]
-      |""".stripMargin
+      |""".stripMargin)
 
   private def sceneOf(
-      src: String,
+      src: Mermaid,
       viewport: Option[Viewport],
       config: RenderConfig = RenderConfig(),
   ): DiagramScene =
-    MermaidParser.parse(src) match
-      case Right(d) =>
-        DiagramLayout.scene(d, config, viewport) match
-          case Scene.Ranked(scene) => scene
-          case Scene.Sequence(_)   => throw new AssertionError(s"expected a ranked scene: $src")
-      case Left(err) => throw new AssertionError(s"unparseable: ${err.message}\n$src")
+    DiagramLayout.scene(src.diagram, config, viewport) match
+      case Scene.Ranked(scene) => scene
+      case Scene.Sequence(_)   => throw new AssertionError(s"expected a ranked scene: ${src.source}")
 
   def doc = page("Responsive layout")(
     md"""
@@ -87,10 +84,10 @@ Without that opt-in, a `flowchart TD` laid out for a 900px column stays top to b
 """,
       exampleValue {
         val src =
-          """flowchart TD
+          Mermaid("""flowchart TD
             |  A --> B
             |  B --> C
-            |""".stripMargin
+            |""".stripMargin)
         val scene = sceneOf(src, Some(Viewport(900)))
         s"Direction: ${scene.direction}"
       }.assert(s => assertTrue(s.contains("Direction: TD"))),
@@ -125,16 +122,11 @@ Disable compression to keep the author's geometry intact regardless of viewport:
 """,
       exampleValue {
         val compressed = sceneOf(chain, Some(Viewport(320))) // default compressSpacing = true
-        val noCompress = MermaidParser
-          .parse(chain)
-          .map { d =>
-            DiagramLayout.scene(
-              d,
-              RenderConfig(responsive = ResponsiveConfig(compressSpacing = false)),
-              Some(Viewport(320)),
-            )
-          }
-          .getOrElse(throw new AssertionError("unparseable"))
+        val noCompress = DiagramLayout.scene(
+          chain.diagram,
+          RenderConfig(responsive = ResponsiveConfig(compressSpacing = false)),
+          Some(Viewport(320)),
+        )
         List(
           s"With compression:  ${compressed.width.toInt}px wide",
           s"Without compression: ${noCompress.width.toInt}px wide",
@@ -160,7 +152,7 @@ when the floor matters:
 """,
       exampleValue {
         val hub =
-          """flowchart LR
+          Mermaid("""flowchart LR
             |  A --> B
             |  A --> C
             |  A --> D
@@ -173,7 +165,7 @@ when the floor matters:
             |  E --> H
             |  F --> H
             |  G --> H
-            |""".stripMargin
+            |""".stripMargin)
         val scene = sceneOf(hub, Some(Viewport(320)))
         List(
           s"Scene width: ${scene.width.toInt}",

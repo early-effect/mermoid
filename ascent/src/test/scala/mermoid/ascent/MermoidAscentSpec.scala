@@ -9,21 +9,21 @@ import zio.test.*
 object MermoidAscentSpec extends ZIOSpecDefault:
 
   private val flow =
-    """flowchart LR
+    Mermaid("""flowchart LR
       |  A[Start] --> B{Decision}
       |  B --> C[Ok]
       |  click A callback "Start here"
       |  click C href "https://example.com" "Docs" _blank
-      |""".stripMargin
+      |""".stripMargin)
 
   private val state =
-    """stateDiagram-v2
+    Mermaid("""stateDiagram-v2
       |  [*] --> Idle
       |  Idle --> Done: finish
       |  note right of Idle
       |    Waiting
       |  end note
-      |""".stripMargin
+      |""".stripMargin)
 
   def spec = suite("MermoidAscent")(
     test("static hybrid SSR contains HTML nodes and SVG edges") {
@@ -91,11 +91,11 @@ object MermoidAscentSpec extends ZIOSpecDefault:
     },
     test("class and classDef paint the hybrid node-shape") {
       val src =
-        """flowchart LR
+        Mermaid("""flowchart LR
           |  classDef warn fill:#4a4030,stroke:#e0c070
           |  A[Tired] --> B[Zipx]
           |  class A warn
-          |""".stripMargin
+          |""".stripMargin)
       val ui = MermoidAscent.diagram(src)
       for html <- Html.render(ui)
       yield assertTrue(
@@ -108,11 +108,11 @@ object MermoidAscentSpec extends ZIOSpecDefault:
     },
     test("state classDef paints the hybrid node-shape") {
       val src =
-        """stateDiagram-v2
+        Mermaid("""stateDiagram-v2
           |  classDef happy fill:#1f4a35,stroke:#7dcea0
           |  [*] --> Green
           |  class Green happy
-          |""".stripMargin
+          |""".stripMargin)
       val ui = MermoidAscent.diagram(src)
       for html <- Html.render(ui)
       yield assertTrue(
@@ -123,13 +123,13 @@ object MermoidAscentSpec extends ZIOSpecDefault:
     },
     test("state classDef beats a theme rule of equal chrome specificity") {
       val src =
-        """stateDiagram-v2
+        Mermaid("""stateDiagram-v2
           |    [*] --> PredictionsRequested
           |    PredictionsRequested --> PredictionsFaulted: DatabricksFailed
           |    PredictionsFaulted --> PredictionsRequested: Retry
           |    classDef fault fill:#2e2410,stroke:#f59e0b,color:#fde68a
           |    class PredictionsFaulted fault
-          |""".stripMargin
+          |""".stripMargin)
       val custom = CssParser
         .parse(
           """.mermoid-node .node-shape { background: #123040 }
@@ -151,10 +151,10 @@ object MermoidAscentSpec extends ZIOSpecDefault:
     },
     test("style fill and color beat the theme on the shape and the button") {
       val src =
-        """stateDiagram-v2
+        Mermaid("""stateDiagram-v2
           |    [*] --> PredictionsFaulted
           |    style PredictionsFaulted fill:#112233,color:#abcdef
-          |""".stripMargin
+          |""".stripMargin)
       val ui = MermoidAscent.diagram(src)
       for html <- Html.render(ui)
       yield assertTrue(
@@ -165,11 +165,11 @@ object MermoidAscentSpec extends ZIOSpecDefault:
     },
     test("subgraph frames land in the hybrid SVG layer") {
       val src =
-        """flowchart LR
+        Mermaid("""flowchart LR
           |  subgraph g [Group]
           |    A --> B
           |  end
-          |""".stripMargin
+          |""".stripMargin)
       val ui = MermoidAscent.diagram(src)
       for html <- Html.render(ui)
       yield assertTrue(

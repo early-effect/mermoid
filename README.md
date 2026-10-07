@@ -58,6 +58,19 @@ val tree: Either[ParseError, SvgNode] =
   MermaidParser.parse(source).map(SvgRenderer.renderTree(_))
 ```
 
+A diagram written in your code can be checked while it compiles. `Mermaid("""...""")` parses at compile time, so a
+typo is a compile error at the literal and the parsed `Diagram` is built into the call site. Text that arrives at
+runtime goes through `Mermaid.from`, which returns the same `Either[ParseError, Mermaid]`:
+
+```scala
+val hello: Mermaid = Mermaid("""flowchart LR
+  A[Hello] --> B[World]""")
+
+val svg: String = SvgRenderer.render(hello.diagram)
+
+val fromFile: Either[ParseError, Mermaid] = Mermaid.from(Files.readString(path))
+```
+
 For layout without painting (metrics, custom painters, responsive hosts):
 
 ```scala
@@ -67,9 +80,15 @@ val scene: Either[ParseError, Scene] =
 
 ## Interactive / hybrid (`mermoid-ascent`)
 
+Every entry point takes a `Mermaid`, so none of them can fail on bad source:
+
 ```scala
 import mermoid.ascent.MermoidAscent
-import mermoid.{RenderConfig, Viewport}
+import mermoid.{Mermaid, RenderConfig, Viewport}
+
+val source = Mermaid("""flowchart LR
+  A[Start] --> B{Ready?}
+  B -->|yes| C([Ship it])""")
 
 // Static hybrid (SSR-friendly HTML nodes + SVG edges)
 val ui = MermoidAscent.diagram(source, viewport = Some(Viewport(640)))

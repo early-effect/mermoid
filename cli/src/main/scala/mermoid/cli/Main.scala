@@ -3,8 +3,21 @@ package mermoid.cli
 import mermoid.*
 import zio.*
 
+import java.io.IOException
 import java.nio.file.{Files, Path}
 import scala.jdk.CollectionConverters.*
+
+/** Why the CLI stopped. `main` prints [[message]] and exits non-zero. */
+enum CliError:
+  case Unreadable(path: Path, cause: IOException)
+  case Unparseable(path: Path, error: ParseError)
+  case Unwritable(path: Path, cause: IOException)
+
+  def message: String = this match
+    case Unreadable(path, cause)  => s"cannot read $path: $cause"
+    case Unparseable(path, error) => s"$path: ${error.message}"
+    case Unwritable(path, cause)  => s"cannot write $path: $cause"
+end CliError
 
 /** Renders `.mmd` files to sibling `.svg` files, and optionally builds a layout review gallery.
   *
@@ -12,36 +25,41 @@ import scala.jdk.CollectionConverters.*
   */
 object MermoidCli extends ZIOAppDefault:
 
-  private def processFile(inputPath: String): ZIO[Any, Throwable, Unit] =
-    val outputPath = inputPath.replaceAll("\\.mmd$", "") + ".svg"
+  private def read(path: Path): IO[CliError, String] =
+    ZIO.attemptBlockingIO(Files.readString(path)).mapError(CliError.Unreadable(path, _))
+
+  private def write(path: Path, text: String): IO[CliError, Unit] =
+    ZIO.attemptBlockingIO(Files.writeString(path, text)).unit.mapError(CliError.Unwritable(path, _))
+
+  private def say(line: String): IO[CliError, Unit] =
+    Console.printLine(line).orDie
+
+  private def processFile(inputPath: String): IO[CliError, Unit] =
+    val input  = Path.of(inputPath)
+    val output = Path.of(inputPath.replaceAll("\\.mmd$", "") + ".svg")
     for
-      input   <- ZIO.attempt(Files.readString(Path.of(inputPath)))
-      diagram <- ZIO
-        .fromEither(MermaidParser.parse(input))
-        .mapError(err => new RuntimeException(s"Parse error: ${err.message}"))
-      svg = SvgRenderer.render(diagram)
-      _ <- ZIO.attempt(Files.writeString(Path.of(outputPath), svg))
-      _ <- Console.printLine(s"Generated SVG: $outputPath")
+      text    <- read(input)
+      mermaid <- ZIO.fromEither(Mermaid.from(text)).mapError(CliError.Unparseable(input, _))
+      _       <- write(output, SvgRenderer.render(mermaid.diagram))
+      _       <- say(s"Generated SVG: $output")
     yield ()
   end processFile
 
   /** Writes `index.html` that embeds every example SVG for visual review (e.g. Playwright). */
-  private def writeGallery(examplesDir: Path, outDir: Path): ZIO[Any, Throwable, Unit] =
+  private def writeGallery(examplesDir: Path, outDir: Path): IO[CliError, Unit] =
     for
-      _    <- ZIO.attempt(Files.createDirectories(outDir))
-      svgs <- ZIO.attempt {
-        Files
-          .list(examplesDir)
-          .iterator
-          .asScala
-          .toList
-          .filter(_.getFileName.toString.endsWith(".svg"))
-          .sortBy(_.getFileName.toString)
-      }
-      cards = svgs
-        .map { p =>
-          val name = p.getFileName.toString
-          val body = Files.readString(p)
+      _    <- ZIO.attemptBlockingIO(Files.createDirectories(outDir)).mapError(CliError.Unwritable(outDir, _))
+      svgs <- ZIO
+        .scoped(
+          ZIO
+            .fromAutoCloseable(ZIO.attemptBlockingIO(Files.list(examplesDir)))
+            .flatMap(listing => ZIO.attemptBlockingIO(listing.iterator.asScala.toList))
+        )
+        .mapError(CliError.Unreadable(examplesDir, _))
+        .map(_.filter(_.getFileName.toString.endsWith(".svg")).sortBy(_.getFileName.toString))
+      bodies <- ZIO.foreach(svgs)(p => read(p).map(p.getFileName.toString -> _))
+      cards = bodies
+        .map { (name, body) =>
           s"""<section class="card">
            |  <h2>$name</h2>
            |  <div class="diagram">$body</div>
@@ -73,8 +91,8 @@ object MermoidCli extends ZIOAppDefault:
            |</body>
            |</html>""".stripMargin
       out = outDir.resolve("index.html")
-      _ <- ZIO.attempt(Files.writeString(out, html))
-      _ <- Console.printLine(s"Wrote gallery: $out")
+      _ <- write(out, html)
+      _ <- say(s"Wrote gallery: $out")
     yield ()
 
   private def parseArgs(args: List[String]): (List[String], Option[Path]) =
@@ -91,17 +109,20 @@ object MermoidCli extends ZIOAppDefault:
         (f :: files, gallery)
 
   val run =
+    render.catchAll(error => Console.printLineError(error.message).orDie *> exit(ExitCode.failure))
+
+  private def render: ZIO[ZIOAppArgs, CliError, Unit] =
     for
       args <- getArgs
       _    <- parseArgs(args.toList) match
-        case (Nil, None) => Console.printLine("Usage: mermoid <input.mmd> [input2.mmd ...] [--gallery <out-dir>]")
+        case (Nil, None)         => say("Usage: mermoid <input.mmd> [input2.mmd ...] [--gallery <out-dir>]")
         case (files, galleryOut) =>
           for
             _ <- ZIO.foreach(files)(processFile)
             _ <- galleryOut match
               case Some(out) =>
                 val examples = files.headOption
-                  .map(f => Path.of(f).toAbsolutePath.getParent)
+                  .flatMap(f => Option(Path.of(f).toAbsolutePath.getParent))
                   .getOrElse(Path.of("examples"))
                 writeGallery(examples, out)
               case None => ZIO.unit

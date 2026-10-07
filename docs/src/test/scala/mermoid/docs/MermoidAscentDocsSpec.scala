@@ -11,9 +11,9 @@ import zio.test.*
 object MermoidAscentDocsSpec extends ZIOSpecDefault:
 
   private val flowchart =
-    """flowchart LR
+    Mermaid("""flowchart LR
       |  A((Go)) --> B[Stop]
-      |""".stripMargin
+      |""".stripMargin)
 
   def spec = suite("MermoidAscent docs bridge")(
     test("svgDiagram SSR starts with svg and carries node classes") {
@@ -36,8 +36,10 @@ object MermoidAscentDocsSpec extends ZIOSpecDefault:
         !SvgBridge.cssIsEntitySafe("a < b"),
       )
     },
-    test("bad mermaid throws from svgDiagram") {
-      assertTrue(scala.util.Try(MermoidAscent.svgDiagram("not a diagram at all")).isFailure)
+    test("bad mermaid does not compile") {
+      assertZIO(typeCheck("""mermoid.ascent.MermoidAscent.svgDiagram(mermoid.Mermaid("not a diagram at all"))"""))(
+        Assertion.isLeft(Assertion.containsString("Not a Mermaid diagram"))
+      )
     },
   )
 end MermoidAscentDocsSpec
