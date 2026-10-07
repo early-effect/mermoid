@@ -28,8 +28,8 @@ object MermoidAscent:
 
   def fromScene(
       scene: Scene,
-      selected: Option[String] = None,
-      onSelect: String => UIO[Unit] = _ => ZIO.unit,
+      selected: Option[NodeId] = None,
+      onSelect: NodeId => UIO[Unit] = _ => ZIO.unit,
       containerWidth: Option[Double] = None,
   ): UI[Any] =
     val cssFit = containerWidth.isEmpty && (scene.config.responsive.fit match
@@ -49,12 +49,12 @@ object MermoidAscent:
       mermaid: Mermaid,
       config: RenderConfig = RenderConfig(),
       initialWidth: Double = 720.0,
-      showWidthControls: Boolean = true,
+      widthControls: WidthControls = WidthControls.Shown,
   ): UIO[UI[Any]] =
     for
-      selected <- sq(Option.empty[String])
+      selected <- sq(Option.empty[NodeId])
       width    <- sq(initialWidth)
-    yield interactiveRoot(mermaid.diagram, config, selected, width, showWidthControls, toggleSelect(selected))
+    yield interactiveRoot(mermaid.diagram, config, selected, width, widthControls, toggleSelect(selected))
   end diagramInteractive
 
   /** Same as [[diagramInteractive]] but accepts an external width source (e.g. host ResizeObserver). */
@@ -62,27 +62,27 @@ object MermoidAscent:
       mermaid: Mermaid,
       width: Source[Double],
       config: RenderConfig = RenderConfig(),
-      showWidthControls: Boolean = false,
+      widthControls: WidthControls = WidthControls.Hidden,
   ): UIO[UI[Any]] =
-    for selected <- sq(Option.empty[String])
-    yield interactiveRoot(mermaid.diagram, config, selected, width, showWidthControls, toggleSelect(selected))
+    for selected <- sq(Option.empty[NodeId])
+    yield interactiveRoot(mermaid.diagram, config, selected, width, widthControls, toggleSelect(selected))
 
   /** Host-driven selection and width. Mechanoid live FSMs use this instead of reimplementing chrome.
     *
     * `selected` is the highlighted node id (typically the live state name). `onSelect` fires on click; the host decides
-    * whether that click is a transition. Width controls are off unless `showWidthControls` is true.
+    * whether that click is a transition. Width controls are hidden unless `widthControls` is [[WidthControls.Shown]].
     */
   def diagramControlled(
       mermaid: Mermaid,
-      selected: Source[Option[String]],
-      onSelect: String => UIO[Unit],
+      selected: Source[Option[NodeId]],
+      onSelect: NodeId => UIO[Unit],
       width: Source[Double],
       config: RenderConfig = RenderConfig(),
-      showWidthControls: Boolean = false,
+      widthControls: WidthControls = WidthControls.Hidden,
   ): UI[Any] =
-    interactiveRoot(mermaid.diagram, config, selected, width, showWidthControls, onSelect)
+    interactiveRoot(mermaid.diagram, config, selected, width, widthControls, onSelect)
 
-  private def toggleSelect(selected: Source[Option[String]]): String => UIO[Unit] = id =>
+  private def toggleSelect(selected: Source[Option[NodeId]]): NodeId => UIO[Unit] = id =>
     selected.get.flatMap {
       case Some(`id`) => selected.set(None)
       case _          => selected.set(Some(id))
@@ -91,10 +91,10 @@ object MermoidAscent:
   private def interactiveRoot(
       diagram: Diagram,
       config: RenderConfig,
-      selected: Source[Option[String]],
+      selected: Source[Option[NodeId]],
       width: Source[Double],
-      showWidthControls: Boolean,
-      onSelect: String => UIO[Unit],
+      widthControls: WidthControls,
+      onSelect: NodeId => UIO[Unit],
   ): UI[Any] =
 
     val body = _root_.ascent.squawk.Squawk.zipWith(width, selected) { (w, sel) =>
@@ -104,43 +104,44 @@ object MermoidAscent:
     }
 
     val controls: UI[Any] =
-      if !showWidthControls then UI.Empty
-      else
-        UI.Element(
-          "div",
-          Vector(Attr.StaticAttr("class", AttrValue.Str(HybridClass.Controls.cssName))),
-          Vector(
-            UI.Element(
-              "button",
-              Vector(
-                Attr.StaticAttr("type", AttrValue.Str("button")),
-                Events.onClick((_: AscentEvent) => width.set(360.0)),
+      widthControls match
+        case WidthControls.Hidden => UI.Empty
+        case WidthControls.Shown  =>
+          UI.Element(
+            "div",
+            Vector(Attr.StaticAttr("class", AttrValue.Str(HybridClass.Controls.cssName))),
+            Vector(
+              UI.Element(
+                "button",
+                Vector(
+                  Attr.StaticAttr("type", AttrValue.Str("button")),
+                  Events.onClick((_: AscentEvent) => width.set(360.0)),
+                ),
+                Vector(UI.Text("Narrow")),
               ),
-              Vector(UI.Text("Narrow")),
-            ),
-            UI.Element(
-              "button",
-              Vector(
-                Attr.StaticAttr("type", AttrValue.Str("button")),
-                Events.onClick((_: AscentEvent) => width.set(640.0)),
+              UI.Element(
+                "button",
+                Vector(
+                  Attr.StaticAttr("type", AttrValue.Str("button")),
+                  Events.onClick((_: AscentEvent) => width.set(640.0)),
+                ),
+                Vector(UI.Text("Medium")),
               ),
-              Vector(UI.Text("Medium")),
-            ),
-            UI.Element(
-              "button",
-              Vector(
-                Attr.StaticAttr("type", AttrValue.Str("button")),
-                Events.onClick((_: AscentEvent) => width.set(900.0)),
+              UI.Element(
+                "button",
+                Vector(
+                  Attr.StaticAttr("type", AttrValue.Str("button")),
+                  Events.onClick((_: AscentEvent) => width.set(900.0)),
+                ),
+                Vector(UI.Text("Wide")),
               ),
-              Vector(UI.Text("Wide")),
+              UI.Element(
+                "span",
+                Vector(Attr.StaticAttr("class", AttrValue.Str(HybridClass.WidthLabel.cssName))),
+                Vector(UI.ReactiveText(width.map(w => s"viewport ${w.toInt}px"))),
+              ),
             ),
-            UI.Element(
-              "span",
-              Vector(Attr.StaticAttr("class", AttrValue.Str(HybridClass.WidthLabel.cssName))),
-              Vector(UI.ReactiveText(width.map(w => s"viewport ${w.toInt}px"))),
-            ),
-          ),
-        )
+          )
 
     UI.Element(
       "div",

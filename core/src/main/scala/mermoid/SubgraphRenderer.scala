@@ -11,7 +11,7 @@ object SubgraphRenderer:
   /** `None` when none of the subgraph's members were laid out — there is no box to draw. */
   def subgraphToSvg(
       info: StyleResolver.SubgraphInfo,
-      nodeMap: Map[String, LayoutNode],
+      nodeMap: Map[NodeId, LayoutNode],
   ): Option[SvgNode] =
     val memberNodes = info.nodeIds.flatMap(nodeMap.get)
     if memberNodes.isEmpty then None

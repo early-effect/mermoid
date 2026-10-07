@@ -25,9 +25,9 @@ object LayoutMetrics:
     * considered. Two edges (a→b) and (c→d) cross when the relative order of a,c differs from b,d.
     */
   private[mermoid] def countLayerCrossings(
-      upper: List[String],
-      lower: List[String],
-      edges: List[(String, String)],
+      upper: List[NodeId],
+      lower: List[NodeId],
+      edges: List[(NodeId, NodeId)],
   ): Int =
     val uPos = upper.zipWithIndex.toMap
     val lPos = lower.zipWithIndex.toMap
@@ -42,7 +42,7 @@ object LayoutMetrics:
   end countLayerCrossings
 
   /** Total crossings across all consecutive layer pairs for the given layering and undirected edge ends. */
-  private[mermoid] def totalCrossings(layers: List[List[String]], edges: List[(String, String)]): Int =
+  private[mermoid] def totalCrossings(layers: List[List[NodeId]], edges: List[(NodeId, NodeId)]): Int =
     layers
       .sliding(2)
       .collect { case List(upper, lower) => countLayerCrossings(upper, lower, edges) }

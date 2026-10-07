@@ -4,16 +4,16 @@ package mermoid
 object DummyVertices:
 
   private[mermoid] case class Expanded(
-      layers: List[List[String]],
+      layers: List[List[NodeId]],
       /** Dummy node stubs keyed by id (no geometry yet). */
-      dummies: Map[String, NodeDef],
+      dummies: Map[NodeId, NodeDef],
       /** Intermediate dummy ids for each (from, to), ordered source → target. */
-      routes: Map[(String, String), List[String]],
+      routes: Map[(NodeId, NodeId), List[NodeId]],
   )
 
   /** Expand `layers` with dummies for every multi-layer edge in `edges`. */
   private[mermoid] def expand(
-      layers: List[List[String]],
+      layers: List[List[NodeId]],
       edges: List[Edge],
   ): Expanded =
     val layerOf = layers.zipWithIndex.flatMap { case (ids, i) => ids.map(_ -> i) }.toMap
@@ -43,6 +43,6 @@ object DummyVertices:
     }
   end expand
 
-  private[mermoid] def dummyId(from: String, to: String, layer: Int): String =
-    s"__dummy_${from}_${to}_$layer"
+  private[mermoid] def dummyId(from: NodeId, to: NodeId, layer: Int): NodeId =
+    NodeId.trusted(s"__dummy_${from.value}_${to.value}_$layer")
 end DummyVertices

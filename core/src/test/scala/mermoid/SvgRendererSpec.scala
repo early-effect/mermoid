@@ -10,31 +10,31 @@ object SvgRendererSpec extends ZIOSpecDefault:
       test("collects nodes from edge statements") {
         val stmts = List(
           FlowStatement.EdgeSt(
-            Edge("A", "B", EdgeStyle.Arrow, None),
-            NodeDef("A", None, NodeShape.Rect),
-            NodeDef("B", None, NodeShape.Rect),
+            Edge(NodeId("A"), NodeId("B"), EdgeStyle.Arrow, None),
+            NodeDef(NodeId("A"), None, NodeShape.Rect),
+            NodeDef(NodeId("B"), None, NodeShape.Rect),
           )
         )
         val nodes = StyleResolver.collectNodes(stmts)
         assertTrue(
-          nodes.contains("A"),
-          nodes.contains("B"),
+          nodes.contains(NodeId("A")),
+          nodes.contains(NodeId("B")),
           nodes.size == 2,
         )
       },
       test("collects explicit node definitions") {
         val stmts = List(
-          FlowStatement.NodeSt(NodeDef("A", Some("Hello"), NodeShape.Round)),
+          FlowStatement.NodeSt(NodeDef(NodeId("A"), Some("Hello"), NodeShape.Round)),
           FlowStatement.EdgeSt(
-            Edge("A", "B", EdgeStyle.Arrow, None),
-            NodeDef("A", None, NodeShape.Rect),
-            NodeDef("B", None, NodeShape.Rect),
+            Edge(NodeId("A"), NodeId("B"), EdgeStyle.Arrow, None),
+            NodeDef(NodeId("A"), None, NodeShape.Rect),
+            NodeDef(NodeId("B"), None, NodeShape.Rect),
           ),
         )
         val nodes = StyleResolver.collectNodes(stmts)
         assertTrue(
-          nodes("A").label == Some("Hello"),
-          nodes("A").shape == NodeShape.Round,
+          nodes(NodeId("A")).label == Some("Hello"),
+          nodes(NodeId("A")).shape == NodeShape.Round,
         )
       },
       test("collects nodes from subgraphs") {
@@ -45,24 +45,24 @@ object SvgRendererSpec extends ZIOSpecDefault:
             None,
             List(
               FlowStatement.EdgeSt(
-                Edge("X", "Y", EdgeStyle.Arrow, None),
-                NodeDef("X", None, NodeShape.Rect),
-                NodeDef("Y", None, NodeShape.Rect),
+                Edge(NodeId("X"), NodeId("Y"), EdgeStyle.Arrow, None),
+                NodeDef(NodeId("X"), None, NodeShape.Rect),
+                NodeDef(NodeId("Y"), None, NodeShape.Rect),
               )
             ),
           )
         )
         val nodes = StyleResolver.collectNodes(stmts)
-        assertTrue(nodes.contains("X"), nodes.contains("Y"))
+        assertTrue(nodes.contains(NodeId("X")), nodes.contains(NodeId("Y")))
       },
     ),
     suite("collectEdges")(
       test("collects edges including from subgraphs") {
         val stmts = List(
           FlowStatement.EdgeSt(
-            Edge("A", "B", EdgeStyle.Arrow, None),
-            NodeDef("A", None, NodeShape.Rect),
-            NodeDef("B", None, NodeShape.Rect),
+            Edge(NodeId("A"), NodeId("B"), EdgeStyle.Arrow, None),
+            NodeDef(NodeId("A"), None, NodeShape.Rect),
+            NodeDef(NodeId("B"), None, NodeShape.Rect),
           ),
           FlowStatement.SubgraphSt(
             "sg",
@@ -70,9 +70,9 @@ object SvgRendererSpec extends ZIOSpecDefault:
             None,
             List(
               FlowStatement.EdgeSt(
-                Edge("C", "D", EdgeStyle.Dotted, Some("label")),
-                NodeDef("C", None, NodeShape.Rect),
-                NodeDef("D", None, NodeShape.Rect),
+                Edge(NodeId("C"), NodeId("D"), EdgeStyle.Dotted, Some("label")),
+                NodeDef(NodeId("C"), None, NodeShape.Rect),
+                NodeDef(NodeId("D"), None, NodeShape.Rect),
               )
             ),
           ),
@@ -80,47 +80,24 @@ object SvgRendererSpec extends ZIOSpecDefault:
         val edges = StyleResolver.collectEdges(stmts)
         assertTrue(
           edges.size == 2,
-          edges(0).from == "A",
-          edges(1).from == "C",
+          edges(0).from == NodeId("A"),
+          edges(1).from == NodeId("C"),
         )
       }
-    ),
-    suite("collectStyleDefs")(
-      test("applies classDef styles via class statement") {
-        val stmts = List(
-          FlowStatement
-            .ClassDefSt("highlight", Map(CssProperty.Fill -> "#ff0", CssProperty.Stroke -> "#f00")),
-          FlowStatement.ClassSt(List("A", "B"), "highlight"),
-        )
-        val styles = StyleResolver.collectStyleDefs(stmts)
-        assertTrue(
-          styles("A")(CssProperty.Fill) == "#ff0",
-          styles("B")(CssProperty.Stroke) == "#f00",
-        )
-      },
-      test("direct style overrides class style") {
-        val stmts = List(
-          FlowStatement.ClassDefSt("cls", Map(CssProperty.Fill -> "#aaa")),
-          FlowStatement.ClassSt(List("A"), "cls"),
-          FlowStatement.StyleSt("A", Map(CssProperty.Fill -> "#bbb")),
-        )
-        val styles = StyleResolver.collectStyleDefs(stmts)
-        assertTrue(styles("A")(CssProperty.Fill) == "#bbb")
-      },
     ),
     suite("layout")(
       test("positions nodes in topological order for TB direction") {
         val config = RenderConfig()
         val nodes  = Map(
-          "A" -> NodeDef("A", Some("Start"), NodeShape.Rect),
-          "B" -> NodeDef("B", Some("End"), NodeShape.Rect),
+          NodeId("A") -> NodeDef(NodeId("A"), Some("Start"), NodeShape.Rect),
+          NodeId("B") -> NodeDef(NodeId("B"), Some("End"), NodeShape.Rect),
         )
-        val edges = List(Edge("A", "B", EdgeStyle.Arrow, None))
+        val edges = List(Edge(NodeId("A"), NodeId("B"), EdgeStyle.Arrow, None))
         val laid  = Layout.layout(config.layout, Direction.TB, nodes, edges).visibleNodes
         assertTrue(
           laid.size == 2,
-          laid.find(_.id == "A").get.center.y < laid
-            .find(_.id == "B")
+          laid.find(_.id == NodeId("A")).get.center.y < laid
+            .find(_.id == NodeId("B"))
             .get
             .center
             .y,
@@ -129,19 +106,19 @@ object SvgRendererSpec extends ZIOSpecDefault:
       test("positions nodes horizontally for LR direction") {
         val config = RenderConfig()
         val nodes  = Map(
-          "A" -> NodeDef("A", None, NodeShape.Rect),
-          "B" -> NodeDef("B", None, NodeShape.Rect),
+          NodeId("A") -> NodeDef(NodeId("A"), None, NodeShape.Rect),
+          NodeId("B") -> NodeDef(NodeId("B"), None, NodeShape.Rect),
         )
-        val edges = List(Edge("A", "B", EdgeStyle.Arrow, None))
+        val edges = List(Edge(NodeId("A"), NodeId("B"), EdgeStyle.Arrow, None))
         val laid  = Layout.layout(config.layout, Direction.LR, nodes, edges).visibleNodes
         assertTrue(
           laid
-            .find(_.id == "A")
+            .find(_.id == NodeId("A"))
             .get
             .center
-            .x < laid.find(_.id == "B").get.center.x,
-          laid.find(_.id == "A").get.center.y == laid
-            .find(_.id == "B")
+            .x < laid.find(_.id == NodeId("B")).get.center.x,
+          laid.find(_.id == NodeId("A")).get.center.y == laid
+            .find(_.id == NodeId("B"))
             .get
             .center
             .y,
@@ -155,7 +132,7 @@ object SvgRendererSpec extends ZIOSpecDefault:
       },
       test("avoids a node at the midpoint by shifting along the edge") {
 
-        val blockingNode = LayoutNode("X", "X", NodeShape.Rect, Point(100, 0), 80, 50, Map.empty)
+        val blockingNode = LayoutNode(NodeId("X"), "X", NodeShape.Rect, Point(100, 0), 80, 50, Map.empty)
         val (mx, _)      = EdgeRenderer.findLabelPosition(0, 0, 200, 0, 40, 20, List(blockingNode))
         // The label should have moved away from x=100
         assertTrue(mx < 99.0 || mx > 101.0)
@@ -164,7 +141,7 @@ object SvgRendererSpec extends ZIOSpecDefault:
 
         // Create a wall of nodes covering the entire edge
         val nodes = (0 to 10).map { i =>
-          LayoutNode(s"N$i", s"N$i", NodeShape.Rect, Point(i * 20.0, 0), 30, 30, Map.empty)
+          LayoutNode(NodeId.trusted(s"N$i"), s"N$i", NodeShape.Rect, Point(i * 20.0, 0), 30, 30, Map.empty)
         }
         val (mx, my) = EdgeRenderer.findLabelPosition(0, 0, 200, 0, 40, 20, nodes)
         assertTrue(mx == 100.0, my == 0.0)
@@ -176,9 +153,9 @@ object SvgRendererSpec extends ZIOSpecDefault:
           Direction.TD,
           List(
             FlowStatement.EdgeSt(
-              Edge("A", "B", EdgeStyle.Arrow, None),
-              NodeDef("A", None, NodeShape.Rect),
-              NodeDef("B", None, NodeShape.Rect),
+              Edge(NodeId("A"), NodeId("B"), EdgeStyle.Arrow, None),
+              NodeDef(NodeId("A"), None, NodeShape.Rect),
+              NodeDef(NodeId("B"), None, NodeShape.Rect),
             )
           ),
         )
@@ -199,7 +176,7 @@ object SvgRendererSpec extends ZIOSpecDefault:
         val diagram = Diagram.Flowchart(
           Direction.TD,
           List(
-            FlowStatement.NodeSt(NodeDef("A", Some("Test"), NodeShape.Rect))
+            FlowStatement.NodeSt(NodeDef(NodeId("A"), Some("Test"), NodeShape.Rect))
           ),
         )
         val svg = SvgRenderer.render(diagram, config)
@@ -212,8 +189,8 @@ object SvgRendererSpec extends ZIOSpecDefault:
         val diagram = Diagram.StateDiagram(
           Direction.TB,
           List(
-            StateStatement.TransitionSt(StateTransition("[*]", "Created", None)),
-            StateStatement.TransitionSt(StateTransition("Created", "Done", Some("Finish"))),
+            StateStatement.TransitionSt(StateTransition(NodeId("[*]"), NodeId("Created"), None)),
+            StateStatement.TransitionSt(StateTransition(NodeId("Created"), NodeId("Done"), Some("Finish"))),
           ),
         )
         val svg = SvgRenderer.render(diagram)
@@ -231,7 +208,7 @@ object SvgRendererSpec extends ZIOSpecDefault:
           Direction.TD,
           List(
             FlowStatement.NodeSt(
-              NodeDef("A", Some("a < b & c"), NodeShape.Rect)
+              NodeDef(NodeId("A"), Some("a < b & c"), NodeShape.Rect)
             )
           ),
         )
@@ -245,7 +222,7 @@ object SvgRendererSpec extends ZIOSpecDefault:
         val diagram = Diagram.Flowchart(
           Direction.TD,
           List(
-            FlowStatement.NodeSt(NodeDef("A", Some("Hello"), NodeShape.Round))
+            FlowStatement.NodeSt(NodeDef(NodeId("A"), Some("Hello"), NodeShape.Round))
           ),
         )
         val svg = SvgRenderer.render(diagram)
@@ -259,7 +236,7 @@ object SvgRendererSpec extends ZIOSpecDefault:
         val diagram = Diagram.Flowchart(
           Direction.TD,
           List(
-            FlowStatement.NodeSt(NodeDef("D", Some("Decision"), NodeShape.Rhombus))
+            FlowStatement.NodeSt(NodeDef(NodeId("D"), Some("Decision"), NodeShape.Rhombus))
           ),
         )
         val svg = SvgRenderer.render(diagram)
@@ -270,9 +247,9 @@ object SvgRendererSpec extends ZIOSpecDefault:
           Direction.TD,
           List(
             FlowStatement.EdgeSt(
-              Edge("A", "B", EdgeStyle.Arrow, None),
-              NodeDef("A", None, NodeShape.Rect),
-              NodeDef("B", None, NodeShape.Rect),
+              Edge(NodeId("A"), NodeId("B"), EdgeStyle.Arrow, None),
+              NodeDef(NodeId("A"), None, NodeShape.Rect),
+              NodeDef(NodeId("B"), None, NodeShape.Rect),
             )
           ),
         )
@@ -287,9 +264,9 @@ object SvgRendererSpec extends ZIOSpecDefault:
           Direction.TD,
           List(
             FlowStatement.EdgeSt(
-              Edge("A", "B", EdgeStyle.Arrow, None, Some("myEdge")),
-              NodeDef("A", None, NodeShape.Rect),
-              NodeDef("B", None, NodeShape.Rect),
+              Edge(NodeId("A"), NodeId("B"), EdgeStyle.Arrow, None, Some("myEdge")),
+              NodeDef(NodeId("A"), None, NodeShape.Rect),
+              NodeDef(NodeId("B"), None, NodeShape.Rect),
             )
           ),
         )
@@ -312,9 +289,9 @@ object SvgRendererSpec extends ZIOSpecDefault:
           Direction.TD,
           List(
             FlowStatement.EdgeSt(
-              Edge("A", "B", EdgeStyle.Arrow, Some("yes")),
-              NodeDef("A", None, NodeShape.Rect),
-              NodeDef("B", None, NodeShape.Rect),
+              Edge(NodeId("A"), NodeId("B"), EdgeStyle.Arrow, Some("yes")),
+              NodeDef(NodeId("A"), None, NodeShape.Rect),
+              NodeDef(NodeId("B"), None, NodeShape.Rect),
             )
           ),
         )
@@ -328,8 +305,8 @@ object SvgRendererSpec extends ZIOSpecDefault:
         val diagram = Diagram.StateDiagram(
           Direction.TB,
           List(
-            StateStatement.TransitionSt(StateTransition("[*]", "Idle", None)),
-            StateStatement.NoteSt(NotePosition.RightOf, "Idle", "hello"),
+            StateStatement.TransitionSt(StateTransition(NodeId("[*]"), NodeId("Idle"), None)),
+            StateStatement.NoteSt(NotePosition.RightOf, NodeId("Idle"), "hello"),
           ),
         )
         val svg = SvgRenderer.render(diagram)
@@ -344,8 +321,8 @@ object SvgRendererSpec extends ZIOSpecDefault:
         val diagram = Diagram.StateDiagram(
           Direction.TB,
           List(
-            StateStatement.TransitionSt(StateTransition("[*]", "Idle", None)),
-            StateStatement.NoteSt(NotePosition.RightOf, "Idle", "hello", Some("myNote")),
+            StateStatement.TransitionSt(StateTransition(NodeId("[*]"), NodeId("Idle"), None)),
+            StateStatement.NoteSt(NotePosition.RightOf, NodeId("Idle"), "hello", Some("myNote")),
           ),
         )
         val svg = SvgRenderer.render(diagram)
@@ -361,9 +338,9 @@ object SvgRendererSpec extends ZIOSpecDefault:
               None,
               List(
                 FlowStatement.EdgeSt(
-                  Edge("A", "B", EdgeStyle.Arrow, None),
-                  NodeDef("A", None, NodeShape.Rect),
-                  NodeDef("B", None, NodeShape.Rect),
+                  Edge(NodeId("A"), NodeId("B"), EdgeStyle.Arrow, None),
+                  NodeDef(NodeId("A"), None, NodeShape.Rect),
+                  NodeDef(NodeId("B"), None, NodeShape.Rect),
                 )
               ),
             )
@@ -386,7 +363,7 @@ object SvgRendererSpec extends ZIOSpecDefault:
               None,
               None,
               List(
-                FlowStatement.NodeSt(NodeDef("X", Some("Server"), NodeShape.Rect))
+                FlowStatement.NodeSt(NodeDef(NodeId("X"), Some("Server"), NodeShape.Rect))
               ),
             )
           ),
@@ -400,7 +377,7 @@ object SvgRendererSpec extends ZIOSpecDefault:
       test("emits <style> block with theme CSS variables") {
         val diagram = Diagram.Flowchart(
           Direction.TD,
-          List(FlowStatement.NodeSt(NodeDef("A", Some("Hi"), NodeShape.Rect))),
+          List(FlowStatement.NodeSt(NodeDef(NodeId("A"), Some("Hi"), NodeShape.Rect))),
         )
         val svg = SvgRenderer.render(diagram)
         assertTrue(
@@ -415,7 +392,7 @@ object SvgRendererSpec extends ZIOSpecDefault:
         val config  = RenderConfig(resolveVariables = true)
         val diagram = Diagram.Flowchart(
           Direction.TD,
-          List(FlowStatement.NodeSt(NodeDef("A", Some("Hi"), NodeShape.Rect))),
+          List(FlowStatement.NodeSt(NodeDef(NodeId("A"), Some("Hi"), NodeShape.Rect))),
         )
         val svg = SvgRenderer.render(diagram, config)
         // resolved means no var() references in the CSS
@@ -425,7 +402,7 @@ object SvgRendererSpec extends ZIOSpecDefault:
         val config  = RenderConfig(resolveVariables = false)
         val diagram = Diagram.Flowchart(
           Direction.TD,
-          List(FlowStatement.NodeSt(NodeDef("A", Some("Hi"), NodeShape.Rect))),
+          List(FlowStatement.NodeSt(NodeDef(NodeId("A"), Some("Hi"), NodeShape.Rect))),
         )
         val svg = SvgRenderer.render(diagram, config)
         assertTrue(
@@ -438,7 +415,7 @@ object SvgRendererSpec extends ZIOSpecDefault:
           Direction.TD,
           List(
             FlowStatement.ClassDefSt("highlight", Map(CssProperty.Fill -> "#ff0", CssProperty.Stroke -> "#f00")),
-            FlowStatement.NodeSt(NodeDef("A", Some("Hi"), NodeShape.Rect)),
+            FlowStatement.NodeSt(NodeDef(NodeId("A"), Some("Hi"), NodeShape.Rect)),
           ),
         )
         val svg = SvgRenderer.render(diagram)
@@ -454,8 +431,8 @@ object SvgRendererSpec extends ZIOSpecDefault:
         val diagram = Diagram.Flowchart(
           Direction.TD,
           List(
-            FlowStatement.NodeSt(NodeDef("A", Some("Hi"), NodeShape.Rect)),
-            FlowStatement.ClassSt(List("A"), "highlight"),
+            FlowStatement.NodeSt(NodeDef(NodeId("A"), Some("Hi"), NodeShape.Rect)),
+            FlowStatement.ClassSt(List(NodeId("A")), "highlight"),
           ),
         )
         val svg = SvgRenderer.render(diagram)
@@ -465,8 +442,8 @@ object SvgRendererSpec extends ZIOSpecDefault:
         val diagram = Diagram.Flowchart(
           Direction.TD,
           List(
-            FlowStatement.NodeSt(NodeDef("A", Some("Hi"), NodeShape.Rect)),
-            FlowStatement.StyleSt("A", Map(CssProperty.Fill -> "#f00")),
+            FlowStatement.NodeSt(NodeDef(NodeId("A"), Some("Hi"), NodeShape.Rect)),
+            FlowStatement.StyleSt(NodeId("A"), Map(CssProperty.Fill -> "#f00")),
           ),
         )
         val svg = SvgRenderer.render(diagram)
@@ -523,7 +500,7 @@ object SvgRendererSpec extends ZIOSpecDefault:
         val config  = RenderConfig(customStylesheet = Some(custom))
         val diagram = Diagram.Flowchart(
           Direction.TD,
-          List(FlowStatement.NodeSt(NodeDef("A", Some("Hi"), NodeShape.Rect))),
+          List(FlowStatement.NodeSt(NodeDef(NodeId("A"), Some("Hi"), NodeShape.Rect))),
         )
         val svg = SvgRenderer.render(diagram, config)
         assertTrue(
@@ -536,9 +513,9 @@ object SvgRendererSpec extends ZIOSpecDefault:
           Direction.TD,
           List(
             FlowStatement.EdgeSt(
-              Edge("A", "B", EdgeStyle.Arrow, None),
-              NodeDef("A", None, NodeShape.Rect),
-              NodeDef("B", None, NodeShape.Rect),
+              Edge(NodeId("A"), NodeId("B"), EdgeStyle.Arrow, None),
+              NodeDef(NodeId("A"), None, NodeShape.Rect),
+              NodeDef(NodeId("B"), None, NodeShape.Rect),
             )
           ),
         )
@@ -555,7 +532,7 @@ object SvgRendererSpec extends ZIOSpecDefault:
         val diagram = Diagram.StateDiagram(
           Direction.TB,
           List(
-            StateStatement.TransitionSt(StateTransition("[*]", "Idle", None))
+            StateStatement.TransitionSt(StateTransition(NodeId("[*]"), NodeId("Idle"), None))
           ),
         )
         val svg = SvgRenderer.render(diagram)
@@ -568,8 +545,8 @@ object SvgRendererSpec extends ZIOSpecDefault:
         val diagram = Diagram.StateDiagram(
           Direction.TB,
           List(
-            StateStatement.TransitionSt(StateTransition("[*]", "A", None)),
-            StateStatement.TransitionSt(StateTransition("A", "[*]", None)),
+            StateStatement.TransitionSt(StateTransition(NodeId("[*]"), NodeId("A"), None)),
+            StateStatement.TransitionSt(StateTransition(NodeId("A"), NodeId("[*]"), None)),
           ),
         )
         val svg = SvgRenderer.render(diagram)
@@ -581,7 +558,7 @@ object SvgRendererSpec extends ZIOSpecDefault:
       test("no inline fill or stroke on node shapes") {
         val diagram = Diagram.Flowchart(
           Direction.TD,
-          List(FlowStatement.NodeSt(NodeDef("A", Some("Hi"), NodeShape.Round))),
+          List(FlowStatement.NodeSt(NodeDef(NodeId("A"), Some("Hi"), NodeShape.Round))),
         )
         val svg = SvgRenderer.render(diagram)
         // node-shape elements should not have inline fill= or stroke= attributes

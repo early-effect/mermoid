@@ -56,7 +56,7 @@ object NoteRenderer:
       note: StateNote,
       node: LayoutNode,
       obstacles: Iterable[LayoutNode],
-      selfLoopBottomExtents: Map[String, Double] = Map.empty,
+      selfLoopBottomExtents: Map[NodeId, Double] = Map.empty,
   ): NoteBox =
     val (noteW, noteH) = noteSize(config, note)
     val gap            = 10.0
@@ -125,8 +125,8 @@ object NoteRenderer:
   def noteToSvg(
       config: RenderConfig,
       note: StateNote,
-      nodeMap: Map[String, LayoutNode],
-      selfLoopBottomExtents: Map[String, Double] = Map.empty,
+      nodeMap: Map[NodeId, LayoutNode],
+      selfLoopBottomExtents: Map[NodeId, Double] = Map.empty,
   ): Option[SvgNode] =
     nodeMap.get(note.stateId).map { node =>
       val lc                  = config.layout

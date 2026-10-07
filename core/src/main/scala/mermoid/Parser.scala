@@ -20,6 +20,9 @@ object MermaidParser:
   private[mermoid] def identifier(using P[Any]): P[String] =
     P(CharPred(c => c.isLetterOrDigit || c == '_').rep(1).!)
 
+  private[mermoid] def nodeId(using P[Any]): P[NodeId] =
+    P(identifier).map(NodeId.trusted)
+
   private[mermoid] def quotedString(using P[Any]): P[String] =
     P("\"" ~ CharsWhile(_ != '"', 0).! ~ "\"")
 
@@ -71,7 +74,7 @@ object MermaidParser:
     P(":::" ~ identifier.rep(sep = ws ~ "," ~ ws, min = 1)).map(_.toList)
 
   private[mermoid] def nodeDef(using P[Any]): P[NodeDef] =
-    P(identifier ~ nodeShape.? ~ classSuffix.?).map { case (id, shapeOpt, classes) =>
+    P(nodeId ~ nodeShape.? ~ classSuffix.?).map { case (id, shapeOpt, classes) =>
       val cls = classes.getOrElse(Nil)
       shapeOpt match
         case Some((label, shape)) => NodeDef(id, Some(label), shape, cls)
@@ -133,7 +136,7 @@ object MermaidParser:
     P(styleProperty.rep(sep = ws ~ "," ~ ws)).map(_.toMap)
 
   private[mermoid] def styleSt(using P[Any]): P[FlowStatement.StyleSt] =
-    P("style" ~ ws ~ identifier ~ ws ~ styleProperties).map { case (id, props) =>
+    P("style" ~ ws ~ nodeId ~ ws ~ styleProperties).map { case (id, props) =>
       FlowStatement.StyleSt(id, props)
     }
 
@@ -143,18 +146,18 @@ object MermaidParser:
     }
 
   private[mermoid] def classSt(using P[Any]): P[FlowStatement.ClassSt] =
-    P("class" ~ ws ~ identifier.rep(sep = ws ~ "," ~ ws, min = 1) ~ ws ~ identifier).map { case (ids, className) =>
+    P("class" ~ ws ~ nodeId.rep(sep = ws ~ "," ~ ws, min = 1) ~ ws ~ identifier).map { case (ids, className) =>
       FlowStatement.ClassSt(ids.toList, className)
     }
 
   /** Mermaid `click` lines: callback and/or href, optional tooltip and link target. */
   private[mermoid] def clickSt(using P[Any]): P[FlowStatement.ClickSt] =
-    P("click" ~ ws ~ identifier ~ ws ~ CharsWhile(c => c != '\n' && c != '\r', 1).!).map { case (id, rest) =>
+    P("click" ~ ws ~ nodeId ~ ws ~ CharsWhile(c => c != '\n' && c != '\r', 1).!).map { case (id, rest) =>
       FlowStatement.ClickSt(parseClickRest(id, rest.trim))
     }
 
   /** Interpret the remainder of a `click` line after `click <id>`. */
-  private[mermoid] def parseClickRest(nodeId: String, rest: String): ClickBinding =
+  private[mermoid] def parseClickRest(nodeId: NodeId, rest: String): ClickBinding =
     def unquote(s: String): String =
       if s.length >= 2 && s.head == '"' && s.last == '"' then s.substring(1, s.length - 1)
       else s
@@ -251,8 +254,8 @@ object MermaidParser:
 
   // -- State Diagram -----------------------------------------------------------
 
-  private[mermoid] def stateId(using P[Any]): P[String] =
-    P("[*]".! | identifier)
+  private[mermoid] def stateId(using P[Any]): P[NodeId] =
+    P("[*]".!.map(NodeId.trusted) | nodeId)
 
   /** `A:::cls --> B:::other: label` — classes default to Nil when the suffix is absent. */
   private[mermoid] def stateTransition(using P[Any]): P[StateStatement.TransitionSt] =
@@ -260,7 +263,7 @@ object MermaidParser:
       stateId ~ classSuffix.? ~ ws ~ "-->" ~ ws ~ stateId ~ classSuffix.? ~
         (":" ~ ws ~ CharsWhile(_ != '\n', 1).!).?
     ).map {
-      (from: String, fromCls: Option[List[String]], to: String, toCls: Option[List[String]], label: Option[String]) =>
+      (from: NodeId, fromCls: Option[List[String]], to: NodeId, toCls: Option[List[String]], label: Option[String]) =>
         StateStatement.TransitionSt(
           StateTransition(from, to, label.map(_.trim), fromCls.getOrElse(Nil), toCls.getOrElse(Nil))
         )
@@ -274,7 +277,7 @@ object MermaidParser:
 
   private[mermoid] def noteSt(using P[Any]): P[StateStatement.NoteSt] =
     P(
-      "note" ~ ws ~ notePosition ~ ws ~ identifier ~ asAlias.? ~ nl ~
+      "note" ~ ws ~ notePosition ~ ws ~ nodeId ~ asAlias.? ~ nl ~
         (!("end note") ~ AnyChar).rep.! ~
         "end note"
     ).map { case (pos, id, alias, text) =>

@@ -14,8 +14,8 @@ private[ascent] object HybridPainter:
 
   def paint(
       scene: Scene,
-      selected: Option[String],
-      onSelect: String => UIO[Unit],
+      selected: Option[NodeId],
+      onSelect: NodeId => UIO[Unit],
       scale: Double = 1.0,
       cssFit: Boolean = false,
   ): UI[Any] =
@@ -25,8 +25,8 @@ private[ascent] object HybridPainter:
 
   private def paintRanked(
       scene: DiagramScene,
-      selected: Option[String],
-      onSelect: String => UIO[Unit],
+      selected: Option[NodeId],
+      onSelect: NodeId => UIO[Unit],
       scale: Double,
       cssFit: Boolean,
   ): UI[Any] =
@@ -93,8 +93,8 @@ private[ascent] object HybridPainter:
 
   private def paintSequence(
       scene: SequenceScene,
-      selected: Option[String],
-      onSelect: String => UIO[Unit],
+      selected: Option[NodeId],
+      onSelect: NodeId => UIO[Unit],
       scale: Double,
       cssFit: Boolean,
   ): UI[Any] =
@@ -185,11 +185,11 @@ private[ascent] object HybridPainter:
 
   private def actorButton(
       person: PlacedParticipant,
-      selected: Option[String],
-      onSelect: String => UIO[Unit],
+      selected: Option[NodeId],
+      onSelect: NodeId => UIO[Unit],
   ): UI[Any] =
     val box   = person.box
-    val isSel = selected.contains(person.id.value)
+    val isSel = selected.contains(NodeId.ofParticipant(person.id))
     val kind  = person.kind match
       case ParticipantKind.Participant => HybridClass.ActorBox.cssName
       case ParticipantKind.Actor       => HybridClass.ActorPerson.cssName
@@ -225,7 +225,7 @@ private[ascent] object HybridPainter:
         Attr.StaticAttr("class", AttrValue.Str(classes.mkString(" "))),
         Attr.StaticAttr("style", AttrValue.Str(style)),
         Attr.StaticAttr("aria-label", AttrValue.Str(person.label)),
-        Events.onClick((_: AscentEvent) => onSelect(person.id.value)),
+        Events.onClick((_: AscentEvent) => onSelect(NodeId.ofParticipant(person.id))),
       ),
       kids,
     )
@@ -268,7 +268,7 @@ private[ascent] object HybridPainter:
     )
   end arrowheadDefs
 
-  private def markIncident(node: SvgNode, edge: LayoutEdge, selected: Option[String]): SvgNode =
+  private def markIncident(node: SvgNode, edge: LayoutEdge, selected: Option[NodeId]): SvgNode =
     val incident = selected.exists(id => edge.from == id || edge.to == id)
     if !incident then node
     else
@@ -297,8 +297,8 @@ private[ascent] object HybridPainter:
   private def nodeButton(
       node: LayoutNode,
       scene: DiagramScene,
-      selected: Option[String],
-      onSelect: String => UIO[Unit],
+      selected: Option[NodeId],
+      onSelect: NodeId => UIO[Unit],
   ): UI[Any] =
     val interaction = scene.interactions.get(node.id)
     val left        = node.center.x - node.width / 2
@@ -321,7 +321,7 @@ private[ascent] object HybridPainter:
         ShapeRenderer.inlineStyle(shapeStyle).map(s => Attr.StaticAttr("style", AttrValue.Str(s)))
     val shapeEl: UI[Any] = UI.Element("span", shapeAttrs, Vector.empty)
     val label: UI[Any]   =
-      if node.id == "[*]" then UI.Empty
+      if node.id == NodeId.stateMarker then UI.Empty
       else
         UI.Element(
           "span",
@@ -357,8 +357,8 @@ private[ascent] object HybridPainter:
       Attr.StaticAttr("style", AttrValue.Str(style)),
       Attr.StaticAttr("type", AttrValue.Str("button")),
       Attr.StaticAttr("id", AttrValue.Str(s"node-${node.id}")),
-      Attr.StaticAttr("aria-label", AttrValue.Str(if node.label.nonEmpty then node.label else node.id)),
-      Attr.StaticAttr("data-node-id", AttrValue.Str(node.id)),
+      Attr.StaticAttr("aria-label", AttrValue.Str(if node.label.nonEmpty then node.label else node.id.value)),
+      Attr.StaticAttr("data-node-id", AttrValue.Str(node.id.value)),
     ) ++ interaction.flatMap(_.tooltip).map(t => Attr.StaticAttr("title", AttrValue.Str(t))) ++ Vector(click)
 
     interaction.flatMap(_.href) match
@@ -368,7 +368,7 @@ private[ascent] object HybridPainter:
           Attr.StaticAttr("class", AttrValue.Str(classes.mkString(" ") + " " + HybridClass.NodeLink.cssName)),
           Attr.StaticAttr("style", AttrValue.Str(style)),
           Attr.StaticAttr("id", AttrValue.Str(s"node-${node.id}")),
-          Attr.StaticAttr("data-node-id", AttrValue.Str(node.id)),
+          Attr.StaticAttr("data-node-id", AttrValue.Str(node.id.value)),
         ) ++ interaction.flatMap(_.linkTarget).map(t => Attr.StaticAttr("target", AttrValue.Str(t))) ++
           interaction.flatMap(_.tooltip).map(t => Attr.StaticAttr("title", AttrValue.Str(t))) :+
           Events.onClick((_: AscentEvent) => onSelect(node.id))
@@ -407,9 +407,9 @@ private[ascent] object HybridPainter:
   private def noteCard(
       note: StateNote,
       scene: DiagramScene,
-      selfLoopExtents: Map[String, Double],
-      selected: Option[String],
-      onSelect: String => UIO[Unit],
+      selfLoopExtents: Map[NodeId, Double],
+      selected: Option[NodeId],
+      onSelect: NodeId => UIO[Unit],
   ): Option[UI[Any]] =
     scene.nodeMap.get(note.stateId).map { node =>
       val box     = NoteRenderer.placeNote(scene.config, note, node, scene.visibleNodes, selfLoopExtents)

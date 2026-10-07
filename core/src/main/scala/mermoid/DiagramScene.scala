@@ -54,10 +54,10 @@ case class DiagramScene(
     height: Double,
     nodes: List[LayoutNode],
     edges: List[LayoutEdge],
-    routes: Map[(String, String), List[Point]],
+    routes: Map[(NodeId, NodeId), List[Point]],
     subgraphs: List[StyleResolver.SubgraphInfo],
     notes: List[StateNote],
-    interactions: Map[String, NodeInteraction],
+    interactions: Map[NodeId, NodeInteraction],
     loopSide: SelfLoopSide,
     classDefRules: List[CssRule],
     config: RenderConfig,
@@ -65,6 +65,6 @@ case class DiagramScene(
     direction: Direction,
 ):
   def visibleNodes: List[LayoutNode]          = nodes.filter(!_.dummy)
-  def nodeMap: Map[String, LayoutNode]        = nodes.map(n => n.id -> n).toMap
-  def visibleNodeMap: Map[String, LayoutNode] = visibleNodes.map(n => n.id -> n).toMap
+  def nodeMap: Map[NodeId, LayoutNode]        = nodes.map(n => n.id -> n).toMap
+  def visibleNodeMap: Map[NodeId, LayoutNode] = visibleNodes.map(n => n.id -> n).toMap
 end DiagramScene

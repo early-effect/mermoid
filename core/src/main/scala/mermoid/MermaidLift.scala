@@ -22,6 +22,9 @@ private[mermoid] object MermaidLift:
   given ToExpr[ParticipantId] with
     def apply(x: ParticipantId)(using Quotes): Expr[ParticipantId] = '{ ParticipantId(${ Expr(x.value) }) }
 
+  given ToExpr[NodeId] with
+    def apply(x: NodeId)(using Quotes): Expr[NodeId] = '{ NodeId.trusted(${ Expr(x.value) }) }
+
   given ToExpr[Direction] with
     def apply(x: Direction)(using Quotes): Expr[Direction] = x match
       case Direction.TB => '{ Direction.TB }

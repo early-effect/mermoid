@@ -214,7 +214,7 @@ and 900px. Direction changes at 640px only when the diagram opts into `flipDirec
       },
       md"""
 For external width sources (e.g., a `ResizeObserver` on the container), use `MermoidAscent.diagramResponsive` with a
-`Source[Double]`. The built-in Narrow/Medium/Wide buttons are hidden when `showWidthControls = false`.
+`Source[Double]`. The built-in Narrow/Medium/Wide buttons are hidden when `widthControls = WidthControls.Hidden`.
 """,
     ),
   )
