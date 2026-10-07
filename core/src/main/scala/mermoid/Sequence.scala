@@ -1,13 +1,5 @@
 package mermoid
 
-/** A participant id. The parser is the only constructor: an empty id cannot be written. */
-opaque type ParticipantId = String
-
-object ParticipantId:
-  private[mermoid] def apply(raw: String): ParticipantId = raw
-
-  extension (id: ParticipantId) def value: String = id
-
 /** `participant` is a rounded box. `actor` is a stick figure in the same column. */
 enum ParticipantKind:
   case Participant
@@ -54,11 +46,11 @@ enum MessageControl:
   case Deactivate
 
 enum NotePlace:
-  case LeftOf(id: ParticipantId)
-  case RightOf(id: ParticipantId)
+  case LeftOf(id: NodeId)
+  case RightOf(id: NodeId)
 
   /** `Over(a, a)` is a note on one column. */
-  case Over(from: ParticipantId, to: ParticipantId)
+  case Over(from: NodeId, to: NodeId)
 
 enum Numbering:
   case On(start: Int, step: Int)
@@ -81,16 +73,16 @@ enum GroupKind:
 case class GroupSection(label: Option[String], body: List[SequenceStatement])
 
 enum SequenceStatement:
-  case Declare(id: ParticipantId, label: Option[String], kind: ParticipantKind)
+  case Declare(id: NodeId, label: Option[String], kind: ParticipantKind)
   case Message(
-      from: ParticipantId,
-      to: ParticipantId,
+      from: NodeId,
+      to: NodeId,
       arrow: SequenceArrow,
       text: Option[String],
       control: MessageControl,
   )
-  case Activate(id: ParticipantId)
-  case Deactivate(id: ParticipantId)
+  case Activate(id: NodeId)
+  case Deactivate(id: NodeId)
   case Note(place: NotePlace, text: String)
   case Autonumber(mode: Numbering)
   case Group(kind: GroupKind, sections: List[GroupSection])
@@ -104,15 +96,15 @@ enum MessagePath:
   case Straight(from: Point, to: Point)
   case Hook(out: Point, down: Point, back: Point, head: Point)
 
-case class PlacedParticipant(id: ParticipantId, label: String, kind: ParticipantKind, box: Rect):
+case class PlacedParticipant(id: NodeId, label: String, kind: ParticipantKind, box: Rect):
   def centerX: Double = box.x + box.w / 2
 
-case class Lifeline(id: ParticipantId, x: Double, y0: Double, y1: Double)
+case class Lifeline(id: NodeId, x: Double, y0: Double, y1: Double)
 
 case class PlacedMessage(
     index: Int,
-    from: ParticipantId,
-    to: ParticipantId,
+    from: NodeId,
+    to: NodeId,
     arrow: SequenceArrow,
     lines: List[String],
     number: Option[Int],
@@ -132,7 +124,7 @@ object PlacedMessage:
           case Nil    => List(n.toString)
           case h :: t => s"$n $h" :: t
 
-case class ActivationBar(id: ParticipantId, depth: Int, rect: Rect)
+case class ActivationBar(id: NodeId, depth: Int, rect: Rect)
 
 case class PlacedNote(index: Int, lines: List[String], box: Rect)
 
@@ -160,11 +152,11 @@ case class SequenceScene(
 )
 
 /** A participant as layout sees it: explicit declare, or the first message that named the id. */
-case class DeclaredParticipant(id: ParticipantId, label: String, kind: ParticipantKind)
+case class DeclaredParticipant(id: NodeId, label: String, kind: ParticipantKind)
 
 object SequenceModel:
 
-  def participantOrder(statements: List[SequenceStatement]): List[ParticipantId] =
+  def participantOrder(statements: List[SequenceStatement]): List[NodeId] =
     declarations(statements).map(_.id)
 
   /** First-seen order. A later declare for the same id does not move the column. */
@@ -190,7 +182,7 @@ object SequenceModel:
         case SequenceStatement.Group(_, sections) =>
           sections.foldLeft(acc)((a, section) => walk(section.body, a))
 
-    def seeId(acc: List[DeclaredParticipant], id: ParticipantId): List[DeclaredParticipant] =
+    def seeId(acc: List[DeclaredParticipant], id: NodeId): List[DeclaredParticipant] =
       if acc.exists(_.id == id) then acc
       else acc :+ DeclaredParticipant(id, id.value, ParticipantKind.Participant)
 
@@ -205,16 +197,16 @@ object SequenceModel:
 
   private def aliases(
       stmts: List[SequenceStatement],
-      seen: Map[ParticipantId, Alias],
-  ): Either[ParseError, Map[ParticipantId, Alias]] =
-    stmts.foldLeft[Either[ParseError, Map[ParticipantId, Alias]]](Right(seen)) { (acc, stmt) =>
+      seen: Map[NodeId, Alias],
+  ): Either[ParseError, Map[NodeId, Alias]] =
+    stmts.foldLeft[Either[ParseError, Map[NodeId, Alias]]](Right(seen)) { (acc, stmt) =>
       acc.flatMap(seen => oneAlias(stmt, seen))
     }
 
   private def oneAlias(
       stmt: SequenceStatement,
-      seen: Map[ParticipantId, Alias],
-  ): Either[ParseError, Map[ParticipantId, Alias]] =
+      seen: Map[NodeId, Alias],
+  ): Either[ParseError, Map[NodeId, Alias]] =
     stmt match
       case SequenceStatement.Declare(id, label, kind) =>
         seen.get(id) match
@@ -226,7 +218,7 @@ object SequenceModel:
             else if kind != prev.kind then Left(ParseError.ConflictingAlias(id, kindWord(prev.kind), kindWord(kind)))
             else Right(seen)
       case SequenceStatement.Group(_, sections) =>
-        sections.foldLeft[Either[ParseError, Map[ParticipantId, Alias]]](Right(seen)) { (acc, section) =>
+        sections.foldLeft[Either[ParseError, Map[NodeId, Alias]]](Right(seen)) { (acc, section) =>
           acc.flatMap(seen => aliases(section.body, seen))
         }
       case _ => Right(seen)
