@@ -40,7 +40,7 @@ object Layout:
       expanded.layers,
       pairEdges ++ expanded.routes.toList.flatMap { case ((from, to), dummies) =>
         val chain = from :: dummies ::: List(to)
-        chain.zip(chain.tail)
+        chain.zip(chain.drop(1))
       },
       Math.max(1, config.barycenterIterations / 2),
     )
@@ -53,24 +53,25 @@ object Layout:
     }
 
     val selfEdges     = edges.filter(e => e.from == e.to)
-    val selfLoopExtra = selfEdges.groupBy(_.from).map { case (id, selfEs) =>
-      val (nodeW, nodeH) = nodeSizes(id)
-      val nodeRadius     = Math.max(nodeW, nodeH) / 2
-      val loopSize       = nodeRadius * 0.8 + config.selfLoopSize
-      val maxLabelW      = selfEs
-        .flatMap(_.label)
-        .map(l => SvgUtil.estimateTextWidth(l, config) + config.selfLoopLabelPadding)
-        .maxOption
-        .getOrElse(0.0)
-      val labelCount         = selfEs.size
-      val stackedLabelHeight = labelCount * (config.edgeLabelFontSize + 16)
-      if isVertical then
-        val extraRight = loopSize + Math.max(0.0, maxLabelW / 2) + config.selfLoopLabelPadding
-        id -> (extraRight, 0.0)
-      else
-        val extraRight = Math.max(0.0, maxLabelW / 2 - nodeW / 2)
-        val extraUp    = loopSize + stackedLabelHeight + config.selfLoopLabelPadding
-        id -> (extraRight, extraUp)
+    val selfLoopExtra = selfEdges.groupBy(_.from).flatMap { case (id, selfEs) =>
+      nodeSizes.get(id).map { (nodeW, nodeH) =>
+        val nodeRadius = Math.max(nodeW, nodeH) / 2
+        val loopSize   = nodeRadius * 0.8 + config.selfLoopSize
+        val maxLabelW  = selfEs
+          .flatMap(_.label)
+          .map(l => SvgUtil.estimateTextWidth(l, config) + config.selfLoopLabelPadding)
+          .maxOption
+          .getOrElse(0.0)
+        val labelCount         = selfEs.size
+        val stackedLabelHeight = labelCount * (config.edgeLabelFontSize + 16)
+        if isVertical then
+          val extraRight = loopSize + Math.max(0.0, maxLabelW / 2) + config.selfLoopLabelPadding
+          id -> (extraRight, 0.0)
+        else
+          val extraRight = Math.max(0.0, maxLabelW / 2 - nodeW / 2)
+          val extraUp    = loopSize + stackedLabelHeight + config.selfLoopLabelPadding
+          id -> (extraRight, extraUp)
+      }
     }
 
     val layerSets = finalLayers.zipWithIndex.flatMap { case (ids, idx) =>
@@ -78,7 +79,7 @@ object Layout:
     }.toMap
     val chainEdges = pairEdges ++ expanded.routes.toList.flatMap { case ((from, to), dummies) =>
       val chain = from :: dummies ::: List(to)
-      chain.zip(chain.tail)
+      chain.zip(chain.drop(1))
     }
     val gapSpacing = (0 until finalLayers.size - 1).map { gapIdx =>
       val maxLabelWidth = layoutEdges
@@ -150,7 +151,7 @@ object Layout:
       def dfs(id: NodeId): Unit =
         color(id) = 1
         succ.getOrElse(id, Nil).foreach { next =>
-          color(next) match
+          color.getOrElse(next, 0) match
             case 0 => dfs(next)
             case 1 => feedback += ((id, next))
             case _ =>
@@ -161,11 +162,11 @@ object Layout:
 
       val indeg = uniq.groupBy(_._2).map((to, es) => to -> es.size)
       nodeIds.foreach { id =>
-        if indeg.getOrElse(id, 0) == 0 && color(id) == 0 then dfs(id)
+        if indeg.getOrElse(id, 0) == 0 && color.getOrElse(id, 0) == 0 then dfs(id)
       }
       uniq.foreach { (from, to) =>
-        if color(from) == 0 then dfs(from)
-        if color(to) == 0 then dfs(to)
+        if color.getOrElse(from, 0) == 0 then dfs(from)
+        if color.getOrElse(to, 0) == 0 then dfs(to)
       }
       feedback.toSet
     end if
@@ -220,13 +221,14 @@ object Layout:
       config.coordinateIterations,
     )
 
-    orderedLayers.zipWithIndex.flatMap { case (layer, layerIdx) =>
-      val main = mainPositions(layerIdx)
-      layer.map { id =>
-        val (w, h)  = nodeSizes(id)
+    orderedLayers.zip(mainPositions).flatMap { (layer, main) =>
+      for
+        id     <- layer
+        (w, h) <- nodeSizes.get(id)
+        nd     <- nodes.get(id)
+        cross  <- crossPositions.get(id)
+      yield
         val extraUp = selfLoopExtra.get(id).map(_._2).getOrElse(0.0)
-        val nd      = nodes(id)
-        val cross   = crossPositions(id)
         val isDummy = dummyIds.contains(id)
         LayoutNode(
           id,
@@ -238,7 +240,7 @@ object Layout:
           Map.empty,
           dummy = isDummy,
         )
-      }
+      end for
     }
   end layoutVertical
 
@@ -267,21 +269,20 @@ object Layout:
       config.coordinateIterations,
     )
 
-    orderedLayers.zipWithIndex.flatMap { case (layer, layerIdx) =>
-      val main      = mainPositions(layerIdx)
+    orderedLayers.zip(mainPositions).flatMap { (layer, main) =>
       val layerMaxW = layer
-        .map { id =>
-          val (w, _)     = nodeSizes(id)
-          val extraRight = selfLoopExtra.get(id).map(_._1).getOrElse(0.0)
-          w + extraRight
+        .flatMap { id =>
+          nodeSizes.get(id).map((w, _) => w + selfLoopExtra.get(id).map(_._1).getOrElse(0.0))
         }
         .maxOption
         .getOrElse(0.0)
-      layer.map { id =>
-        val (w, h)  = nodeSizes(id)
+      for
+        id     <- layer
+        (w, h) <- nodeSizes.get(id)
+        nd     <- nodes.get(id)
+        cross  <- crossPositions.get(id)
+      yield
         val extraUp = selfLoopExtra.get(id).map(_._2).getOrElse(0.0)
-        val nd      = nodes(id)
-        val cross   = crossPositions(id)
         val isDummy = dummyIds.contains(id)
         LayoutNode(
           id,
@@ -293,7 +294,7 @@ object Layout:
           Map.empty,
           dummy = isDummy,
         )
-      }
+      end for
     }
   end layoutHorizontal
 
@@ -313,19 +314,15 @@ object Layout:
           val thickness =
             if vertical then
               layer
-                .map { id =>
-                  val (_, h)  = nodeSizes(id)
-                  val extraUp = selfLoopExtra.get(id).map(_._2).getOrElse(0.0)
-                  h + extraUp
+                .flatMap { id =>
+                  nodeSizes.get(id).map((_, h) => h + selfLoopExtra.get(id).map(_._2).getOrElse(0.0))
                 }
                 .maxOption
                 .getOrElse(0.0)
             else
               layer
-                .map { id =>
-                  val (w, _)     = nodeSizes(id)
-                  val extraRight = selfLoopExtra.get(id).map(_._1).getOrElse(0.0)
-                  w + extraRight
+                .flatMap { id =>
+                  nodeSizes.get(id).map((w, _) => w + selfLoopExtra.get(id).map(_._1).getOrElse(0.0))
                 }
                 .maxOption
                 .getOrElse(0.0)
@@ -357,7 +354,7 @@ object Layout:
       iterations: Int,
   ): Map[NodeId, Double] =
     def halfExtent(id: NodeId): Double =
-      val (w, h) = nodeSizes(id)
+      val (w, h) = nodeSizes.getOrElse(id, (0.0, 0.0))
       if vertical then
         val extraRight = selfLoopExtra.get(id).map(_._1).getOrElse(0.0)
         (w + extraRight) / 2
@@ -380,16 +377,21 @@ object Layout:
           }
           ._2
           .reverse
-        val left   = packed.head._2 - packed.head._3
-        val right  = packed.last._2 + packed.last._3
-        val center = (left + right) / 2
-        val want   =
-          val ds = sorted.flatMap(id => desired.get(id))
-          if ds.isEmpty then center else ds.sum / ds.size
-        val shift0 = want - center
-        val minX   = packed.map((_, x, half) => x - half + shift0).min
-        val shift  = if minX < padding then shift0 + (padding - minX) else shift0
-        packed.map((id, x, _) => id -> (x + shift)).toMap
+        packed match
+          case Nil                         => Map.empty
+          case (_, firstX, firstHalf) :: _ =>
+            val (lastX, lastHalf) = packed.lastOption.fold((firstX, firstHalf))((_, x, half) => (x, half))
+            val left              = firstX - firstHalf
+            val right             = lastX + lastHalf
+            val center            = (left + right) / 2
+            val want              =
+              val ds = sorted.flatMap(id => desired.get(id))
+              if ds.isEmpty then center else ds.sum / ds.size
+            val shift0 = want - center
+            val minX   = packed.map((_, x, half) => x - half + shift0).minOption.getOrElse(left + shift0)
+            val shift  = if minX < padding then shift0 + (padding - minX) else shift0
+            packed.map((id, x, _) => id -> (x + shift)).toMap
+        end match
     end packLayer
 
     def initialPack: Map[NodeId, Double] =
@@ -398,11 +400,10 @@ object Layout:
       }
 
     def medianOf(id: NodeId, pos: Map[NodeId, Double]): Option[Double] =
-      val ns = adj.getOrElse(id, Nil).flatMap(pos.get).sorted
-      if ns.isEmpty then None
-      else
-        val mid = ns.size / 2
-        Some(if ns.size % 2 == 1 then ns(mid) else (ns(mid - 1) + ns(mid)) / 2)
+      val ns  = adj.getOrElse(id, Nil).flatMap(pos.get).sorted
+      val mid = ns.size / 2
+      if ns.size % 2 == 1 then ns.lift(mid)
+      else ns.lift(mid - 1).zip(ns.lift(mid)).map((a, b) => (a + b) / 2)
 
     (0 until iterations)
       .foldLeft(initialPack) { (pos, iter) =>

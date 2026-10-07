@@ -422,10 +422,7 @@ object EdgeRenderer:
 
   private def labelPointOnPath(points: List[Point]): (Double, Double) =
     if points.size < 2 then (0.0, 0.0)
-    else
-      val mid = points.size / 2
-      val p   = points(mid)
-      (p.x, p.y)
+    else points.lift(points.size / 2).fold((0.0, 0.0))(p => (p.x, p.y))
 
   /** Smooth cubic Bezier through waypoints.
     *
@@ -449,18 +446,15 @@ object EdgeRenderer:
           val mx       = (a.x + b.x) / 2 + nx * bow
           val my       = (a.y + b.y) / 2 + ny * bow
           s"M${a.x.f},${a.y.f} Q${mx.f},${my.f} ${b.x.f},${b.y.f}"
-      case pts =>
-        val padded = pts.head :: pts ::: List(pts.last)
-        val segs   = (0 until pts.size - 1).map { i =>
-          val p0 = padded(i)
-          val p1 = padded(i + 1)
-          val p2 = padded(i + 2)
-          val p3 = padded(i + 3)
+      case pts @ (first :: _ :: third :: rest) =>
+        val last   = rest.lastOption.getOrElse(third)
+        val padded = first :: pts ::: List(last)
+        val segs   = padded.sliding(4).collect { case List(p0, p1, p2, p3) =>
           val c1 = Point(p1.x + (p2.x - p0.x) / 6, p1.y + (p2.y - p0.y) / 6)
           val c2 = Point(p2.x - (p3.x - p1.x) / 6, p2.y - (p3.y - p1.y) / 6)
           s"C${c1.x.f},${c1.y.f} ${c2.x.f},${c2.y.f} ${p2.x.f},${p2.y.f}"
         }
-        s"M${pts.head.x.f},${pts.head.y.f} ${segs.mkString(" ")}"
+        s"M${first.x.f},${first.y.f} ${segs.mkString(" ")}"
   end smoothPath
 
   private def nearlyAxisAligned(a: Point, b: Point): Boolean =

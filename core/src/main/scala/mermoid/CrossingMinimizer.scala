@@ -35,27 +35,33 @@ object CrossingMinimizer:
       layers: List[List[NodeId]],
       adj: Map[NodeId, List[NodeId]],
   ): List[List[NodeId]] =
-    layers.zipWithIndex.foldLeft(List.empty[List[NodeId]]) { case (acc, (layer, idx)) =>
-      if idx == 0 then acc :+ layer
-      else
-        val prev = acc.last
-        val pos  = prev.zipWithIndex.toMap
-        acc :+ sortByBarycenter(layer, pos, adj)
-    }
+    layers match
+      case Nil           => Nil
+      case first :: rest => sweep(first, rest, adj).reverse
 
   private def sweepBackward(
       layers: List[List[NodeId]],
       adj: Map[NodeId, List[NodeId]],
   ): List[List[NodeId]] =
-    val indexed = layers.zipWithIndex
-    indexed.foldRight(List.empty[List[NodeId]]) { case ((layer, idx), acc) =>
-      if idx == layers.size - 1 then layer :: acc
-      else
-        val next = acc.head
-        val pos  = next.zipWithIndex.toMap
-        sortByBarycenter(layer, pos, adj) :: acc
-    }
-  end sweepBackward
+    layers.reverse match
+      case Nil          => Nil
+      case last :: rest => sweep(last, rest, adj)
+
+  /** Keep `fixed`, then sort each of `rest` against the layer placed just before it. Result is in placement order,
+    * newest first.
+    */
+  private def sweep(
+      fixed: List[NodeId],
+      rest: List[List[NodeId]],
+      adj: Map[NodeId, List[NodeId]],
+  ): List[List[NodeId]] =
+    rest
+      .foldLeft((List(fixed), fixed)) { case ((placed, prev), layer) =>
+        val sorted = sortByBarycenter(layer, prev.zipWithIndex.toMap, adj)
+        (sorted :: placed, sorted)
+      }
+      ._1
+  end sweep
 
   /** Stable sort by mean neighbor position; nodes with no neighbors keep relative order via index. */
   private def sortByBarycenter(

@@ -85,8 +85,9 @@ object NoteRenderer:
         case NotePosition.LeftOf =>
           val near = others.map(n => n.center.x - n.width / 2).minOption.getOrElse(sideX + noteW)
           Math.min(sideX, near - 15 - noteW)
+      val above      = NoteBox(node.center.x - noteW / 2, aboveY, noteW, noteH)
       val candidates = List(
-        NoteBox(node.center.x - noteW / 2, aboveY, noteW, noteH),
+        above,
         NoteBox(sideX, aboveY, noteW, noteH),
         NoteBox(node.center.x - noteW / 2, belowY, noteW, noteH),
         NoteBox(sideX, belowY, noteW, noteH),
@@ -94,7 +95,7 @@ object NoteRenderer:
         NoteBox(pushX, aboveY, noteW, noteH),
         NoteBox(pushX, belowY, noteW, noteH),
       )
-      candidates.find(clear).getOrElse(candidates.head)
+      candidates.find(clear).getOrElse(above)
     end if
   end placeNote
 

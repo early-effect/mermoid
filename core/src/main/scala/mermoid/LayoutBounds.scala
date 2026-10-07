@@ -27,20 +27,17 @@ object LayoutBounds:
   def fit(padding: Double, boxes: Iterable[InkBox]): FittedCanvas =
     val xs = boxes.iterator.flatMap(b => Iterator(b.left, b.right)).toList
     val ys = boxes.iterator.flatMap(b => Iterator(b.top, b.bottom)).toList
-    if xs.isEmpty || ys.isEmpty then FittedCanvas(padding * 2, padding * 2, 0.0, 0.0)
-    else
-      val minX   = xs.min
-      val minY   = ys.min
-      val maxX   = xs.max
-      val maxY   = ys.max
-      val shiftX = if minX < padding then padding - minX else 0.0
-      val shiftY = if minY < padding then padding - minY else 0.0
-      FittedCanvas(
-        width = maxX + shiftX + padding,
-        height = maxY + shiftY + padding,
-        shiftX = shiftX,
-        shiftY = shiftY,
-      )
-    end if
+    (xs.minOption, ys.minOption, xs.maxOption, ys.maxOption) match
+      case (Some(minX), Some(minY), Some(maxX), Some(maxY)) =>
+        val shiftX = if minX < padding then padding - minX else 0.0
+        val shiftY = if minY < padding then padding - minY else 0.0
+        FittedCanvas(
+          width = maxX + shiftX + padding,
+          height = maxY + shiftY + padding,
+          shiftX = shiftX,
+          shiftY = shiftY,
+        )
+      case _ => FittedCanvas(padding * 2, padding * 2, 0.0, 0.0)
+    end match
   end fit
 end LayoutBounds

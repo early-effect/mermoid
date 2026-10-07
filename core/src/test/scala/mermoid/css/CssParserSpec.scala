@@ -1,5 +1,6 @@
 package mermoid.css
 
+import zio.*
 import zio.test.*
 
 object CssParserSpec extends ZIOSpecDefault:
@@ -98,7 +99,7 @@ object CssParserSpec extends ZIOSpecDefault:
         val result = CssParser.parse(css)
         assertTrue(
           result.isRight,
-          result.toOption.get.rules.head.declarations.size == 3,
+          result.is(_.right).rules.map(_.declarations.size) == List(3),
         )
       },
       test("parses a simple rule") {
@@ -144,10 +145,8 @@ object CssParserSpec extends ZIOSpecDefault:
       test("parses a space-separated composite value") {
         val result = CssParser.parse(""".x { border: 1px solid #333; }""")
         assertTrue(
-          result.map(_.rules.head.declarations) == Right(
-            List(
-              CssDeclaration("border", CssValue.Str("1px solid #333"))
-            )
+          result.map(_.rules.map(_.declarations)) == Right(
+            List(List(CssDeclaration("border", CssValue.Str("1px solid #333"))))
           )
         )
       },
@@ -156,20 +155,16 @@ object CssParserSpec extends ZIOSpecDefault:
         // comma support a theme's own rendered output would not parse back in.
         val result = CssParser.parse(""".x { stroke-dasharray: 4,2; }""")
         assertTrue(
-          result.map(_.rules.head.declarations) == Right(
-            List(
-              CssDeclaration("stroke-dasharray", CssValue.Str("4, 2"))
-            )
+          result.map(_.rules.map(_.declarations)) == Right(
+            List(List(CssDeclaration("stroke-dasharray", CssValue.Str("4, 2"))))
           )
         )
       },
       test("parses a font stack") {
         val result = CssParser.parse(""".x { font-family: ui-monospace, "Fira Code", monospace; }""")
         assertTrue(
-          result.map(_.rules.head.declarations) == Right(
-            List(
-              CssDeclaration("font-family", CssValue.Str("ui-monospace, Fira Code, monospace"))
-            )
+          result.map(_.rules.map(_.declarations)) == Right(
+            List(List(CssDeclaration("font-family", CssValue.Str("ui-monospace, Fira Code, monospace"))))
           )
         )
       },
@@ -218,9 +213,9 @@ object CssParserSpec extends ZIOSpecDefault:
         val result = CssParser.parse(css)
         assertTrue(
           result.isRight,
-          result.toOption.get.variables.size == 1,
-          result.toOption.get.rules.size == 1,
-          result.toOption.get.rules.head.declarations.size == 2,
+          result.is(_.right).variables.size == 1,
+          result.is(_.right).rules.size == 1,
+          result.is(_.right).rules.map(_.declarations.size) == List(2),
         )
       },
       test("parses multiple rules") {
@@ -230,7 +225,7 @@ object CssParserSpec extends ZIOSpecDefault:
         val result = CssParser.parse(css)
         assertTrue(
           result.isRight,
-          result.toOption.get.rules.size == 2,
+          result.is(_.right).rules.size == 2,
         )
       },
       test("handles CSS comments") {
@@ -243,7 +238,7 @@ object CssParserSpec extends ZIOSpecDefault:
         val result = CssParser.parse(css)
         assertTrue(
           result.isRight,
-          result.toOption.get.rules.size == 1,
+          result.is(_.right).rules.size == 1,
         )
       },
       test("empty input produces empty stylesheet") {
@@ -255,8 +250,8 @@ object CssParserSpec extends ZIOSpecDefault:
         val result = CssParser.parse(css)
         assertTrue(
           result.isRight,
-          result.toOption.get.variables.contains("--bg"),
-          result.toOption.get.rules.size == 1,
+          result.is(_.right).variables.contains("--bg"),
+          result.is(_.right).rules.size == 1,
         )
       },
       test("round-trip: render then parse") {
@@ -276,8 +271,8 @@ object CssParserSpec extends ZIOSpecDefault:
         val parsed   = CssParser.parse(rendered)
         assertTrue(
           parsed.isRight,
-          parsed.toOption.get.variables == original.variables,
-          parsed.toOption.get.rules.size == original.rules.size,
+          parsed.is(_.right).variables == original.variables,
+          parsed.is(_.right).rules.size == original.rules.size,
         )
       },
     ),
@@ -300,17 +295,12 @@ object CssParserSpec extends ZIOSpecDefault:
     ),
     suite("integration")(
       test("parsed stylesheet can be used as custom stylesheet") {
-        val css    = """.my-highlight { fill: #ff0; stroke: #f00; }"""
-        val parsed = CssParser.parse(css)
-        assertTrue(parsed.isRight)
-        val stylesheet = parsed.toOption.get
-        val merged     = Stylesheet.merge(Stylesheet.empty, stylesheet)
-        assertTrue(merged.rules.size == 1)
-        val rendered = CssRenderer.render(merged)
-        assertTrue(
-          rendered.contains(".my-highlight"),
-          rendered.contains("#ff0"),
-        )
+        val css = """.my-highlight { fill: #ff0; stroke: #f00; }"""
+        for stylesheet <- ZIO.fromEither(CssParser.parse(css))
+        yield
+          val merged   = Stylesheet.merge(Stylesheet.empty, stylesheet)
+          val rendered = CssRenderer.render(merged)
+          assertTrue(merged.rules.size == 1, rendered.contains(".my-highlight"), rendered.contains("#ff0"))
       }
     ),
   )
