@@ -10,24 +10,21 @@ import zio.*
 /** Ascent UI painter for mermoid diagrams: hybrid HTML nodes + SVG edges, with optional reactive reflow. */
 object MermoidAscent:
 
-  /** Parse and paint a static hybrid diagram (SSR-friendly). Uses unconstrained layout unless `viewport` is set. */
+  /** Paint a static hybrid diagram (SSR-friendly). Uses unconstrained layout unless `viewport` is set. */
   def diagram(
-      mmd: String,
+      mermaid: Mermaid,
       config: RenderConfig = RenderConfig(),
       viewport: Option[Viewport] = None,
   ): UI[Any] =
-    val d = parseOrThrow(mmd)
-    fromScene(DiagramLayout.scene(d, config, viewport), selected = None, onSelect = _ => ZIO.unit)
+    fromScene(DiagramLayout.scene(mermaid.diagram, config, viewport), selected = None, onSelect = _ => ZIO.unit)
 
   /** Inert SVG embed mapped into ascent UI (byte-stable structure demos). */
-  def svgDiagram(mmd: String, config: RenderConfig = RenderConfig()): UI[Any] =
-    val d = parseOrThrow(mmd)
-    SvgBridge.toUi(SvgRenderer.renderTree(d, config))
+  def svgDiagram(mermaid: Mermaid, config: RenderConfig = RenderConfig()): UI[Any] =
+    SvgBridge.toUi(SvgRenderer.renderTree(mermaid.diagram, config))
 
   /** SVG markup string for the same source. */
-  def svg(mmd: String, config: RenderConfig = RenderConfig()): String =
-    val d = parseOrThrow(mmd)
-    SvgRenderer.render(d, config)
+  def svg(mermaid: Mermaid, config: RenderConfig = RenderConfig()): String =
+    SvgRenderer.render(mermaid.diagram, config)
 
   def fromScene(
       scene: Scene,
@@ -49,28 +46,26 @@ object MermoidAscent:
     * across reflow.
     */
   def diagramInteractive(
-      mmd: String,
+      mermaid: Mermaid,
       config: RenderConfig = RenderConfig(),
       initialWidth: Double = 720.0,
       showWidthControls: Boolean = true,
   ): UIO[UI[Any]] =
-    val d = parseOrThrow(mmd)
     for
       selected <- sq(Option.empty[String])
       width    <- sq(initialWidth)
-    yield interactiveRoot(d, config, selected, width, showWidthControls, toggleSelect(selected))
+    yield interactiveRoot(mermaid.diagram, config, selected, width, showWidthControls, toggleSelect(selected))
   end diagramInteractive
 
   /** Same as [[diagramInteractive]] but accepts an external width source (e.g. host ResizeObserver). */
   def diagramResponsive(
-      mmd: String,
+      mermaid: Mermaid,
       width: Source[Double],
       config: RenderConfig = RenderConfig(),
       showWidthControls: Boolean = false,
   ): UIO[UI[Any]] =
-    val d = parseOrThrow(mmd)
     for selected <- sq(Option.empty[String])
-    yield interactiveRoot(d, config, selected, width, showWidthControls, toggleSelect(selected))
+    yield interactiveRoot(mermaid.diagram, config, selected, width, showWidthControls, toggleSelect(selected))
 
   /** Host-driven selection and width. Mechanoid live FSMs use this instead of reimplementing chrome.
     *
@@ -78,14 +73,14 @@ object MermoidAscent:
     * whether that click is a transition. Width controls are off unless `showWidthControls` is true.
     */
   def diagramControlled(
-      mmd: String,
+      mermaid: Mermaid,
       selected: Source[Option[String]],
       onSelect: String => UIO[Unit],
       width: Source[Double],
       config: RenderConfig = RenderConfig(),
       showWidthControls: Boolean = false,
   ): UI[Any] =
-    interactiveRoot(parseOrThrow(mmd), config, selected, width, showWidthControls, onSelect)
+    interactiveRoot(mermaid.diagram, config, selected, width, showWidthControls, onSelect)
 
   private def toggleSelect(selected: Source[Option[String]]): String => UIO[Unit] = id =>
     selected.get.flatMap {
@@ -154,9 +149,4 @@ object MermoidAscent:
     )
   end interactiveRoot
 
-  private def parseOrThrow(mmd: String): Diagram =
-    MermaidParser.parse(mmd) match
-      case Right(d)  => d
-      case Left(err) =>
-        throw new IllegalArgumentException(s"mermoid could not parse this diagram: ${err.message}\n$mmd")
 end MermoidAscent

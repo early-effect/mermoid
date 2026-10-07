@@ -2,7 +2,7 @@ package mermoid.docs
 
 import mermoid.ascent.MermoidAscent
 import mermoid.css.{Theme, ThemeColors, ThemeName}
-import mermoid.{RenderConfig, ResponsiveConfig, Viewport}
+import mermoid.{Mermaid, RenderConfig, ResponsiveConfig, Viewport}
 import specular.*
 
 /** Every interactive / hybrid feature, exercisable via `docs/specularPreview`.
@@ -40,15 +40,15 @@ object Interactive extends DocSpec:
   end chalkboard
 
   private val hybridFlow =
-    """flowchart LR
+    Mermaid("""flowchart LR
       |  A[Start] --> B{Decide}
       |  B -->|yes| C[Ship]
       |  B -->|no| D[Fix]
       |  D --> B
-      |""".stripMargin
+      |""".stripMargin)
 
   private val stateNotes =
-    """stateDiagram-v2
+    Mermaid("""stateDiagram-v2
       |  [*] --> Idle
       |  Idle --> Active: start
       |  Active --> Idle: pause
@@ -57,29 +57,29 @@ object Interactive extends DocSpec:
       |  note right of Idle
       |    Waiting for input
       |  end note
-      |""".stripMargin
+      |""".stripMargin)
 
   private val tooltips =
-    """flowchart LR
+    Mermaid("""flowchart LR
       |  A[Parse] --> B[Layout]
       |  B --> C[Paint]
       |  click A callback "Mermaid → AST"
       |  click B callback "DiagramScene + routes"
       |  click C href "https://www.earlyeffect.rocks" "Open Early Effect" _blank
-      |""".stripMargin
+      |""".stripMargin)
 
   private val reflowWide =
-    """flowchart LR
+    Mermaid("""flowchart LR
       |  A[One] --> B[Two]
       |  B --> C[Three]
       |  C --> D[Four]
       |  D --> E[Five]
       |  E --> F[Six]
       |  A -.-> F
-      |""".stripMargin
+      |""".stripMargin)
 
   private val denseFit =
-    """flowchart LR
+    Mermaid("""flowchart LR
       |  A --> B
       |  A --> C
       |  A --> D
@@ -92,7 +92,7 @@ object Interactive extends DocSpec:
       |  E --> H
       |  F --> H
       |  G --> H
-      |""".stripMargin
+      |""".stripMargin)
 
   def doc = page("Interactive")(
     md"""
@@ -104,7 +104,9 @@ libraryDependencies += "rocks.earlyeffect" %% "mermoid-ascent" % "<version>"   /
 libraryDependencies += "rocks.earlyeffect" %%% "mermoid-ascent" % "<version>"  // Scala.js
 
 import mermoid.ascent.MermoidAscent
-import mermoid.{RenderConfig, Viewport}
+import mermoid.{Mermaid, RenderConfig, Viewport}
+
+val source = Mermaid("flowchart LR\\n  A[Start] --> B[Done]")
 
 MermoidAscent.diagram(source, viewport = Some(Viewport(640)))
 MermoidAscent.diagramInteractive(source, initialWidth = 720)

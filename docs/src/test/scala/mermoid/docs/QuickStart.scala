@@ -1,6 +1,7 @@
 package mermoid.docs
 
 import mermoid.ascent.MermoidAscent
+import _root_.mermoid.Mermaid
 import specular.*
 import specular.ziotest.DocSpecSuite
 
@@ -30,15 +31,17 @@ Pre-1.0 on early-semver: pin the exact version and read the release notes before
     ),
     section("Parse and render")(
       md"""
-`MermaidParser.parse` returns `Either[ParseError, Diagram]`. Surface `ParseError.message` rather than swallowing the
-`Left`. `SvgRenderer.render` turns a `Diagram` into the SVG document. Same source, rendered:
+`Mermaid("...")` parses a literal while your code compiles: a broken diagram is a compile error at the literal, and
+the parsed `Diagram` is built into the call site. For text that arrives at runtime, `Mermaid.from` (or
+`MermaidParser.parse`) returns `Either[ParseError, _]`. Surface `ParseError.message` rather than swallowing the `Left`.
+`SvgRenderer.render` turns a `Diagram` into the SVG document. A literal, rendered:
 """,
       example {
-        MermoidAscent.svgDiagram("""flowchart LR
+        MermoidAscent.svgDiagram(Mermaid("""flowchart LR
                             |    A[Start] --> B{Ready?}
                             |    B -->|yes| C([Ship it])
                             |    B -->|no| A
-                            |""".stripMargin)
+                            |""".stripMargin))
       },
     ),
     section("Write it to a file")(

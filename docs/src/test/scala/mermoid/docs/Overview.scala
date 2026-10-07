@@ -1,6 +1,7 @@
 package mermoid.docs
 
 import mermoid.ascent.MermoidAscent
+import _root_.mermoid.Mermaid
 import specular.*
 import specular.ziotest.DocSpecSuite
 
@@ -8,13 +9,13 @@ import specular.ziotest.DocSpecSuite
 object Overview extends DocSpecSuite:
 
   private val hello =
-    """flowchart LR
+    Mermaid("""flowchart LR
       |    Source[".mmd source"] --> Parser[MermaidParser]
       |    Parser --> Ast[Diagram AST]
       |    Ast --> Laid[Scene]
       |    Laid --> Tree[SvgNode tree]
       |    Tree --> Svg([SVG string])
-      |""".stripMargin
+      |""".stripMargin)
 
   def doc = page("Overview")(
     md"""

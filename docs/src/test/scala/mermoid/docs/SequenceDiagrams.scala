@@ -1,6 +1,7 @@
 package mermoid.docs
 
 import mermoid.ascent.MermoidAscent
+import _root_.mermoid.Mermaid
 import specular.*
 import specular.ziotest.DocSpecSuite
 
@@ -8,7 +9,7 @@ import specular.ziotest.DocSpecSuite
 object SequenceDiagrams extends DocSpecSuite:
 
   private val span =
-    """sequenceDiagram
+    Mermaid("""sequenceDiagram
       |    participant Alice
       |    participant Bob
       |    participant Carol
@@ -23,10 +24,10 @@ object SequenceDiagrams extends DocSpecSuite:
       |    Dave-->>Alice: accepted or pending
       |    Eve->>Dave: fetch snapshot
       |    Dave-->>Eve: snapshot plus version
-      |""".stripMargin
+      |""".stripMargin)
 
   private val fragments =
-    """sequenceDiagram
+    Mermaid("""sequenceDiagram
       |    actor Alice
       |    participant Bob
       |    autonumber
@@ -38,7 +39,7 @@ object SequenceDiagrams extends DocSpecSuite:
       |    end
       |    Bob-->>-Alice: done
       |    note right of Bob: held the lock
-      |""".stripMargin
+      |""".stripMargin)
 
   def doc = page("Sequence diagrams")(
     md"""

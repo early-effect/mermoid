@@ -85,6 +85,13 @@ lazy val core = (projectMatrix in file("core"))
     scalacOptions ++= commonScalacOptions,
     MyVersions.parserLib,
     zioTestSettings,
+    // Uncached: the inputs are the example files, which sbt does not see as task inputs here.
+    Test / sourceGenerators += Def
+      .uncached(Def.task {
+        val out = (Test / sourceManaged).value / "mermoid" / "GalleryLiterals.scala"
+        GalleryLiterals.write((ThisBuild / baseDirectory).value / "examples", out)
+      })
+      .taskValue,
   )
   .jvmPlatform(scalaVersions = scalaVersions)
   .jsPlatform(scalaVersions = scalaVersions)

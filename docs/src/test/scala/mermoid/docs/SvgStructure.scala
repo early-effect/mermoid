@@ -1,6 +1,7 @@
 package mermoid.docs
 
 import mermoid.ascent.MermoidAscent
+import _root_.mermoid.Mermaid
 import mermoid.css.{PaintClass, WrapperClass}
 import specular.*
 import specular.ziotest.DocSpecSuite
@@ -10,10 +11,10 @@ import zio.test.*
 object SvgStructure extends DocSpecSuite:
 
   private val sample =
-    """flowchart LR
+    Mermaid("""flowchart LR
       |    A((Start)) -->|go| B{Check}
       |    B ==> C[[Work]] as main
-      |""".stripMargin
+      |""".stripMargin)
 
   def doc = page("SVG structure")(
     md"""
@@ -54,11 +55,11 @@ use `actor-{id}`, `lifeline-{id}`, `message-{index}`, `note-{index}`, `fragment-
 Hover the first node for the native SVG tooltip; the second is a link.
 """,
       example {
-        MermoidAscent.svgDiagram("""flowchart LR
+        MermoidAscent.svgDiagram(Mermaid("""flowchart LR
                             |  A[Hover for tip] --> B[Opens example.com]
                             |  click A callback "tip"
                             |  click B href "https://example.com" "go" _blank
-                            |""".stripMargin)
+                            |""".stripMargin))
       },
     ),
     section("Wrapper groups")(
