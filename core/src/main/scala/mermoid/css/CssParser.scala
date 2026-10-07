@@ -126,10 +126,9 @@ object CssParser:
     }
 
   private[css] def compoundSelector(using P[Any]): P[CssSelector] =
-    P(simpleSelector.rep(1)).map { parts =>
-      if parts.length == 1 then parts.head
-      else CssSelector.Compound(parts.toList)
-    }
+    P(simpleSelector.rep(1)).map(_.toList match
+      case single :: Nil => single
+      case parts         => CssSelector.Compound(parts))
 
   private[css] def descendantPart(using P[Any]): P[CssSelector] =
     P(CharsWhileIn(" \t", 1) ~ &(CharPred(c => c == '.' || c == '#' || c.isLetter)) ~ compoundSelector)

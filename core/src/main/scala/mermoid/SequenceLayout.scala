@@ -128,7 +128,7 @@ private[mermoid] object SequenceLayout:
       selfAt.get(index) match
         case None         => 0.0
         case Some(labelW) =>
-          val pastBox = seq.selfHookWidth + 8 + labelW - boxWs(index) / 2
+          val pastBox = seq.selfHookWidth + 8 + labelW - boxWs.lift(index).getOrElse(0.0) / 2
           math.max(seq.selfHookWidth, pastBox)
 
     val initGaps = Vector.tabulate(math.max(0, n - 1)) { i => math.max(minGap, overhang(i)) }
@@ -137,15 +137,17 @@ private[mermoid] object SequenceLayout:
     val gaps    = solveGaps(initGaps, ordered, boxWs, ordered.size + 2)
     val centers = centersOf(boxWs, gaps)
     val extra   = if n == 0 then 0.0 else overhang(n - 1)
-    val right   = centers.lastOption.map(c => c + boxWs(boxWs.length - 1) / 2 + extra).getOrElse(0.0)
+    val right   = centers.lastOption.zip(boxWs.lastOption).map((c, w) => c + w / 2 + extra).getOrElse(0.0)
     val heights = declared.map(d => kindHeight(d.kind, seq, lc.lineHeight))
     val band    = heights.maxOption.getOrElse(0.0)
-    val cols    = declared.zipWithIndex.map { (d, i) =>
-      val w  = boxWs(i)
-      val h  = heights(i)
-      val cx = centers(i)
-      Column(d.id, d.label, d.kind, w, h, cx, cx - w / 2, band - h)
-    }.toVector
+    val cols    = declared
+      .lazyZip(boxWs)
+      .lazyZip(heights)
+      .lazyZip(centers)
+      .map { (d, w, h, cx) =>
+        Column(d.id, d.label, d.kind, w, h, cx, cx - w / 2, band - h)
+      }
+      .toVector
     ColumnLayout(cols, right, band)
   end columns
 
@@ -159,8 +161,8 @@ private[mermoid] object SequenceLayout:
 
   /** Center distance between columns `i` and `j` (`i < j`). */
   private def spanOf(gaps: Vector[Double], boxWs: Vector[Double], i: Int, j: Int): Double =
-    (i until j).foldLeft(0.0) { (acc, k) =>
-      acc + boxWs(k) / 2 + gaps(k) + boxWs(k + 1) / 2
+    boxWs.slice(i, j).lazyZip(gaps.slice(i, j)).lazyZip(boxWs.slice(i + 1, j + 1)).foldLeft(0.0) {
+      case (acc, (left, gap, right)) => acc + left / 2 + gap + right / 2
     }
 
   @tailrec

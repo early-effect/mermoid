@@ -159,7 +159,7 @@ object MermaidParser:
   /** Interpret the remainder of a `click` line after `click <id>`. */
   private[mermoid] def parseClickRest(nodeId: NodeId, rest: String): ClickBinding =
     def unquote(s: String): String =
-      if s.length >= 2 && s.head == '"' && s.last == '"' then s.substring(1, s.length - 1)
+      if s.length >= 2 && s.startsWith("\"") && s.endsWith("\"") then s.substring(1, s.length - 1)
       else s
 
     val tokens = tokenizeClickRest(rest)

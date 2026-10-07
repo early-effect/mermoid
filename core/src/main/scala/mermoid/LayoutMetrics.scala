@@ -31,13 +31,10 @@ object LayoutMetrics:
   ): Int =
     val uPos = upper.zipWithIndex.toMap
     val lPos = lower.zipWithIndex.toMap
-    val segs = edges.collect {
-      case (a, b) if uPos.contains(a) && lPos.contains(b) => (uPos(a), lPos(b))
-      case (a, b) if uPos.contains(b) && lPos.contains(a) => (uPos(b), lPos(a))
-    }
-    segs.indices.foldLeft(0) { (acc, i) =>
-      val (u1, l1) = segs(i)
-      acc + segs.drop(i + 1).count { case (u2, l2) => (u1 < u2) != (l1 < l2) }
+    val segs = edges.flatMap((a, b) => uPos.get(a).zip(lPos.get(b)).orElse(uPos.get(b).zip(lPos.get(a))))
+    segs.tails.foldLeft(0) {
+      case (acc, (u1, l1) :: later) => acc + later.count { case (u2, l2) => (u1 < u2) != (l1 < l2) }
+      case (acc, Nil)               => acc
     }
   end countLayerCrossings
 
@@ -54,12 +51,13 @@ object LayoutMetrics:
     val segs = edges
       .filter(e => e.from != e.to)
       .flatMap(e => pos.get(e.from).zip(pos.get(e.to)).map((a, b) => (e.from, e.to, a, b)))
-    segs.indices.foldLeft(0) { (acc, i) =>
-      val (f1, t1, a, b) = segs(i)
-      acc + segs.drop(i + 1).count { case (f2, t2, c, d) =>
-        val shareEndpoint = f1 == f2 || f1 == t2 || t1 == f2 || t1 == t2
-        !shareEndpoint && segmentsCross(a, b, c, d)
-      }
+    segs.tails.foldLeft(0) {
+      case (acc, (f1, t1, a, b) :: later) =>
+        acc + later.count { case (f2, t2, c, d) =>
+          val shareEndpoint = f1 == f2 || f1 == t2 || t1 == f2 || t1 == t2
+          !shareEndpoint && segmentsCross(a, b, c, d)
+        }
+      case (acc, Nil) => acc
     }
   end edgeCrossings
 
