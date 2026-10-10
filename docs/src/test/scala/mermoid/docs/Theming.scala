@@ -22,6 +22,9 @@ object Theming extends DocSpecSuite:
     md"""
 `RenderConfig(theme = …)` picks one of ${ThemeName.values.size} palettes (`ThemeName`). Each is a `ThemeColors` record
 turned into a stylesheet: one CSS custom property per `ThemeVar` on `:root`, plus the rules that consume them.
+
+`%%{init: {'theme': 'dark'}}%%` in the source selects the same palette when you left `theme` at `Default`. Pass
+`RenderConfig(theme = ThemeName.Forest)` and the directive does not override it. Keys other than `theme` are ignored.
 """,
     section("Default")(example(themed(ThemeName.Default))),
     section("Dark")(example(themed(ThemeName.Dark))),

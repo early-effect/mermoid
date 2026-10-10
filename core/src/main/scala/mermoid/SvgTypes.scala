@@ -28,6 +28,7 @@ case class LayoutEdge(
     edgeIndex: Int = 0,
     edgeCount: Int = 1,
     mark: Option[RelationMark] = None,
+    inline: Map[css.CssProperty, String] = Map.empty,
 )
 
 /** A frame whose geometry was decided by layout, not measured afterwards from its members. */

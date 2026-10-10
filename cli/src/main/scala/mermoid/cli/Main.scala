@@ -40,7 +40,7 @@ object MermoidCli extends ZIOAppDefault:
     for
       text    <- read(input)
       mermaid <- ZIO.fromEither(Mermaid.from(text)).mapError(CliError.Unparseable(input, _))
-      _       <- write(output, SvgRenderer.render(mermaid.diagram))
+      _       <- write(output, SvgRenderer.render(mermaid.diagram, InitDirective.apply(mermaid.source, RenderConfig())))
       _       <- say(s"Generated SVG: $output")
     yield ()
   end processFile

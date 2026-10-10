@@ -95,12 +95,44 @@ A later `participant A as "other"` for an id that already has a different label,
 Message text may break a line with a `<br>` or `<br/>` tag, written in the source as those five or six characters. No other HTML is read.
 """
     ),
-    section("What is not sequence syntax")(
+    section("Boxes, creation, and stereotypes")(
       md"""
-`box` bands, `create` / `destroy`, stereotypes (`@{"type": ...}`), `link` / `links`, and `click` / `style` /
-`classDef` inside a sequence diagram are not parsed. A lifeline already runs from the header to the last row, so
-create and destroy would only punch a hole in a line that is otherwise one span.
-"""
+`box <color> <title>` paints a band behind the participants it wraps, and closes with `end`. The color is a name, a
+`#hex`, or `rgb()` / `rgba()`.
+
+`create participant Carol` (or `create actor`) puts that header on the create row. The lifeline starts under the box.
+Everyone declared with `participant` or `actor`, and everyone first named by a message, still spans the whole diagram.
+`destroy Carol` ends the lifeline on an X.
+
+`@{"type": "boundary"}` (also `control`, `entity`, `database`, `collections`, `queue`, `actor`) draws that UML icon
+instead of a plain header. An unknown type is `ParseError.UnknownStereotype` and the message names the raw value.
+
+`link Alice: Dashboard @ https://example.com` and `links Alice: Dashboard @ https://a, Wiki @ https://b` become a
+title, and a single link wraps the header in an `<a>`. `click`, `style`, `classDef`, and `class` are the same
+bindings a flowchart uses. `accTitle` and `accDescr` become the SVG `<title>` and `<desc>`.
+""",
+      example {
+        MermoidAscent.svgDiagram(Mermaid("""sequenceDiagram
+                            |    box rgb(220, 232, 246) People
+                            |        actor Alice
+                            |        participant Bob@{"type": "boundary"}
+                            |    end
+                            |    Alice->>Bob: hello
+                            |    create participant Carol@{"type": "control"}
+                            |    Bob->>Carol: start
+                            |    alt ready
+                            |        Carol-->>Bob: yes
+                            |    else later
+                            |        Carol-->>Bob: wait
+                            |    end
+                            |    note right of Carol: held the lock
+                            |    destroy Carol
+                            |""".stripMargin))
+      },
+      md"""
+The fragment keyword sits on a tab in the top-left of the frame. `else` and `and` get the same plate. A note is a
+rectangle with the corner folded over.
+""",
     ),
   )
 end SequenceDiagrams

@@ -241,6 +241,14 @@ object Theme:
         ),
       ),
       CssRule(
+        PaintClass.FragmentTab.selector,
+        List(
+          CssDeclaration(CssProperty.Fill, ThemeVar.MainBkg.asVar),
+          CssDeclaration(CssProperty.Stroke, ThemeVar.NodeBorder.asVar),
+          CssDeclaration(CssProperty.StrokeWidth, CssValue.Str("1")),
+        ),
+      ),
+      CssRule(
         PaintClass.FragmentLabel.selector,
         List(
           CssDeclaration(CssProperty.Fill, ThemeVar.Text.asVar),

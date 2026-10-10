@@ -147,6 +147,11 @@
   stroke: #9370DB;
   stroke-width: 1;
 }
+.fragment-tab {
+  fill: #ECECFF;
+  stroke: #9370DB;
+  stroke-width: 1;
+}
 .fragment-label {
   fill: #333;
   font-family: sans-serif;

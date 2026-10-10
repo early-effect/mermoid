@@ -35,7 +35,9 @@ object DocPagesSpec extends ZIOSpecDefault:
     val svgRoot =
       els.headOption.map(_.tag).contains("svg") &&
         els.exists(_.tag == "style") &&
-        els.exists(e => classOf(e).exists(_.startsWith("node "))) &&
+        els.exists(e =>
+          classOf(e).exists(c => c.startsWith("node ") || c.startsWith("actor") || c.contains("message"))
+        ) &&
         html.startsWith("<svg")
     val hybrid =
       els.exists(e =>

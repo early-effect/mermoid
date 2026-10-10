@@ -1,16 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1055.5" height="640" viewBox="0 0 1055.5 640">
   <defs>
-    <marker id="seq-head" markerWidth="12" markerHeight="10.2" refX="12" refY="5.1" orient="auto" markerUnits="userSpaceOnUse">
-      <polygon class="arrowhead" points="0 0, 12 5.1, 0 10.2"/>
+    <marker id="seq-head" markerWidth="9" markerHeight="6" refX="9" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon class="arrowhead" points="0 0, 9 3, 0 6"/>
     </marker>
-    <marker id="seq-tail" markerWidth="12" markerHeight="10.2" refX="12" refY="5.1" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
-      <polygon class="arrowhead" points="0 0, 12 5.1, 0 10.2"/>
+    <marker id="seq-tail" markerWidth="9" markerHeight="6" refX="9" refY="3" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <polygon class="arrowhead" points="0 0, 9 3, 0 6"/>
     </marker>
-    <marker id="seq-open" markerWidth="12" markerHeight="10.2" refX="12" refY="5.1" orient="auto" markerUnits="userSpaceOnUse">
-      <polyline class="arrow-open" points="0 0, 12 5.1, 0 10.2" fill="none"/>
+    <marker id="seq-open" markerWidth="9" markerHeight="6" refX="9" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <polyline class="arrow-open" points="0 0, 9 3, 0 6" fill="none"/>
     </marker>
-    <marker id="seq-cross" markerWidth="12" markerHeight="10.2" refX="12" refY="5.1" orient="auto" markerUnits="userSpaceOnUse">
-      <path class="arrow-cross" d="M 0 0 L 12 10.2 M 0 10.2 L 12 0" fill="none"/>
+    <marker id="seq-cross" markerWidth="9" markerHeight="6" refX="9" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path class="arrow-cross" d="M 0 0 L 9 6 M 0 6 L 9 0" fill="none"/>
     </marker>
   </defs>
   <style>
@@ -153,6 +153,11 @@
 }
 .fragment-frame {
   fill: none;
+  stroke: #9370DB;
+  stroke-width: 1;
+}
+.fragment-tab {
+  fill: #ECECFF;
   stroke: #9370DB;
   stroke-width: 1;
 }

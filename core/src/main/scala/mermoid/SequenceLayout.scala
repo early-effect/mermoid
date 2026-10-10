@@ -2,14 +2,29 @@ package mermoid
 
 import scala.annotation.tailrec
 
-/** Stick-figure header. Layout and paint share it so the lifeline starts under the label. */
+/** Stick-figure header. Layout and paint share it so the lifeline starts under the feet. */
 private[mermoid] object ActorMetrics:
-  val headRadius: Double = 8.0
-  val stem: Double       = 18.0
+  val headRadius: Double = 7.0
+  val neck: Double       = 2.0
+  val torso: Double      = 14.0
+  val arm: Double        = 9.0
+  val leg: Double        = 12.0
+  val legSpread: Double  = 7.0
   val gap: Double        = 4.0
 
+  def figureHeight: Double = headRadius * 2 + neck + torso + leg
+
   def height(lineHeight: Double): Double =
-    headRadius * 2 + gap + stem + gap + lineHeight
+    figureHeight + gap + lineHeight
+end ActorMetrics
+
+/** UML stereotype icon above the participant name. */
+private[mermoid] object StereotypeIcon:
+  val size: Double = 26.0
+  val gap: Double  = 4.0
+
+  def height(lineHeight: Double): Double =
+    size + gap + lineHeight
 
 /** Columns are participants in source order. Rows are statements in source order. No ranker. */
 private[mermoid] object SequenceLayout:
@@ -22,16 +37,19 @@ private[mermoid] object SequenceLayout:
       viewport: Option[Viewport],
   ): SequenceScene =
     val declared = SequenceModel.declarations(statements)
+    val created  = SequenceModel.createdIds(statements)
     val seq      = config.sequence
     val lc       = config.layout
-    val measured = measure(statements, declared, lc.charWidthEstimate)
-    val natural  = columns(declared, measured, seq, lc, gapScale = 1.0)
+    val measure  = TextMeasure.resolve(config)
+    val measured = measureSpans(statements, declared, measure, lc)
+    val natural  = columns(declared, measured, seq, lc, 1.0, created, measure)
     val scale    = spacingScale(natural.contentRight + lc.padding * 2, config, viewport)
-    val laid     = if scale == 1.0 then natural else columns(declared, measured, seq, lc, gapScale = scale)
-    val pitch    = seq.rowPitch * scale
-    val env      = Env(laid, seq, lc, pitch)
-    val cursor   = placeStatements(statements, Cursor.start(env.headerBand + seq.headerGap), env)
-    finish(cursor, env, config)
+    val laid     =
+      if scale == 1.0 then natural else columns(declared, measured, seq, lc, scale, created, measure)
+    val pitch  = seq.rowPitch * scale
+    val env    = Env(laid, seq, lc, pitch, created, measure)
+    val cursor = placeStatements(statements, Cursor.start(env.headerBand + seq.headerGap), env)
+    finish(cursor, env, config, statements)
   end place
 
   private def linesOf(text: Option[String]): List[String] =
@@ -41,8 +59,8 @@ private[mermoid] object SequenceLayout:
         val parts = lineBreak.split(raw).toList.map(_.trim)
         if parts.forall(_.isEmpty) then Nil else parts
 
-  private def textWidth(lines: List[String], charWidth: Double): Double =
-    lines.map(_.length * charWidth).maxOption.getOrElse(0.0)
+  private def textWidth(lines: List[String], measure: TextMeasure, lc: LayoutConfig): Double =
+    lines.map(line => measure.width(line, lc.fontSize.toDouble, lc.fontFamily)).maxOption.getOrElse(0.0)
 
   private case class NumState(on: Boolean, next: Int, step: Int):
     def applyMode(mode: Numbering): NumState = mode match
@@ -60,10 +78,11 @@ private[mermoid] object SequenceLayout:
   private case class SelfNeed(index: Int, width: Double)
   private case class Measured(spans: List[SpanNeed], selves: List[SelfNeed])
 
-  private def measure(
+  private def measureSpans(
       statements: List[SequenceStatement],
       declared: List[DeclaredParticipant],
-      charWidth: Double,
+      measure: TextMeasure,
+      lc: LayoutConfig,
   ): Measured =
     val indexOf: Map[NodeId, Int] =
       declared.zipWithIndex.map((d, i) => d.id -> i).toMap
@@ -74,7 +93,7 @@ private[mermoid] object SequenceLayout:
           case SequenceStatement.Autonumber(mode)              => (st.applyMode(mode), measured)
           case SequenceStatement.Message(from, to, _, text, _) =>
             val (number, next) = st.take
-            val width          = textWidth(PlacedMessage.shown(linesOf(text), number), charWidth)
+            val width          = textWidth(PlacedMessage.shown(linesOf(text), number), measure, lc)
             (indexOf.get(from), indexOf.get(to)) match
               case (Some(i), Some(j)) if i == j =>
                 (next, measured.copy(selves = SelfNeed(i, width) :: measured.selves))
@@ -84,12 +103,13 @@ private[mermoid] object SequenceLayout:
               case _ => (next, measured)
           case SequenceStatement.Group(_, sections) =>
             sections.foldLeft((st, measured)) { case ((s, m), section) => walk(section.body, s, m) }
-          case _ => (st, measured)
+          case SequenceStatement.Box(_, _, body) => walk(body, st, measured)
+          case _                                 => (st, measured)
       }
 
     val (_, measured) = walk(statements, NumState.initial, Measured(Nil, Nil))
     measured.copy(spans = measured.spans.reverse, selves = measured.selves.reverse)
-  end measure
+  end measureSpans
 
   private case class Column(
       id: NodeId,
@@ -104,10 +124,14 @@ private[mermoid] object SequenceLayout:
 
   private case class ColumnLayout(columns: Vector[Column], contentRight: Double, headerBand: Double)
 
-  private def kindHeight(kind: ParticipantKind, seq: SequenceConfig, lineHeight: Double): Double =
-    kind match
-      case ParticipantKind.Participant => seq.actorHeight
-      case ParticipantKind.Actor       => ActorMetrics.height(lineHeight)
+  private def boxHeight(person: DeclaredParticipant, seq: SequenceConfig, lineHeight: Double): Double =
+    person.stereotype match
+      case Some(SequenceStereotype.Actor) => ActorMetrics.height(lineHeight)
+      case Some(_)                        => StereotypeIcon.height(lineHeight)
+      case None                           =>
+        person.kind match
+          case ParticipantKind.Participant => seq.actorHeight
+          case ParticipantKind.Actor       => ActorMetrics.height(lineHeight)
 
   private def columns(
       declared: List[DeclaredParticipant],
@@ -115,10 +139,12 @@ private[mermoid] object SequenceLayout:
       seq: SequenceConfig,
       lc: LayoutConfig,
       gapScale: Double,
+      created: Set[NodeId],
+      measure: TextMeasure,
   ): ColumnLayout =
-    val charW = lc.charWidthEstimate
     val boxWs = declared.map { d =>
-      math.max(seq.actorMinWidth, d.label.length * charW + seq.actorPadH * 2)
+      val text = measure.width(d.label, lc.fontSize.toDouble, lc.fontFamily)
+      math.max(seq.actorMinWidth, text + seq.actorPadH * 2)
     }.toVector
     val n      = boxWs.length
     val selfAt = measured.selves.groupBy(_.index).view.mapValues(_.map(_.width).maxOption.getOrElse(0.0)).toMap
@@ -138,14 +164,15 @@ private[mermoid] object SequenceLayout:
     val centers = centersOf(boxWs, gaps)
     val extra   = if n == 0 then 0.0 else overhang(n - 1)
     val right   = centers.lastOption.zip(boxWs.lastOption).map((c, w) => c + w / 2 + extra).getOrElse(0.0)
-    val heights = declared.map(d => kindHeight(d.kind, seq, lc.lineHeight))
-    val band    = heights.maxOption.getOrElse(0.0)
+    val heights = declared.map(d => boxHeight(d, seq, lc.lineHeight))
+    val band    = declared.zip(heights).collect { case (d, h) if !created.contains(d.id) => h }.maxOption.getOrElse(0.0)
     val cols    = declared
       .lazyZip(boxWs)
       .lazyZip(heights)
       .lazyZip(centers)
       .map { (d, w, h, cx) =>
-        Column(d.id, d.label, d.kind, w, h, cx, cx - w / 2, band - h)
+        val top = if created.contains(d.id) then 0.0 else band - h
+        Column(d.id, d.label, d.kind, w, h, cx, cx - w / 2, top)
       }
       .toVector
     ColumnLayout(cols, right, band)
@@ -203,12 +230,15 @@ private[mermoid] object SequenceLayout:
       seq: SequenceConfig,
       lc: LayoutConfig,
       rowPitch: Double,
+      created: Set[NodeId],
+      measure: TextMeasure,
   ):
-    val byId: Map[NodeId, Column] = layout.columns.map(c => c.id -> c).toMap
-    def headerBand: Double        = layout.headerBand
-    def lineH: Double             = lc.lineHeight
-    def frameLeft: Double         = layout.columns.headOption.map(_.boxLeft - 8).getOrElse(0.0)
-    def frameRight: Double        =
+    def widthOf(lines: List[String]): Double = textWidth(lines, measure, lc)
+    val byId: Map[NodeId, Column]            = layout.columns.map(c => c.id -> c).toMap
+    def headerBand: Double                   = layout.headerBand
+    def lineH: Double                        = lc.lineHeight
+    def frameLeft: Double                    = layout.columns.headOption.map(_.boxLeft - 8).getOrElse(0.0)
+    def frameRight: Double                   =
       layout.columns.lastOption.map(c => c.boxLeft + c.boxW + 8).getOrElse(180.0) max (frameLeft + 120)
   end Env
 
@@ -225,7 +255,12 @@ private[mermoid] object SequenceLayout:
       notes: List[PlacedNote],
       groups: List[PlacedGroup],
       bars: List[ActivationBar],
+      createdAt: Map[NodeId, Double] = Map.empty,
+      destroyedAt: Map[NodeId, Double] = Map.empty,
+      bands: List[BandDraft] = Nil,
   )
+
+  private case class BandDraft(title: Option[String], fill: String, ids: List[NodeId])
 
   private object Cursor:
     def start(y: Double): Cursor =
@@ -236,9 +271,12 @@ private[mermoid] object SequenceLayout:
 
   private def placeOne(cursor: Cursor, stmt: SequenceStatement, env: Env): Cursor =
     stmt match
-      case SequenceStatement.Autonumber(mode) => cursor.copy(numbering = cursor.numbering.applyMode(mode))
-      case SequenceStatement.Declare(_, _, _) => cursor
-      case SequenceStatement.Activate(id)     =>
+      case SequenceStatement.Autonumber(mode)       => cursor.copy(numbering = cursor.numbering.applyMode(mode))
+      case SequenceStatement.Declare(_, _, _, _)    => cursor
+      case SequenceStatement.Create(id, _, _, _)    => placeCreate(cursor, id, env)
+      case SequenceStatement.Destroy(id)            => placeDestroy(cursor, id)
+      case SequenceStatement.Box(title, fill, body) => placeBox(cursor, title, fill, body, env)
+      case SequenceStatement.Activate(id)           =>
         cursor.copy(open = pushBar(cursor.open, id, cursor.y))
       case SequenceStatement.Deactivate(id) =>
         val (closed, open) = popBar(cursor.open, id, cursor.y, env)
@@ -249,6 +287,34 @@ private[mermoid] object SequenceLayout:
         placeNote(cursor, place, text, env)
       case SequenceStatement.Group(kind, sections) =>
         placeGroup(cursor, kind, sections, env)
+      case SequenceStatement.Link(_, _) | SequenceStatement.ClickSt(_) | SequenceStatement.StyleSt(_, _) |
+          SequenceStatement.ClassDefSt(_, _) | SequenceStatement.ClassSt(_, _) | SequenceStatement.AccTitle(_) |
+          SequenceStatement.AccDescr(_) | SequenceStatement.BadStereotype(_) =>
+        cursor
+
+  private def placeCreate(cursor: Cursor, id: NodeId, env: Env): Cursor =
+    if !env.created.contains(id) || cursor.createdAt.contains(id) then cursor
+    else
+      env.byId.get(id) match
+        case None      => cursor
+        case Some(col) =>
+          cursor.copy(y = cursor.y + col.boxH + 6, createdAt = cursor.createdAt.updated(id, cursor.y))
+
+  private def placeDestroy(cursor: Cursor, id: NodeId): Cursor =
+    val y = cursor.y + 8
+    cursor.copy(y = cursor.y + 16, destroyedAt = cursor.destroyedAt.updated(id, y))
+
+  private def placeBox(
+      cursor: Cursor,
+      title: Option[String],
+      fill: String,
+      body: List[SequenceStatement],
+      env: Env,
+  ): Cursor =
+    val ids  = SequenceModel.declarations(body).map(_.id)
+    val next = placeStatements(body, cursor, env)
+    next.copy(bands = next.bands :+ BandDraft(title, fill, ids))
+  end placeBox
 
   private def pushBar(open: List[OpenBar], id: NodeId, y0: Double): List[OpenBar] =
     OpenBar(id, open.count(_.id == id), y0) :: open
@@ -332,7 +398,7 @@ private[mermoid] object SequenceLayout:
 
   private def placeNote(cursor: Cursor, place: NotePlace, text: String, env: Env): Cursor =
     val lines  = linesOf(Some(text))
-    val width  = math.max(48.0, textWidth(lines, env.lc.charWidthEstimate) + 16)
+    val width  = math.max(48.0, env.widthOf(lines) + 16)
     val height = math.max(lines.size, 1) * env.lineH + 12
     val box    = place match
       case NotePlace.LeftOf(id) =>
@@ -368,6 +434,8 @@ private[mermoid] object SequenceLayout:
     val first            = sections.headOption.flatMap(_.label).getOrElse("")
     val tab              = tabOf(kind, first)
     val tabH             = if tab.isEmpty then 6.0 else env.lineH + 8
+    val tabW             = tab.map(text => env.widthOf(List(text)) + 16).getOrElse(0.0)
+    val tabBox           = if tabW <= 0 then None else Some(Rect(env.frameLeft, y0, tabW, tabH))
     val insertAt         = cursor.groups.size
     val (dividers, body) = sections match
       case Nil          => (Nil, cursor.copy(y = y0 + tabH))
@@ -375,12 +443,13 @@ private[mermoid] object SequenceLayout:
         val started = placeStatements(head.body, cursor.copy(y = y0 + tabH), env)
         tail.foldLeft((List.empty[SectionDivider], started)) { case ((divs, c), section) =>
           val label = titled(dividerWord(kind), section.label.getOrElse(""))
-          val div   = SectionDivider(label, c.y + env.lineH, env.frameLeft, env.frameRight)
+          val plate = env.widthOf(List(label)) + 16
+          val div   = SectionDivider(label, c.y + env.lineH, env.frameLeft, env.frameRight, tabWidth = plate)
           val next  = placeStatements(section.body, c.copy(y = c.y + env.lineH + 8), env)
           (divs :+ div, next)
         }
     val frame = Rect(env.frameLeft, y0, env.frameRight - env.frameLeft, body.y + 6 - y0)
-    val group = PlacedGroup(cursor.groupIndex, kind, tab, frame, dividers)
+    val group = PlacedGroup(cursor.groupIndex, kind, tab, frame, dividers, tabBox)
     body.copy(
       y = body.y + 8,
       groupIndex = cursor.groupIndex + 1,
@@ -410,21 +479,46 @@ private[mermoid] object SequenceLayout:
     def add(x: Double, y: Double): Bounds = addX(x).addY(y)
     def addRect(r: Rect): Bounds          = add(r.x, r.y).add(r.x + r.w, r.y + r.h)
 
-  private def finish(cursor: Cursor, env: Env, config: RenderConfig): SequenceScene =
+  private def finish(
+      cursor: Cursor,
+      env: Env,
+      config: RenderConfig,
+      statements: List[SequenceStatement],
+  ): SequenceScene =
     val endY      = cursor.y + env.seq.footerGap
     val flushed   = cursor.open.map(bar => barOf(bar, endY, env))
     val bars      = cursor.bars ++ flushed
+    val chromes   = SequenceModel.chrome(statements)
     val lifelines =
       if env.layout.columns.isEmpty then Nil
       else
         env.layout.columns.map { col =>
-          Lifeline(col.id, col.center, env.headerBand, math.max(endY, env.headerBand))
+          val y0 = cursor.createdAt.get(col.id) match
+            case Some(top) => top + col.boxH
+            case None      => env.headerBand
+          val y1 = cursor.destroyedAt.get(col.id) match
+            case Some(at) => math.max(at, y0)
+            case None     => math.max(endY, y0)
+          Lifeline(col.id, col.center, y0, y1, destroyed = cursor.destroyedAt.contains(col.id))
         }.toList
     val participants = env.layout.columns.map { col =>
-      PlacedParticipant(col.id, col.label, col.kind, Rect(col.boxLeft, col.boxTop, col.boxW, col.boxH))
+      val top    = cursor.createdAt.getOrElse(col.id, col.boxTop)
+      val chrome = chromes.getOrElse(col.id, ParticipantChrome.empty)
+      PlacedParticipant(
+        col.id,
+        col.label,
+        col.kind,
+        Rect(col.boxLeft, top, col.boxW, col.boxH),
+        chrome.stereotype,
+        chrome.cssClasses,
+        chrome.styles,
+        chrome.links,
+        chrome.tooltip,
+      )
     }.toList
-    val charW = env.lc.charWidthEstimate
-    varBounds(participants, lifelines, cursor, bars, env, charW, endY) match
+    val bands          = bandRects(cursor.bands, env, endY)
+    val (title, descr) = SequenceModel.access(statements)
+    varBounds(participants, lifelines, cursor, bars, env, endY, bands) match
       case bounds =>
         val pad = env.lc.padding
         val dx  = pad - bounds.minX
@@ -439,9 +533,33 @@ private[mermoid] object SequenceLayout:
           activations = bars.map(b => b.copy(rect = shiftRect(b.rect, dx, dy))),
           groups = cursor.groups.map(g => shiftGroup(g, dx, dy)),
           config = config,
+          bands = bands.map(b => b.copy(rect = shiftRect(b.rect, dx, dy))),
+          accTitle = title,
+          accDescr = descr,
+          classDefRules = SequenceModel.classRules(statements),
         )
     end match
   end finish
+
+  private def bandRects(drafts: List[BandDraft], env: Env, endY: Double): List[PlacedBand] =
+    drafts.flatMap { draft =>
+      val cols = draft.ids.flatMap(id => env.byId.get(id))
+      cols match
+        case Nil          => None
+        case head :: tail =>
+          val left  = tail.foldLeft(head.boxLeft)((acc, col) => math.min(acc, col.boxLeft))
+          val right =
+            (head :: tail).foldLeft(head.boxLeft + head.boxW)((acc, col) => math.max(acc, col.boxLeft + col.boxW))
+          val lift = if draft.title.isDefined then 18.0 else 0.0
+          Some(
+            PlacedBand(
+              draft.title,
+              draft.fill,
+              Rect(left - 8, -lift, right - left + 16, endY + lift),
+            )
+          )
+      end match
+    }
 
   private def varBounds(
       participants: List[PlacedParticipant],
@@ -449,8 +567,8 @@ private[mermoid] object SequenceLayout:
       cursor: Cursor,
       bars: List[ActivationBar],
       env: Env,
-      charW: Double,
       endY: Double,
+      bands: List[PlacedBand],
   ): Bounds =
     val base       = Bounds(0, 0, math.max(env.layout.contentRight, env.frameRight), math.max(endY, env.headerBand))
     val withPeople = participants.foldLeft(base)((b, p) => b.addRect(p.box))
@@ -466,15 +584,16 @@ private[mermoid] object SequenceLayout:
         val middle = m.path match
           case MessagePath.Straight(_, _)   => true
           case MessagePath.Hook(_, _, _, _) => false
-        geom.addRect(labelBox(m.labelAt, shown, middle, charW, env.lineH))
+        geom.addRect(labelBox(m.labelAt, shown, middle, env, env.lineH))
     }
-    val withNotes = cursor.notes.foldLeft(withMsg)((b, n) => b.addRect(n.box))
-    val withBars  = bars.foldLeft(withNotes)((b, bar) => b.addRect(bar.rect))
-    cursor.groups.foldLeft(withBars)((b, g) => b.addRect(g.frame))
+    val withNotes  = cursor.notes.foldLeft(withMsg)((b, n) => b.addRect(n.box))
+    val withBars   = bars.foldLeft(withNotes)((b, bar) => b.addRect(bar.rect))
+    val withGroups = cursor.groups.foldLeft(withBars)((b, g) => b.addRect(g.frame))
+    bands.foldLeft(withGroups)((b, band) => b.addRect(band.rect))
   end varBounds
 
-  private def labelBox(at: Point, lines: List[String], middle: Boolean, charW: Double, lineH: Double): Rect =
-    val w = textWidth(lines, charW)
+  private def labelBox(at: Point, lines: List[String], middle: Boolean, env: Env, lineH: Double): Rect =
+    val w = env.widthOf(lines)
     val h = math.max(lines.size, 1) * lineH
     val x = if middle then at.x - w / 2 else at.x
     Rect(x, at.y - lineH * 0.85, w, h)
@@ -503,5 +622,6 @@ private[mermoid] object SequenceLayout:
     g.copy(
       frame = shiftRect(g.frame, dx, dy),
       dividers = g.dividers.map(d => d.copy(y = d.y + dy, x0 = d.x0 + dx, x1 = d.x1 + dx)),
+      tabBox = g.tabBox.map(shiftRect(_, dx, dy)),
     )
 end SequenceLayout

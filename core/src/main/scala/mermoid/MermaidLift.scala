@@ -83,13 +83,17 @@ private[mermoid] object MermaidLift:
 
   given ToExpr[FlowStatement] with
     def apply(x: FlowStatement)(using Quotes): Expr[FlowStatement] = x match
-      case v: FlowStatement.NodeSt     => product(v)
-      case v: FlowStatement.EdgeSt     => product(v)
-      case v: FlowStatement.SubgraphSt => product(v)
-      case v: FlowStatement.StyleSt    => product(v)
-      case v: FlowStatement.ClassDefSt => product(v)
-      case v: FlowStatement.ClassSt    => product(v)
-      case v: FlowStatement.ClickSt    => product(v)
+      case v: FlowStatement.NodeSt      => product(v)
+      case v: FlowStatement.EdgeSt      => product(v)
+      case v: FlowStatement.SubgraphSt  => product(v)
+      case v: FlowStatement.StyleSt     => product(v)
+      case v: FlowStatement.ClassDefSt  => product(v)
+      case v: FlowStatement.ClassSt     => product(v)
+      case v: FlowStatement.ClickSt     => product(v)
+      case v: FlowStatement.LinkStyleSt => product(v)
+      case v: FlowStatement.AccTitle    => product(v)
+      case v: FlowStatement.AccDescr    => product(v)
+  end given
 
   given ToExpr[NotePosition] with
     def apply(x: NotePosition)(using Quotes): Expr[NotePosition] = x match
@@ -133,9 +137,20 @@ private[mermoid] object MermaidLift:
       case v: StateStatement.Scale             => product(v)
       case v: StateStatement.AccTitle          => product(v)
       case v: StateStatement.AccDescr          => product(v)
+      case v: StateStatement.LinkStyleSt       => product(v)
       case StateStatement.Divider              => '{ StateStatement.Divider }
       case v: StateStatement.UnknownStereo     => product(v)
   end given
+
+  given ToExpr[SequenceStereotype] with
+    def apply(x: SequenceStereotype)(using Quotes): Expr[SequenceStereotype] = x match
+      case SequenceStereotype.Actor       => '{ SequenceStereotype.Actor }
+      case SequenceStereotype.Boundary    => '{ SequenceStereotype.Boundary }
+      case SequenceStereotype.Control     => '{ SequenceStereotype.Control }
+      case SequenceStereotype.Entity      => '{ SequenceStereotype.Entity }
+      case SequenceStereotype.Database    => '{ SequenceStereotype.Database }
+      case SequenceStereotype.Collections => '{ SequenceStereotype.Collections }
+      case SequenceStereotype.Queue       => '{ SequenceStereotype.Queue }
 
   given ToExpr[ParticipantKind] with
     def apply(x: ParticipantKind)(using Quotes): Expr[ParticipantKind] = x match
@@ -191,13 +206,25 @@ private[mermoid] object MermaidLift:
 
   given ToExpr[SequenceStatement] with
     def apply(x: SequenceStatement)(using Quotes): Expr[SequenceStatement] = x match
-      case v: SequenceStatement.Declare    => product(v)
-      case v: SequenceStatement.Message    => product(v)
-      case v: SequenceStatement.Activate   => product(v)
-      case v: SequenceStatement.Deactivate => product(v)
-      case v: SequenceStatement.Note       => product(v)
-      case v: SequenceStatement.Autonumber => product(v)
-      case v: SequenceStatement.Group      => product(v)
+      case v: SequenceStatement.Declare       => product(v)
+      case v: SequenceStatement.Create        => product(v)
+      case v: SequenceStatement.Destroy       => product(v)
+      case v: SequenceStatement.Box           => product(v)
+      case v: SequenceStatement.Message       => product(v)
+      case v: SequenceStatement.Activate      => product(v)
+      case v: SequenceStatement.Deactivate    => product(v)
+      case v: SequenceStatement.Note          => product(v)
+      case v: SequenceStatement.Autonumber    => product(v)
+      case v: SequenceStatement.Group         => product(v)
+      case v: SequenceStatement.Link          => product(v)
+      case v: SequenceStatement.ClickSt       => product(v)
+      case v: SequenceStatement.StyleSt       => product(v)
+      case v: SequenceStatement.ClassDefSt    => product(v)
+      case v: SequenceStatement.ClassSt       => product(v)
+      case v: SequenceStatement.AccTitle      => product(v)
+      case v: SequenceStatement.AccDescr      => product(v)
+      case v: SequenceStatement.BadStereotype => product(v)
+  end given
 
   given ToExpr[MarkKind] with
     def apply(x: MarkKind)(using Quotes): Expr[MarkKind] = x match

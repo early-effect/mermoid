@@ -159,6 +159,7 @@ private[mermoid] object StateModel:
           case StateStatement.ClassSt(ids, _)     => ids.foldLeft(acc)((a, id) => claim(a, id, scope))
           case StateStatement.ClickSt(binding)    => claim(acc, binding.nodeId, scope)
           case StateStatement.FloatingNote(_, _)  => acc
+          case StateStatement.LinkStyleSt(_, _)   => acc
     }
 
   private def claim(acc: Acc, id: NodeId, scope: Scope): Acc =
@@ -237,6 +238,7 @@ private[mermoid] object StateModel:
         rewrite(t.to, scope, startId, endId, asTarget = true),
         EdgeStyle.Arrow,
         t.label,
+        inline = t.inline,
       )
     }
     val classes        = classesIn(stmts, scope, endId, hasEnd, acc)

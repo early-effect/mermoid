@@ -24,6 +24,7 @@ enum PaintClass(val cssName: String, val element: String, val description: Strin
   case MessageLabel    extends PaintClass("message-label", "text", "a sequence message label")
   case Activation      extends PaintClass("activation", "rect", "an activation bar on a lifeline")
   case FragmentFrame   extends PaintClass("fragment-frame", "rect", "a loop, alt, par, or highlight frame")
+  case FragmentTab     extends PaintClass("fragment-tab", "rect", "the keyword tab on a fragment")
   case FragmentLabel   extends PaintClass("fragment-label", "text", "a fragment tab or divider label")
   case FragmentDivider extends PaintClass("fragment-divider", "line", "an alt or par section divider")
   case StartEnd        extends PaintClass("start-end", "on a node wrapper", "`[*]` in a state diagram")

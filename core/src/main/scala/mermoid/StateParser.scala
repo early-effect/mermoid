@@ -44,7 +44,8 @@ private[mermoid] object StateParser:
   private def statements(using P[Any]): P[List[StateStatement]] =
     P(
       noteSt.map(List(_)) | clickSt.map(List(_)) | classDefSt.map(List(_)) | classSt.map(List(_)) |
-        styleSt.map(List(_)) | accDescrBlock.map(List(_)) | accDescrLine.map(List(_)) | accTitleLine.map(List(_)) |
+        styleSt.map(List(_)) | linkStyleSt.map(List(_)) | accDescrBlock.map(List(_)) | accDescrLine.map(List(_)) |
+        accTitleLine.map(List(_)) |
         hideEmpty.map(List(_)) | scaleLine.map(List(_)) | divider.map(List(_)) | stateHead | stateTransition.map(
           List(_)
         ) |
@@ -106,6 +107,22 @@ private[mermoid] object StateParser:
       case (id, props) =>
         StateStatement.StyleSt(id, StateStyle.fromProperties(props))
     }
+
+  private def linkStyleSt(using P[Any]): P[StateStatement.LinkStyleSt] =
+    P("linkStyle" ~ MermaidParser.ws ~ linkIndex ~ MermaidParser.ws ~ MermaidParser.styleProperties).map {
+      (index, props) =>
+        StateStatement.LinkStyleSt(index, props)
+    }
+
+  private def linkIndex(using P[Any]): P[Option[Int]] =
+    P(
+      ("default" ~ !CharPred(c => c.isLetterOrDigit || c == '_')).map(_ => Option.empty[Int]) |
+        CharsWhileIn("0-9", 1).!.flatMap { raw =>
+          raw.toIntOption match
+            case Some(n) => Pass(Some(n))
+            case None    => Fail
+        }
+    )
 
   private def accTitleLine(using P[Any]): P[StateStatement.AccTitle] =
     P("accTitle" ~ MermaidParser.ws ~ ":" ~ MermaidParser.ws ~ lineText).map(StateStatement.AccTitle(_))

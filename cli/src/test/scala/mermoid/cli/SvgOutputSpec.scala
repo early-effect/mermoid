@@ -71,6 +71,7 @@ object SvgOutputSpec extends ZIOSpec[SvgOutputSpec.Corpus]:
 
   final case class Rendered(
       name: String,
+      source: String,
       diagram: Diagram,
       svg: String,
       root: Elem,
@@ -116,13 +117,13 @@ object SvgOutputSpec extends ZIOSpec[SvgOutputSpec.Corpus]:
   private def render(example: Example): IO[CorpusError, Rendered] =
     for
       mermaid <- ZIO.fromEither(Mermaid.from(example.source)).mapError(CorpusError.Unparseable(example.name, _))
-      svg = SvgRenderer.render(mermaid.diagram)
+      svg = SvgRenderer.render(mermaid.diagram, InitDirective.apply(mermaid.source, RenderConfig()))
       root <- ZIO.attempt(parse(svg)).mapError(CorpusError.NotXml(example.name, _))
       raw = root.attr("viewBox")
       viewBox <- raw.map(_.trim.split("\\s+").toList.flatMap(_.toDoubleOption)) match
         case Some(List(a, b, c, d)) => ZIO.succeed((a, b, c, d))
         case _                      => ZIO.fail(CorpusError.MalformedViewBox(example.name, raw))
-    yield Rendered(example.name, mermaid.diagram, svg, root, viewBox)
+    yield Rendered(example.name, example.source, mermaid.diagram, svg, root, viewBox)
 
   private val corpus: IO[CorpusError, Corpus] =
     for
@@ -298,7 +299,7 @@ object SvgOutputSpec extends ZIOSpec[SvgOutputSpec.Corpus]:
       assertTrue(endpoints.forall(nodeIds.contains))
     },
     forEachExample("re-rendering is deterministic") { r =>
-      assertTrue(SvgRenderer.render(r.diagram) == r.svg)
+      assertTrue(SvgRenderer.render(r.diagram, InitDirective.apply(r.source, RenderConfig())) == r.svg)
     },
   )
 end SvgOutputSpec

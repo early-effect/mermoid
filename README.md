@@ -187,6 +187,10 @@ flip. A narrow viewport compresses `SequenceConfig.columnGap` and `rowPitch`, th
 | Numbering | `autonumber`, `autonumber off`, `autonumber 3`, `autonumber 3 2` |
 | Notes | `note left of A: text`, `note right of A: text`, `note over A,B: text` |
 | Fragments | `loop`, `opt`, `critical`, `break`, `alt` / `else`, `par` / `and`, `rect rgb()` / `rgba()` |
+| Bands | `box <color> <title>` … `end` |
+| Lifetime | `create participant Carol`, `destroy Carol` |
+| Stereotypes | `@{"type": "boundary"}` and `control`, `entity`, `database`, `collections`, `queue`, `actor` |
+| Links and paint | `link` / `links`, `click`, `style`, `classDef`, `class`, `accTitle`, `accDescr` |
 
 A second declare of the same id with a different label, or a switch between `participant` and `actor`, fails with
 `ParseError.ConflictingAlias`. `else` belongs to `alt`. `and` belongs to `par`.
@@ -198,7 +202,7 @@ Documented so adopters are not surprised:
 | Case | Behaviour |
 |---|---|
 | Chained edges `A --> B --> C` | One hop per pair, same as writing each edge on its own line. |
-| Mermaid `%%` comments | Ignored. `%%{init:…}%%` is skipped too; it does not pick a theme. |
+| Mermaid `%%` comments | Ignored. `%%{init:…}%%` contributes only a theme name (`default`, `dark`, `forest`, `neutral`), and only when `RenderConfig.theme` is still `Default`. |
 | Parallel edges `A --> B` twice | Both render; offset so they do not sit on top of each other. Use `as` if you CSS-select one. |
 | Cycles / back-edges | A greedy feedback arc set reverses back edges for ranking and draws them in the original direction, so a retry sits on the next rank instead of ranking as a root. Barycenter ordering cuts crossings. Long edges route through waypoints. |
 | Self-loops | Attach right (vertical flow) or top (horizontal); stacked labels get room in the bbox. |
@@ -214,9 +218,8 @@ Documented so adopters are not surprised:
 **Not yet implemented** (parse-fail or ignored):
 
 - Diagram types: Gantt, pie, journey, git graph
-- Sequence: `box` bands, `create` / `destroy`, stereotypes, `link` / `links`, `click` / `style` / `classDef`
 - State: `entry` / `exit` actions (a colon line is the description, not an action)
-- Flowchart: `linkStyle`, Mermaid theme directives
+- `%%{init}%%` keys other than the theme name
 
 ## Layout and responsive
 
@@ -320,6 +323,7 @@ Checked by the test suite (committed SVG must match the renderer):
 | Reflow demo source | [interactive-reflow.mmd](examples/interactive-reflow.mmd) | [interactive-reflow.svg](examples/interactive-reflow.svg) |
 | Dense hub (interactive) | [interactive-hub.mmd](examples/interactive-hub.mmd) | [interactive-hub.svg](examples/interactive-hub.svg) |
 | Sequence span | [sequence-span.mmd](examples/sequence-span.mmd) | [sequence-span.svg](examples/sequence-span.svg) |
+| Sequence life | [sequence-life.mmd](examples/sequence-life.mmd) | [sequence-life.svg](examples/sequence-life.svg) |
 
 ## Documentation
 
