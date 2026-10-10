@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="332.5" height="928.5" viewBox="0 0 332.5 928.5">
+<svg xmlns="http://www.w3.org/2000/svg" width="359.140625" height="928.5" viewBox="0 0 359.140625 928.5">
   <defs>
     <marker id="arrowhead" markerWidth="12" markerHeight="10.2" refX="12" refY="5.1" orient="auto" markerUnits="userSpaceOnUse">
       <polygon class="arrowhead" points="0 0, 12 5.1, 0 10.2"/>
@@ -167,25 +167,25 @@
   stroke: #333;
 }
 </style>
-  <rect class="diagram-bg" x="0" y="0" width="332.5" height="928.5"/>
+  <rect class="diagram-bg" x="0" y="0" width="359.140625" height="928.5"/>
   <g class="edge edge-arrow" id="edge-[*]-IsPositive-0" data-from="[*]" data-to="IsPositive">
-    <path class="edge-line" d="M117.52499999999999,56 L117.52499999999999,128" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M219.53125,56 L219.53125,128" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="edge edge-arrow" id="edge-IsPositive-if_state-0" data-from="IsPositive" data-to="if_state">
-    <path class="edge-line" d="M118.18124999999999,186 Q127.81874613157564,221.96912640731162 120.08160134988815,258.39433713859637" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M219.53125,186 L219.53125,258" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="edge edge-arrow" id="edge-if_state-False-0" data-from="if_state" data-to="False">
-    <path class="edge-line" d="M141.7358239200658,327.1483517585923 Q194.5725417320435,368.9656746095036 222.67485630992775,430.2083652339818" fill="none" marker-end="url(#arrowhead)"/>
-    <rect class="edge-label-bg" x="149.40534011499676" y="368.67835849628705" width="65.6" height="20" rx="3" ry="3"/>
-    <text class="edge-label" x="182.20534011499677" y="378.67835849628705" text-anchor="middle" dominant-baseline="central" style="font-size: 12px">if n &lt; 0</text>
+    <path class="edge-line" d="M229.87524070817912,331.54138331544004 Q258.05195238460146,376.2742618404867 262.8571257883817,428.922792784782" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="213.56618324828042" y="370.23208805011103" width="65.6" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="246.36618324828044" y="380.23208805011103" text-anchor="middle" dominant-baseline="central" style="font-size: 12px">if n &lt; 0</text>
   </g>
   <g class="edge edge-arrow" id="edge-if_state-True-0" data-from="if_state" data-to="True">
-    <path class="edge-line" d="M113.28784176847003,332.5895869691681 Q89.70859566375626,377.77475507623467 89.20538004566787,428.73971399677384" fill="none" marker-end="url(#arrowhead)"/>
-    <rect class="edge-label-bg" x="64.84661090706894" y="370.66465048297096" width="72.8" height="20" rx="3" ry="3"/>
-    <text class="edge-label" x="101.24661090706894" y="380.66465048297096" text-anchor="middle" dominant-baseline="central" style="font-size: 12px">if n &gt;= 0</text>
+    <path class="edge-line" d="M200.76923239806092,327.91292344744005 Q152.96376475984547,370.3901186545197 129.64415526395288,429.93733237378524" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="128.8066938310069" y="368.9251279106127" width="72.8" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="165.2066938310069" y="378.9251279106127" text-anchor="middle" dominant-baseline="central" style="font-size: 12px">if n &gt;= 0</text>
   </g>
   <g class="edge edge-arrow" id="edge-True-fork_state-0" data-from="True" data-to="fork_state">
-    <path class="edge-line" d="M100.06536697247707,486.5 Q136.98099972156126,516.5804053283247 156.22333873928173,560.1387238806823" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M120.59575688073394,486.5 Q148.23122260780377,518.4154507731231 158.3713951967708,559.397054742095" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="edge edge-arrow" id="edge-fork_state-Left-0" data-from="fork_state" data-to="Left">
     <path class="edge-line" d="M161.07454128440367,574.5 Q124.15890853531945,604.5804053283247 104.91656951759899,648.1387238806823" fill="none" marker-end="url(#arrowhead)"/>
@@ -200,26 +200,26 @@
     <path class="edge-line" d="M228.18463302752292,704.5 Q191.26900027843874,734.5804053283247 172.02666126071827,778.1387238806823" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="edge edge-arrow" id="edge-join_state-[*]-end-0" data-from="join_state" data-to="[*]-end">
-    <path class="edge-line" d="M160.5108695652174,792.5 Q116.98334735067503,822.309970776653 91.72658585087237,868.6281696447488" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M166.53396739130434,792.5 Q197.82059393414224,824.2777118583969 211.27673535049996,866.7936880270006" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="node node-circle start-end" id="node-[*]">
-    <circle class="node-shape" cx="117.52499999999999" cy="48" r="8"/>
+    <circle class="node-shape" cx="219.53125" cy="48" r="8"/>
   </g>
   <g class="node node-round" id="node-IsPositive">
-    <rect class="node-shape" x="51.02499999999999" y="136" width="133" height="50" rx="15" ry="15"/>
-    <text class="node-label" x="117.52499999999999" y="161" text-anchor="middle" dominant-baseline="central">IsPositive</text>
+    <rect class="node-shape" x="153.03125" y="136" width="133" height="50" rx="15" ry="15"/>
+    <text class="node-label" x="219.53125" y="161" text-anchor="middle" dominant-baseline="central">IsPositive</text>
   </g>
   <g class="node node-rhombus" id="node-if_state">
-    <polygon class="node-shape" points="121.19999999999999,266 202.39999999999998,301 121.19999999999999,336 40,301"/>
-    <text class="node-label" x="121.19999999999999" y="301" text-anchor="middle" dominant-baseline="central">if_state</text>
+    <polygon class="node-shape" points="219.53125,266 300.73125,301 219.53125,336 138.33125,301"/>
+    <text class="node-label" x="219.53125" y="301" text-anchor="middle" dominant-baseline="central">if_state</text>
   </g>
   <g class="node node-round" id="node-True">
-    <rect class="node-shape" x="40" y="436.5" width="82" height="50" rx="15" ry="15"/>
-    <text class="node-label" x="81" y="461.5" text-anchor="middle" dominant-baseline="central">True</text>
+    <rect class="node-shape" x="66.640625" y="436.5" width="82" height="50" rx="15" ry="15"/>
+    <text class="node-label" x="107.640625" y="461.5" text-anchor="middle" dominant-baseline="central">True</text>
   </g>
   <g class="node node-round" id="node-False">
-    <rect class="node-shape" x="202" y="436.5" width="90.5" height="50" rx="15" ry="15"/>
-    <text class="node-label" x="247.25" y="461.5" text-anchor="middle" dominant-baseline="central">False</text>
+    <rect class="node-shape" x="228.640625" y="436.5" width="90.5" height="50" rx="15" ry="15"/>
+    <text class="node-label" x="273.890625" y="461.5" text-anchor="middle" dominant-baseline="central">False</text>
   </g>
   <g class="node node-rect state-bar" id="node-fork_state">
     <rect class="node-shape" x="74" y="566.5" width="180.25" height="8" rx="0" ry="0"/>
@@ -238,7 +238,7 @@
     <text class="node-label" x="164.125" y="788.5" text-anchor="middle" dominant-baseline="central">join_state</text>
   </g>
   <g class="node node-circle start-end state-end" id="node-[*]-end">
-    <circle class="node-shape" cx="81" cy="880.5" r="8" fill="none"/>
-    <circle class="node-shape" cx="81" cy="880.5" r="3.6"/>
+    <circle class="node-shape" cx="219.53125" cy="880.5" r="8" fill="none"/>
+    <circle class="node-shape" cx="219.53125" cy="880.5" r="3.6"/>
   </g>
 </svg>

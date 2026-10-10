@@ -169,34 +169,34 @@
 </style>
   <rect class="diagram-bg" x="0" y="0" width="320" height="520"/>
   <g class="edge edge-arrow" id="edge-A-B-0" data-from="A" data-to="B">
-    <path class="edge-line" d="M100.4131610576923,90 Q84.74242773763598,124.39037228454272 86.38698108082757,162.14702776353298" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M129.52689302884616,90 Q103.63419902795357,122.26362622249577 95.20498737927429,162.7645098008888" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="edge edge-arrow" id="edge-B-C-0" data-from="B" data-to="C">
-    <path class="edge-line" d="M84.8602764423077,220 Q100.53100976236402,254.39037228454276 98.88645641917243,292.147027763533" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M90.67583133012822,220 Q114.90339576830087,252.59886995957748 121.69670055833178,292.64274853392385" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="edge edge-arrow" id="edge-A-C-0" data-from="A" data-to="C">
-    <path class="edge-line" d="M127.82738095238095,90 C139.85615079365078,103.33333333333333 200.51728773071775,136.13769493650304 200,170 C199.48271226928225,203.86230506349696 137.26971214006198,272.64485865081815 124.72365456807438,293.17383038098177" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M155.2906746031746,90 C162.74222883597884,103.33333333333333 201.05041310519297,136.231044416991 200,170 C198.94958689480703,203.768955583009 157.49016331001403,272.17811124837823 148.98819597201683,292.6137334980539" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="edge edge-arrow" id="edge-C-D-0" data-from="C" data-to="D">
-    <path class="edge-line" d="M104.47866586538461,350 Q94.69364575177711,385.7273312998729 102.18959513611456,422.00403957477056" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M136.630608974359,350 Q146.8791942513642,385.6181504207176 139.8458683844062,422.0079630998465" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="edge edge-arrow" id="edge-A-D-0" data-from="A" data-to="D">
-    <path class="edge-line" d="M145.2734375,89.03755868544602 C167.72786458333334,102.53129890453835 265.0833333333333,134.839593114241 280,170 C294.9166666666667,205.160406885759 260.12042195618704,257.6765075546672 234.7734375,300 C209.42645304381296,342.3234924453328 145.72731730239803,403.2841288933308 127.91809326287765,423.9409546719969" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M174.33829365079367,90 C191.94857804232805,103.33333333333333 264.88732845568785,135 280,170 C295.11267154431215,205 283.9710013840245,257.7088236444879 265.0143229166667,300 C246.0576444493089,342.2911763555121 182.71899481598882,403.12254844422716 166.25992919585326,423.7470581330726" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="node node-rect" id="node-A">
-    <rect class="node-shape" x="65.2734375" y="40" width="80" height="50" rx="0" ry="0"/>
-    <text class="node-label" x="105.2734375" y="65" text-anchor="middle" dominant-baseline="central">Top</text>
+    <rect class="node-shape" x="101.31901041666669" y="40" width="80" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="141.31901041666669" y="65" text-anchor="middle" dominant-baseline="central">Top</text>
   </g>
   <g class="node node-rect" id="node-B">
-    <rect class="node-shape" x="40" y="170" width="80" height="50" rx="0" ry="0"/>
-    <text class="node-label" x="80" y="195" text-anchor="middle" dominant-baseline="central">Mid</text>
+    <rect class="node-shape" x="40.000000000000014" y="170" width="80" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="80.00000000000001" y="195" text-anchor="middle" dominant-baseline="central">Mid</text>
   </g>
   <g class="node node-rect" id="node-C">
-    <rect class="node-shape" x="55.7734375" y="300" width="99" height="50" rx="0" ry="0"/>
-    <text class="node-label" x="105.2734375" y="325" text-anchor="middle" dominant-baseline="central">Bottom</text>
+    <rect class="node-shape" x="86.01432291666669" y="300" width="99" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="135.51432291666669" y="325" text-anchor="middle" dominant-baseline="central">Bottom</text>
   </g>
   <g class="node node-rect" id="node-D">
-    <rect class="node-shape" x="60.140625" y="430" width="82" height="50" rx="0" ry="0"/>
-    <text class="node-label" x="101.140625" y="455" text-anchor="middle" dominant-baseline="central">Tail</text>
+    <rect class="node-shape" x="100.31901041666669" y="430" width="82" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="141.31901041666669" y="455" text-anchor="middle" dominant-baseline="central">Tail</text>
   </g>
 </svg>

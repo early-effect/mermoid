@@ -6,7 +6,10 @@
   </defs>
   <defs>
     <marker id="mark-arrow" markerWidth="12" markerHeight="10" refX="12" refY="5" orient="auto" markerUnits="userSpaceOnUse">
-      <polygon class="arrowhead" points="0,0 12,5 0,10" fill="context-stroke"/>
+      <polygon class="arrowhead" points="0,0 12,5 0,10" style="fill: var(--mermoid-line, #333); stroke: var(--mermoid-line, #333); stroke-width: 2"/>
+    </marker>
+    <marker id="mark-arrow-start" markerWidth="12" markerHeight="10" refX="12" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <polygon class="arrowhead" points="0,0 12,5 0,10" style="fill: var(--mermoid-line, #333); stroke: var(--mermoid-line, #333); stroke-width: 2"/>
     </marker>
   </defs>
   <style>

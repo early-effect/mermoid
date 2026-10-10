@@ -313,7 +313,7 @@ which substate was last active.
     section("Click and the accessible name")(
       md"""
 `click` is the same binding as on a flowchart: an href, a tooltip, or a callback name. `accTitle` and `accDescr` become
-the SVG `<title>` and `<desc>`. `classDef`, `class`, `:::`, and `style` apply inside a composite, on the frame, on a
+the SVG `<title>` and `<desc>`, and the accessible name of the hybrid root. `classDef`, `class`, `:::`, and `style` apply inside a composite, on the frame, on a
 choice, on a bar, and on a marker. `classDef default` is the paint for a state that has no other class.
 """,
       example {

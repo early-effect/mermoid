@@ -20,6 +20,7 @@ private[mermoid] object SequenceRenderer:
         .toList ++ (background(scene) :: bands(scene) ++ frames(scene) ++ lifelines(scene) ++ activations(
         scene
       ) ++ messages(scene) ++ notes(scene) ++ headers(scene))),
+      AccessibleName.of(scene.accTitle, scene.accDescr),
     )
   end paint
 
@@ -182,13 +183,16 @@ private[mermoid] object SequenceRenderer:
   end frame
 
   private def bands(scene: SequenceScene): List[SvgNode] =
+    val lineH = scene.config.layout.lineHeight
     scene.bands.zipWithIndex.map { (band, index) =>
+      // The strip above the participants is lineH + 14. Center the title in it.
       val title = band.title.toList.map { text =>
         SvgNode.textElem("text")(
-          "class"       -> PaintClass.FragmentLabel.cssName,
-          "x"           -> (band.rect.x + 8).f,
-          "y"           -> (band.rect.y + 14).f,
-          "text-anchor" -> "start",
+          "class"             -> PaintClass.FragmentLabel.cssName,
+          "x"                 -> (band.rect.x + 8).f,
+          "y"                 -> (band.rect.y + (lineH + 14) / 2).f,
+          "text-anchor"       -> "start",
+          "dominant-baseline" -> "central",
         )(text)
       }
       SvgNode.elem("g")(
@@ -204,6 +208,7 @@ private[mermoid] object SequenceRenderer:
         ) :: title)*
       )
     }
+  end bands
 
   private def lifelines(scene: SequenceScene): List[SvgNode] =
     scene.lifelines.map { line =>

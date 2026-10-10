@@ -213,5 +213,23 @@ object SequenceLayoutSpec extends ZIOSpecDefault:
             case _ => assertTrue(false)
         case _ => assertTrue(false)
     },
+    test("a box title sits above the actor's head") {
+      val src =
+        """sequenceDiagram
+          |box rgb(220, 232, 246) People
+          |  actor Alice
+          |end
+          |""".stripMargin
+      SequenceFixture.laid(src) match
+        case None        => assertTrue(false)
+        case Some(scene) =>
+          (person(scene, "Alice"), scene.bands.headOption) match
+            case (Some(alice), Some(band)) =>
+              val lineH = scene.config.layout.lineHeight
+              val gap   = alice.box.y - band.rect.y
+              assertTrue(gap >= lineH + 14)
+            case _ => assertTrue(false)
+      end match
+    },
   )
 end SequenceLayoutSpec

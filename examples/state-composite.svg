@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="933" height="285" viewBox="0 0 933 285">
+<svg xmlns="http://www.w3.org/2000/svg" width="933" height="290.3125" viewBox="0 0 933 290.3125">
   <defs>
     <marker id="arrowhead" markerWidth="12" markerHeight="10.2" refX="12" refY="5.1" orient="auto" markerUnits="userSpaceOnUse">
       <polygon class="arrowhead" points="0 0, 12 5.1, 0 10.2"/>
@@ -167,27 +167,27 @@
   stroke: #333;
 }
 </style>
-  <rect class="diagram-bg" x="0" y="0" width="933" height="285"/>
+  <rect class="diagram-bg" x="0" y="0" width="933" height="290.3125"/>
   <g class="subgraph" id="subgraph-Review">
-    <rect class="subgraph-rect" x="136" y="90" width="444.5" height="100" rx="5" ry="5"/>
-    <text class="subgraph-label" x="144" y="106">Review</text>
+    <rect class="subgraph-rect" x="136" y="150.3125" width="444.5" height="100" rx="5" ry="5"/>
+    <text class="subgraph-label" x="144" y="166.3125">Review</text>
   </g>
   <g class="edge edge-arrow" id="edge-Decision-Draft-0" data-from="Decision" data-to="Draft">
-    <path class="edge-line" d="M566.5,168.68839779005526 Q628.3953229897467,172.43561268214896 681.8479414062864,203.86633351175144" fill="none" marker-end="url(#arrowhead)"/>
-    <rect class="edge-label-bg" x="591.3739707031432" y="176.27736565090333" width="65.6" height="20" rx="3" ry="3"/>
-    <text class="edge-label" x="624.1739707031431" y="186.27736565090333" text-anchor="middle" dominant-baseline="central" style="font-size: 12px">rejected</text>
+    <path class="edge-line" d="M566.5,213.53957182320443 Q624.5328621709712,201.94685092726897 681.5058910476467,217.95554388276875" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="591.2029455238235" y="205.74755785298657" width="65.6" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="624.0029455238234" y="215.74755785298657" text-anchor="middle" dominant-baseline="central" style="font-size: 12px">rejected</text>
   </g>
   <g class="edge edge-arrow" id="edge-Published-[*]-end-0" data-from="Published" data-to="[*]-end">
-    <path class="edge-line" d="M797,82.95673876871881 Q834.0296684962894,87.52996161287922 869.1014409585628,74.79883862698458" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M797,84.63987104825291 Q833.7740629697731,90.18457628133028 869.0589868111038,78.43512467974273" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="edge edge-arrow" id="edge-[*]-start@Review#0-Screening-0" data-from="[*]-start@Review#0" data-to="Screening">
-    <path class="edge-line" d="M165.94927952071865,134.8994193134923 Q202.9789480170081,130.32619646933185 238.05072047928135,143.0573194552265" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M165.94927952071865,195.2119193134923 Q202.9789480170081,190.63869646933185 238.05072047928135,203.3698194552265" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="edge edge-arrow" id="edge-Screening-Decision-0" data-from="Screening" data-to="Decision">
-    <path class="edge-line" d="M370.5,151 L442.5,151" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M370.5,211.3125 L442.5,211.3125" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="node node-circle start-end" id="node-[*]">
-    <circle class="node-shape" cx="48" cy="98" r="8"/>
+    <circle class="node-shape" cx="48" cy="158.3125" r="8"/>
   </g>
   <g class="node node-round" id="node-Published">
     <rect class="node-shape" x="672.5" y="65" width="124.5" height="50" rx="15" ry="15"/>
@@ -198,18 +198,18 @@
     <text class="node-label" x="734.75" y="220" text-anchor="middle" dominant-baseline="central">Draft</text>
   </g>
   <g class="node node-circle start-end state-end" id="node-[*]-end">
-    <circle class="node-shape" cx="885" cy="73" r="8" fill="none"/>
-    <circle class="node-shape" cx="885" cy="73" r="3.6"/>
+    <circle class="node-shape" cx="885" cy="77.0625" r="8" fill="none"/>
+    <circle class="node-shape" cx="885" cy="77.0625" r="3.6"/>
   </g>
   <g class="node node-circle start-end" id="node-[*]-start@Review#0">
-    <circle class="node-shape" cx="158" cy="134" r="8"/>
+    <circle class="node-shape" cx="158" cy="194.3125" r="8"/>
   </g>
   <g class="node node-round" id="node-Screening">
-    <rect class="node-shape" x="246" y="126" width="124.5" height="50" rx="15" ry="15"/>
-    <text class="node-label" x="308.25" y="151" text-anchor="middle" dominant-baseline="central">Screening</text>
+    <rect class="node-shape" x="246" y="186.3125" width="124.5" height="50" rx="15" ry="15"/>
+    <text class="node-label" x="308.25" y="211.3125" text-anchor="middle" dominant-baseline="central">Screening</text>
   </g>
   <g class="node node-round" id="node-Decision">
-    <rect class="node-shape" x="450.5" y="126" width="116" height="50" rx="15" ry="15"/>
-    <text class="node-label" x="508.5" y="151" text-anchor="middle" dominant-baseline="central">Decision</text>
+    <rect class="node-shape" x="450.5" y="186.3125" width="116" height="50" rx="15" ry="15"/>
+    <text class="node-label" x="508.5" y="211.3125" text-anchor="middle" dominant-baseline="central">Decision</text>
   </g>
 </svg>

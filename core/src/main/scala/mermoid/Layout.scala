@@ -394,9 +394,9 @@ object Layout:
             val want              =
               val ds = sorted.flatMap(id => desired.get(id))
               if ds.isEmpty then center else ds.sum / ds.size
-            val shift0 = want - center
-            val minX   = packed.map((_, x, half) => x - half + shift0).minOption.getOrElse(left + shift0)
-            val shift  = if minX < padding then shift0 + (padding - minX) else shift0
+            // Padding is a margin around the whole scene, applied once after alignment.
+            // Clamping each rank here pins a wide node to the left edge and shoves it off the column.
+            val shift = want - center
             packed.map((id, x, _) => id -> (x + shift)).toMap
         end match
     end packLayer
@@ -412,7 +412,7 @@ object Layout:
       if ns.size % 2 == 1 then ns.lift(mid)
       else ns.lift(mid - 1).zip(ns.lift(mid)).map((a, b) => (a + b) / 2)
 
-    (0 until iterations)
+    val aligned = (0 until iterations)
       .foldLeft(initialPack) { (pos, iter) =>
         val forward = iter % 2 == 0
         val order   = if forward then layers.zipWithIndex else layers.zipWithIndex.reverse
@@ -423,5 +423,8 @@ object Layout:
           current ++ packLayer(layer, desired)
         }
       }
+    val minLeft = aligned.map((id, x) => x - halfExtent(id)).minOption.getOrElse(0.0)
+    val margin  = padding - minLeft
+    if margin == 0.0 then aligned else aligned.map((id, x) => id -> (x + margin))
   end medianCrossPositions
 end Layout

@@ -40,10 +40,10 @@ private[mermoid] object StructurePainter:
   end box
 
   def markers(kinds: Set[MarkKind]): SvgNode =
-    SvgNode.elem("defs")()(kinds.toList.map(marker)*)
+    SvgNode.elem("defs")()(kinds.toList.flatMap(kind => List(marker(kind, start = false), marker(kind, start = true)))*)
 
   def markerAttrs(mark: RelationMark): List[(String, String)] =
-    mark.from.toList.map(kind => "marker-start" -> s"url(#${kind.markerId})") ++
+    mark.from.toList.map(kind => "marker-start" -> s"url(#${kind.markerId}-start)") ++
       mark.to.toList.map(kind => "marker-end" -> s"url(#${kind.markerId})")
 
   private def hline(x: Double, y: Double, width: Double): SvgNode =
@@ -69,99 +69,87 @@ private[mermoid] object StructurePainter:
       text(x, y0 + index * 16, value, middle = false)
     }
 
-  private def marker(kind: MarkKind): SvgNode =
+  /** The arrowhead class fills its shape. An inline style wins, so a foot stays a stroke and a hollow diamond stays
+    * hollow.
+    */
+  private val ink   = "var(--mermoid-line, #333)"
+  private val paper = "var(--mermoid-background, #fff)"
+
+  private def paint(fill: String): String =
+    s"fill: $fill; stroke: $ink; stroke-width: 2"
+
+  private def marker(kind: MarkKind, start: Boolean): SvgNode =
+    // Local +x runs toward the entity. refX is that tip, so the glyph hangs back on the line.
+    // The maximum mark (bar or crow toes) sits on the entity. The minimum mark sits on the line.
     val (w, h, refX, body) = kind match
       case MarkKind.Triangle =>
-        (14.0, 12.0, 14.0, polygon("0,0 14,6 0,12", filled = false))
+        (14.0, 12.0, 14.0, polygon("0,0 14,6 0,12", paper))
       case MarkKind.Diamond =>
-        (16.0, 12.0, 16.0, polygon("0,6 8,0 16,6 8,12", filled = true))
+        (18.0, 12.0, 18.0, polygon("0,6 9,0 18,6 9,12", ink))
       case MarkKind.OpenDiamond =>
-        (16.0, 12.0, 16.0, polygon("0,6 8,0 16,6 8,12", filled = false))
+        (18.0, 12.0, 18.0, polygon("0,6 9,0 18,6 9,12", paper))
       case MarkKind.Arrow =>
-        (12.0, 10.0, 12.0, polygon("0,0 12,5 0,10", filled = true))
+        (12.0, 10.0, 12.0, polygon("0,0 12,5 0,10", ink))
       case MarkKind.Lollipop =>
-        (
-          14.0,
-          12.0,
-          14.0,
-          List(
-            leaf("circle")(
-              "class" -> PaintClass.Arrowhead.cssName,
-              "cx"    -> "6",
-              "cy"    -> "6",
-              "r"     -> "5",
-              "fill"  -> "none",
-            )
-          ),
-        )
+        (14.0, 16.0, 14.0, List(circle(7, 8, 5, paper)))
       case MarkKind.ExactlyOne =>
-        (10.0, 14.0, 10.0, List(bar(2), bar(7)))
+        (14.0, 16.0, 14.0, List(bar(4), bar(9)))
       case MarkKind.ZeroOrOne =>
-        (
-          16.0,
-          14.0,
-          16.0,
-          List(
-            leaf("circle")(
-              "class" -> PaintClass.Arrowhead.cssName,
-              "cx"    -> "5",
-              "cy"    -> "7",
-              "r"     -> "4",
-              "fill"  -> "none",
-            ),
-            bar(12),
-          ),
-        )
+        (20.0, 16.0, 20.0, List(circle(6, 8, 4, paper), bar(15)))
       case MarkKind.OneOrMore =>
-        (16.0, 14.0, 16.0, crow(0) :+ bar(12))
+        (22.0, 16.0, 22.0, bar(2) :: crowToes(22))
       case MarkKind.ZeroOrMore =>
-        (
-          18.0,
-          14.0,
-          18.0,
-          crow(0) :+ leaf("circle")(
-            "class" -> PaintClass.Arrowhead.cssName,
-            "cx"    -> "13",
-            "cy"    -> "7",
-            "r"     -> "4",
-            "fill"  -> "none",
-          ),
-        )
+        (26.0, 16.0, 26.0, circle(6, 8, 4, paper) :: crowToes(26))
+    val id = if start then s"${kind.markerId}-start" else kind.markerId
+    // marker-start's auto orientation points +x along the path, into the source node. Reverse it.
+    val orient = if start then "auto-start-reverse" else "auto"
     SvgNode.elem("marker")(
-      "id"           -> kind.markerId,
+      "id"           -> id,
       "markerWidth"  -> w.f,
       "markerHeight" -> h.f,
       "refX"         -> refX.f,
       "refY"         -> (h / 2).f,
-      "orient"       -> "auto",
+      "orient"       -> orient,
       "markerUnits"  -> "userSpaceOnUse",
     )(body*)
   end marker
 
-  private def polygon(points: String, filled: Boolean): List[SvgNode] =
+  private def polygon(points: String, fill: String): List[SvgNode] =
     List(
       leaf("polygon")(
         "class"  -> PaintClass.Arrowhead.cssName,
         "points" -> points,
-        "fill"   -> (if filled then "context-stroke" else "var(--mermoid-background, #fff)"),
+        "style"  -> paint(fill),
       )
+    )
+
+  private def circle(cx: Double, cy: Double, r: Double, fill: String): SvgNode =
+    leaf("circle")(
+      "class" -> PaintClass.Arrowhead.cssName,
+      "cx"    -> cx.f,
+      "cy"    -> cy.f,
+      "r"     -> r.f,
+      "style" -> paint(fill),
     )
 
   private def bar(x: Double): SvgNode =
     leaf("line")(
       "class" -> PaintClass.Arrowhead.cssName,
       "x1"    -> x.f,
-      "y1"    -> "1",
+      "y1"    -> "2",
       "x2"    -> x.f,
-      "y2"    -> "13",
+      "y2"    -> "14",
+      "style" -> paint("none"),
     )
 
-  private def crow(x: Double): List[SvgNode] =
+  /** Toes at `tip` (the entity). The heel sits back on the relationship line. */
+  private def crowToes(tip: Double): List[SvgNode] =
+    val heel = tip - 11
     List(
       leaf("path")(
         "class" -> PaintClass.Arrowhead.cssName,
-        "d"     -> s"M${x.f},1 L${(x + 8).f},7 L${x.f},13 M${(x + 8).f},7 L${x.f},7",
-        "fill"  -> "none",
+        "d"     -> s"M${heel.f},8 L${tip.f},2 M${heel.f},8 L${tip.f},8 M${heel.f},8 L${tip.f},14",
+        "style" -> paint("none"),
       )
     )
 end StructurePainter

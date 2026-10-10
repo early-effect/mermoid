@@ -109,7 +109,7 @@ instead of a plain header. An unknown type is `ParseError.UnknownStereotype` and
 
 `link Alice: Dashboard @ https://example.com` and `links Alice: Dashboard @ https://a, Wiki @ https://b` become a
 title, and a single link wraps the header in an `<a>`. `click`, `style`, `classDef`, and `class` are the same
-bindings a flowchart uses. `accTitle` and `accDescr` become the SVG `<title>` and `<desc>`.
+bindings a flowchart uses. `accTitle` and `accDescr` become the SVG `<title>` and `<desc>`, and the accessible name of the hybrid root.
 """,
       example {
         MermoidAscent.svgDiagram(Mermaid("""sequenceDiagram
