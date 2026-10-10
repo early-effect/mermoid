@@ -4,7 +4,7 @@ import earlyeffect.docs.EarlyEffectTheme
 import specular.site.*
 import zio.*
 
-import java.nio.file.{Files, Path, Paths}
+import java.nio.file.{Files, Path, Paths, StandardCopyOption}
 import scala.jdk.OptionConverters.*
 
 /** Docs-as-tests site builder (Test classpath; `docs/specularSite`).
@@ -17,7 +17,8 @@ import scala.jdk.OptionConverters.*
   */
 object BuildSite extends DocsSite:
 
-  def pages = Vector(
+  /** Sidebar order. [[Front]] is the index, not a second copy of this list. */
+  private val guide = Vector(
     Overview.doc,
     QuickStart.doc,
     Flowcharts.doc,
@@ -34,54 +35,26 @@ object BuildSite extends DocsSite:
     Cli.doc,
   )
 
+  private val frontPage = Front.doc
+
+  def pages = frontPage +: guide
+
   override def site(settings: DocsSettings): SiteModel =
-    val m       = settings.meta
-    val branded = EarlyEffectTheme.brand(super.site(settings))
-    branded.copy(
-      clientScript = Some("assets/client.js"),
-      summaryMarkdown = Some(
-        """**mermoid** parses [Mermaid](https://mermaid.js.org) diagram syntax and renders SVG in Scala 3, on the JVM
-and in the browser via Scala.js. No headless Chrome, no Node build step, no JavaScript at page load.
-
-The output is **styled entirely by CSS**. Every element carries a stable class and id (`node-Start`, `edge-a-b-0`,
-`note-Idle-0`), and the stylesheet ships in a `<style>` block built from CSS custom properties, so you restyle a
-diagram with a stylesheet instead of re-rendering it. Four built-in themes, or bring your own CSS.
-
-`SvgRenderer.render` gives you a `String`; `SvgRenderer.renderTree` / `DiagramLayout.scene` are the paint-agnostic
-contracts. **`mermoid-ascent`** paints hybrid HTML+SVG with reactive reflow for Specular and any ascent app.
-
-fastparse is the only dependency of `mermoid` core; `mermoid-ascent` adds ascent.
-
-Guide: Quick start → Flowcharts → State diagrams → Sequence diagrams → Interactive → Responsive layout → Theming → Custom CSS → SVG structure → CLI.
-"""
-      ),
-      installSnippets = Vector(
-        ArtifactKind.defaultInstall(m, ArtifactKind.Library),
-        CodeSnippet(
-          "Scala.js",
-          s"""// the same artifact cross-builds for Scala.js
-libraryDependencies += "${m.organization}" %%% "${m.name}" % "${m.docsVersion}"""",
+    val m = settings.meta
+    EarlyEffectTheme
+      .brand(super.site(settings))
+      .copy(
+        clientScript = Some("assets/client.js"),
+        nav = Some(NavModel.flat(guide)),
+        pages = pages,
+        summaryMarkdown = None,
+        brand = Some(
+          Brand(
+            name = m.title.getOrElse("mermoid"),
+            links = Vector(EarlyEffectTheme.github("https://github.com/early-effect/mermoid")),
+          )
         ),
-        CodeSnippet(
-          "mermoid-ascent (hybrid / interactive)",
-          s"""libraryDependencies += "${m.organization}" %% "mermoid-ascent" % "${m.docsVersion}"
-libraryDependencies += "${m.organization}" %%% "mermoid-ascent" % "${m.docsVersion}"""",
-        ),
-        CodeSnippet(
-          "Render a diagram",
-          """import mermoid.*
-
-val svg = MermaidParser.parse("flowchart TD\\n  A[Start] --> B[Done]")
-  .map(SvgRenderer.render(_))""",
-        ),
-      ),
-      brand = Some(
-        Brand(
-          name = m.title.getOrElse("mermoid"),
-          links = Vector(EarlyEffectTheme.github("https://github.com/early-effect/mermoid")),
-        )
-      ),
-    )
+      )
   end site
 
   override def layers: ZLayer[Any, Nothing, SiteBuilder] =
@@ -89,7 +62,16 @@ val svg = MermaidParser.parse("flowchart TD\\n  A[Start] --> B[Done]")
 
   override def afterBuild(out: Path, result: SiteOutput): IO[SiteError, Unit] =
     val _ = result
-    EarlyEffectTheme.writeLogo(out) *> copyClientBundle(out)
+    // Specular always writes index.html as a summary plus a second copy of the nav.
+    // The front DocPage is the index. Copy it over that file. It is not a sidebar item.
+    val front   = out.resolve(s"${frontPage.slug}.html")
+    val index   = out.resolve("index.html")
+    val promote =
+      ZIO.attemptBlockingIO(Files.copy(front, index, StandardCopyOption.REPLACE_EXISTING)).mapError { err =>
+        SiteError.WriteFailed(index, err)
+      }
+    promote *> EarlyEffectTheme.writeLogo(out) *> copyClientBundle(out)
+  end afterBuild
 
   /** The linked client named by [[clientJsMarker]], else the first fastopt bundle under `target/out`. */
   private def copyClientBundle(out: Path): IO[SiteError, Unit] =
