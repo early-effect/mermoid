@@ -22,6 +22,8 @@ object BuildSite extends DocsSite:
     QuickStart.doc,
     Flowcharts.doc,
     StateDiagrams.doc,
+    ClassDiagrams.doc,
+    ErDiagrams.doc,
     SequenceDiagrams.doc,
     Interactive.doc,
     Responsive.doc,

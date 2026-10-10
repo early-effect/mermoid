@@ -27,6 +27,7 @@ case class LayoutEdge(
     alias: Option[String] = None,
     edgeIndex: Int = 0,
     edgeCount: Int = 1,
+    mark: Option[RelationMark] = None,
 )
 
 /** A frame whose geometry was decided by layout, not measured afterwards from its members. */
@@ -36,6 +37,20 @@ case class PlacedFrame(
     rect: Rect,
     /** Absolute y of a dashed divider inside the frame. */
     dividers: List[Double] = Nil,
+)
+
+/** A class or entity drawn as stacked bands. Heights are the bands inside the node. */
+case class CompartmentBox(
+    id: NodeId,
+    stereotype: Option[String],
+    title: String,
+    attributes: List[String],
+    operations: List[String],
+    headerHeight: Double,
+    attributeHeight: Double,
+    operationHeight: Double,
+    /** Entity boxes have no operation band. */
+    entity: Boolean = false,
 )
 
 /** A note with no state to point at. `rect` is top-left in scene coordinates. */

@@ -77,9 +77,9 @@ element tree `renderTree` returns.
     section("Status")(
       md"""
 Pre-1.0, on [early-semver](https://www.scala-lang.org/blog/2021/02/16/preventing-version-conflicts-with-versionscheme.html):
-`0.x` releases may break binary compatibility. Flowcharts, `stateDiagram-v2`, and `sequenceDiagram` are implemented.
-Class, ER, and Gantt diagrams are not. The [README](https://github.com/early-effect/mermoid#supported-syntax) has the
-honest feature table.
+`0.x` releases may break binary compatibility. Flowcharts, `stateDiagram-v2`, `classDiagram`, `erDiagram`, and
+`sequenceDiagram` are implemented. Gantt, pie, journey, and git graphs are not. The
+[README](https://github.com/early-effect/mermoid#supported-syntax) has the honest feature table.
 """
     ),
   )

@@ -23,8 +23,6 @@ list is the public promise; this file is the plan behind it.
 
 None of these parse today; the README says so explicitly.
 
-- Class diagrams
-- ER diagrams
 - Gantt charts
 - Pie charts, user journey, git graph
 

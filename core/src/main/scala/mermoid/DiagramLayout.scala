@@ -25,7 +25,19 @@ object DiagramLayout:
           case Left(_) =>
             stateScene(dir, stmts, config, viewport)
         Scene.Ranked(scene)
-      case Diagram.Sequence(stmts) => Scene.Sequence(SequenceLayout.place(stmts, config, viewport))
+      case Diagram.Sequence(stmts)       => Scene.Sequence(SequenceLayout.place(stmts, config, viewport))
+      case diagram: Diagram.ClassDiagram =>
+        val scene = ClassModel.resolve(diagram) match
+          case Right(resolved) => ClassModel.scene(resolved, config, viewport)
+          case Left(_)         =>
+            ClassModel.scene(ResolvedClass(Direction.TB, Nil, Nil, Nil, false, Nil, None, None), config, viewport)
+        Scene.Ranked(scene)
+      case diagram: Diagram.ErDiagram =>
+        val scene = ErModel.resolve(diagram) match
+          case Right(resolved) => ErModel.scene(resolved, config, viewport)
+          case Left(_)         =>
+            ErModel.scene(ErModel.ResolvedEr(Nil, Nil, Map.empty, Map.empty, Nil, None, None), config, viewport)
+        Scene.Ranked(scene)
 
   private[mermoid] def effectiveDirection(
       author: Direction,

@@ -226,9 +226,12 @@ object EdgeRenderer:
   private def edgeId(edge: LayoutEdge): String =
     edge.alias.getOrElse(s"${edge.from}-${edge.to}-${edge.edgeIndex}")
 
-  /** `marker-end` attribute, present only for the arrow-headed edge styles. */
-  private def markerAttr(style: EdgeStyle): List[(String, String)] =
-    if style.arrowhead then List("marker-end" -> s"url(#${PaintClass.Arrowhead.cssName})") else Nil
+  /** Flowchart arrows use the shared head. Class and ER edges use [[RelationMark]]. */
+  private def markerAttr(edge: LayoutEdge): List[(String, String)] =
+    edge.mark match
+      case Some(mark) => StructurePainter.markerAttrs(mark)
+      case None       =>
+        if edge.style.arrowhead then List("marker-end" -> s"url(#${PaintClass.Arrowhead.cssName})") else Nil
 
   def edgeToSvg(
       config: RenderConfig,
@@ -240,7 +243,7 @@ object EdgeRenderer:
     val from   = nodeMap(edge.from)
     val to     = nodeMap(edge.to)
     val lc     = config.layout
-    val marker = markerAttr(edge.style)
+    val marker = markerAttr(edge)
 
     val selfLoopClass = if edge.from == edge.to then s" ${PaintClass.SelfLoop.cssName}" else ""
     val children      =
@@ -259,8 +262,13 @@ object EdgeRenderer:
     )
   end edgeToSvg
 
-  private def curve(d: String, marker: List[(String, String)]): SvgNode =
-    SvgNode.Element("path", List("class" -> PaintClass.EdgeLine.cssName, "d" -> d, "fill" -> "none") ++ marker, Nil)
+  private def curve(d: String, marker: List[(String, String)], dashed: Boolean = false): SvgNode =
+    val dash = if dashed then List("stroke-dasharray" -> "6 4") else Nil
+    SvgNode.Element(
+      "path",
+      List("class" -> PaintClass.EdgeLine.cssName, "d" -> d, "fill" -> "none") ++ dash ++ marker,
+      Nil,
+    )
 
   private def renderSelfLoop(
       lc: LayoutConfig,
@@ -391,7 +399,7 @@ object EdgeRenderer:
       else List(start, end)
 
     val d    = smoothPath(points)
-    val line = curve(d, marker)
+    val line = curve(d, marker, edge.mark.exists(_.dashed))
 
     val label = edge.label
       .map { lbl =>

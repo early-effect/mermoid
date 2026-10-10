@@ -6,6 +6,8 @@ enum Diagram:
   case Flowchart(direction: Direction, statements: List[FlowStatement])
   case StateDiagram(direction: Direction, statements: List[StateStatement])
   case Sequence(statements: List[SequenceStatement])
+  case ClassDiagram(direction: Direction, statements: List[ClassStatement])
+  case ErDiagram(direction: Direction, statements: List[ErStatement])
 
 // -- Flowchart ----------------------------------------------------------------
 
@@ -67,7 +69,15 @@ object EdgeStyle:
     s"| Syntax | `EdgeStyle` | CSS class | Arrowhead |\n|---|---|---|\n$rows"
 end EdgeStyle
 
-case class Edge(from: NodeId, to: NodeId, style: EdgeStyle, label: Option[String], alias: Option[String] = None)
+case class Edge(
+    from: NodeId,
+    to: NodeId,
+    style: EdgeStyle,
+    label: Option[String],
+    alias: Option[String] = None,
+    /** Set for a class or ER relation. Flowchart edges leave it empty. */
+    mark: Option[RelationMark] = None,
+)
 
 /** A Mermaid `click` binding: tooltip and/or link and/or opaque callback name. */
 case class ClickBinding(

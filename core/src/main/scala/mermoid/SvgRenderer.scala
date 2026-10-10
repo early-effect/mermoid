@@ -27,6 +27,7 @@ object SvgRenderer:
         alias = e.alias,
         edgeIndex = idx,
         edgeCount = pairCounts((e.from, e.to)),
+        mark = e.mark,
       )
     }
   end buildLayoutEdges
@@ -114,15 +115,21 @@ object SvgRenderer:
         )
       )
 
+    val boxes   = scene.compartments.map(box => box.id -> box).toMap
     val nodeSvg = visible.map { n =>
-      val interaction = scene.interactions.get(n.id)
-      ShapeRenderer.nodeToSvg(
-        n,
-        config,
-        includeLabel = !n.cssClasses.contains(PaintClass.StartEnd.cssName),
-        interaction = interaction,
-      )
+      boxes.get(n.id) match
+        case Some(box) => StructurePainter.box(n, box)
+        case None      =>
+          val interaction = scene.interactions.get(n.id)
+          ShapeRenderer.nodeToSvg(
+            n,
+            config,
+            includeLabel = !n.cssClasses.contains(PaintClass.StartEnd.cssName),
+            interaction = interaction,
+          )
     }
+    val marks    = scene.edges.flatMap(_.mark).flatMap(_.kinds).toSet
+    val markDefs = if marks.isEmpty then Nil else List(StructurePainter.markers(marks))
 
     val selfLoopCounts  = scene.edges.filter(e => e.from == e.to).groupBy(_.from).map((id, es) => id -> es.size)
     val selfLoopExtents = selfLoopCounts.flatMap { case (id, count) =>
@@ -147,10 +154,10 @@ object SvgRenderer:
     svgRoot(
       scene.width,
       scene.height,
-      meta ++ (arrowheadDefs(config) :: styleBlock(
+      meta ++ (arrowheadDefs(config) :: markDefs) ++ styleBlock(
         config,
         scene.classDefRules,
-      ).toList) ++ (background :: subgraphSvg ++ edgeSvg ++ nodeSvg ++ noteSvg ++ floating),
+      ).toList ++ (background :: subgraphSvg ++ edgeSvg ++ nodeSvg ++ noteSvg ++ floating),
     )
   end paintRanked
 

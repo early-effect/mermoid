@@ -1,0 +1,203 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="284" viewBox="0 0 640 284">
+  <defs>
+    <marker id="arrowhead" markerWidth="12" markerHeight="10.2" refX="12" refY="5.1" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon class="arrowhead" points="0 0, 12 5.1, 0 10.2"/>
+    </marker>
+  </defs>
+  <defs>
+    <marker id="mark-arrow" markerWidth="12" markerHeight="10" refX="12" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon class="arrowhead" points="0,0 12,5 0,10" fill="context-stroke"/>
+    </marker>
+  </defs>
+  <style>
+:root {
+  --mermoid-background: #ffffff;
+  --mermoid-edge-label-bg: #ffffff;
+  --mermoid-font-family: sans-serif;
+  --mermoid-font-size: 14px;
+  --mermoid-line: #333;
+  --mermoid-main-bkg: #ECECFF;
+  --mermoid-node-border: #9370DB;
+  --mermoid-note-bg: #ffffcc;
+  --mermoid-note-border: #333333;
+  --mermoid-note-text: #333333;
+  --mermoid-primary: #1f77b4;
+  --mermoid-primary-border: #1a5a8a;
+  --mermoid-primary-text: #333;
+  --mermoid-secondary: #ffffde;
+  --mermoid-secondary-border: #aaaa33;
+  --mermoid-secondary-text: #333;
+  --mermoid-selection: #333;
+  --mermoid-tertiary: #f4f4f4;
+  --mermoid-tertiary-border: #cccccc;
+  --mermoid-tertiary-text: #333;
+  --mermoid-text: #333;
+}
+.diagram-bg {
+  fill: #ffffff;
+  stroke: none;
+}
+.node-shape {
+  fill: #ECECFF;
+  stroke: #9370DB;
+  stroke-width: 2;
+}
+.node-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+.edge-line {
+  stroke: #333;
+  stroke-width: 2;
+}
+.edge-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.edge-label-bg {
+  fill: #ffffff;
+}
+.note-rect {
+  fill: #ffffcc;
+  stroke: #333333;
+  stroke-width: 1;
+  stroke-dasharray: 4,2;
+}
+.note-text {
+  fill: #333333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.note-connector {
+  stroke: #333333;
+  stroke-width: 1;
+  stroke-dasharray: 4,2;
+}
+.subgraph-rect {
+  fill: none;
+  stroke: #9370DB;
+  stroke-width: 1;
+  stroke-dasharray: 6,3;
+}
+.subgraph-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+.edge-thick .edge-line {
+  stroke-width: 3;
+}
+.edge-dotted .edge-line {
+  stroke-dasharray: 5,5;
+}
+.edge-dotted-open .edge-line {
+  stroke-dasharray: 5,5;
+}
+.arrowhead {
+  fill: #333;
+}
+.arrow-open {
+  fill: none;
+  stroke: #333;
+  stroke-width: 2;
+}
+.arrow-cross {
+  fill: none;
+  stroke: #333;
+  stroke-width: 2;
+}
+.actor-box {
+  fill: #ECECFF;
+  stroke: #9370DB;
+  stroke-width: 2;
+}
+.actor-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+.actor-figure {
+  fill: none;
+  stroke: #9370DB;
+  stroke-width: 2;
+}
+.lifeline {
+  stroke: #333;
+  stroke-width: 1;
+  fill: none;
+  stroke-dasharray: 4,4;
+}
+.message-line {
+  stroke: #333;
+  stroke-width: 2;
+  fill: none;
+}
+.message-dashed .message-line {
+  stroke-dasharray: 6,4;
+}
+.message-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.activation {
+  fill: #333;
+  stroke: none;
+  fill-opacity: 0.25;
+}
+.fragment-frame {
+  fill: none;
+  stroke: #9370DB;
+  stroke-width: 1;
+}
+.fragment-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.fragment-divider {
+  stroke: #9370DB;
+  stroke-width: 1;
+  fill: none;
+}
+.start-end .node-shape {
+  fill: #333;
+  stroke: #333;
+}
+</style>
+  <rect class="diagram-bg" x="0" y="0" width="640" height="284"/>
+  <g class="subgraph" id="subgraph-Billing">
+    <rect class="subgraph-rect" x="248" y="108" width="352" height="136" rx="5" ry="5"/>
+    <text class="subgraph-label" x="256" y="124">Billing</text>
+  </g>
+  <g class="edge edge-open" id="edge-Customer-Invoice-0" data-from="Customer" data-to="Invoice">
+    <path class="edge-line" d="M156,160.5889781859931 Q211.10296211251435,156.6313203214696 262,178.11366245694603" fill="none" marker-end="url(#mark-arrow)"/>
+    <rect class="edge-label-bg" x="176.2" y="159.3513203214696" width="65.6" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="209" y="169.3513203214696" text-anchor="middle" dominant-baseline="central" style="font-size: 12px">receives</text>
+  </g>
+  <g class="edge edge-open" id="edge-Invoice-Payment-0" data-from="Invoice" data-to="Payment">
+    <path class="edge-line" d="M369.5,187 L478.5,187" fill="none" marker-end="url(#mark-arrow)"/>
+    <rect class="edge-label-bg" x="384" y="177" width="80" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="424" y="187" text-anchor="middle" dominant-baseline="central" style="font-size: 12px">settled by</text>
+  </g>
+  <g class="node node-rect" id="node-Customer">
+    <rect class="node-shape" x="40" y="108" width="116" height="86" rx="4"/>
+    <line class="node-shape" x1="40" y1="134" x2="156" y2="134"/>
+    <line class="node-shape" x1="40" y1="160" x2="156" y2="160"/>
+    <text class="node-label" x="98" y="121" text-anchor="middle" dominant-baseline="central">Customer</text>
+  </g>
+  <g class="node node-rect" id="node-Invoice">
+    <rect class="node-shape" x="262" y="144" width="107.5" height="86" rx="4"/>
+    <line class="node-shape" x1="262" y1="170" x2="369.5" y2="170"/>
+    <line class="node-shape" x1="262" y1="196" x2="369.5" y2="196"/>
+    <text class="node-label" x="315.75" y="157" text-anchor="middle" dominant-baseline="central">Invoice</text>
+  </g>
+  <g class="node node-rect" id="node-Payment">
+    <rect class="node-shape" x="478.5" y="144" width="107.5" height="86" rx="4"/>
+    <line class="node-shape" x1="478.5" y1="170" x2="586" y2="170"/>
+    <line class="node-shape" x1="478.5" y1="196" x2="586" y2="196"/>
+    <text class="node-label" x="532.25" y="157" text-anchor="middle" dominant-baseline="central">Payment</text>
+  </g>
+</svg>
