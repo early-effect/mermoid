@@ -6,7 +6,7 @@ import zipx.*
   * already brings it in. Action pins stay on jar defaults.
   *
   * Parent `Lib` vals used only for `.mod` are catalog rows; they are not `library()`-selected when another selected
-  * module already pulls them (specular-site via the docs theme).
+  * module already pulls them. The docs stack selects specular-site itself so the coordinate is the catalog row.
   */
 object MyVersions extends ZipxVersions:
   val sbt: SbtVersion     = SbtVersion("2.1.0-M3")
@@ -28,14 +28,15 @@ object MyVersions extends ZipxVersions:
   // Own row: its line is not the core family's.
   val ascentJs   = Lib("rocks.earlyeffect", "ascent-js", "0.11.0")
 
-  val specular        = Lib("rocks.earlyeffect", "specular-core", "0.19.0")
+  val specular        = Lib("rocks.earlyeffect", "specular-core", "0.20.0")
   val specularZioTest = specular.mod("specular-zio-test").test
+  val specularSite    = specular.mod("specular-site").test
   val specularTheme   = specular.mod("early-effect-docs-theme").test
 
   val scalajs        = Plugin("org.scala-js", "sbt-scalajs", "1.22.0")
   val scalafmt       = Plugin("org.scalameta", "sbt-scalafmt", "2.6.2")
   val assembly       = Plugin("com.eed3si9n", "sbt-assembly", "2.5.0")
-  val specularPlugin = Plugin("rocks.earlyeffect", "sbt-specular", "0.19.0")
+  val specularPlugin = Plugin("rocks.earlyeffect", "sbt-specular", "0.20.0")
 
   def zioTests      = library(zioTest.test, zioTestSbt.test)
   def zioLib        = library(zio)
@@ -44,6 +45,6 @@ object MyVersions extends ZipxVersions:
   def ascentLib     = library(ascent, ascentCss, zio)
   def ascentHtmlLib = library(ascentHtml)
   def ascentJsLib   = library(ascentJs)
-  def docsJvm       = library(specularZioTest, specularTheme)
+  def docsJvm       = library(specularZioTest, specularSite, specularTheme)
   def docsJs        = library(specular, ascentJs, ascentCss, zio)
 end MyVersions

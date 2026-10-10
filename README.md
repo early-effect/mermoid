@@ -5,20 +5,9 @@
 [![Maven Central](https://img.shields.io/maven-central/v/rocks.earlyeffect/mermoid_3?logo=apachemaven)](https://central.sonatype.com/artifact/rocks.earlyeffect/mermoid_3)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
-**[Mermaid](https://mermaid.js.org) → SVG (and optional interactive HTML) in Scala 3.** Parse flowchart,
-`stateDiagram-v2`, `classDiagram`, and `erDiagram` source, lay it out, and paint a self-contained SVG on the JVM and
-in the browser via Scala.js.
-No headless Chrome, no Node build step, no JavaScript required at page load for static embeds.
+mermoid parses Mermaid flowchart, state, class, ER, and sequence diagrams and paints SVG in Scala, on the JVM and Scala.js.
 
-The SVG is **styled by CSS**: stable classes and ids, plus a `<style>` block built from `--mermoid-*` custom
-properties. Restyle with a stylesheet instead of re-rendering.
-
-Two published artifacts:
-
-| Artifact | Role | Dependencies |
-|---|---|---|
-| **`mermoid`** | Parser, layout (`Scene`), SVG painter | **fastparse only** |
-| **`mermoid-ascent`** | Hybrid HTML nodes + SVG edges, selection, tooltips, reactive reflow | `mermoid` + [ascent](https://github.com/early-effect/ascent) + ZIO |
+[Docs](https://www.earlyeffect.rocks/mermoid/)
 
 > **Status: early / pre-1.0.** Published under [early-semver](https://www.scala-sbt.org/1.x/docs/Publishing.html#Version+scheme)
 > (`versionScheme := "early-semver"`). The API can change between minor versions until `1.0`.

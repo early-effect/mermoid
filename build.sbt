@@ -203,8 +203,13 @@ lazy val docs = (projectMatrix in file("docs"))
           // The JVM row of the core matrix — a bare LocalProject name resolves to it.
           specularMetaProject   := Some(LocalProject("core")),
           specularSiteDirectory := (ThisBuild / baseDirectory).value / "target" / "site",
-          // Docs-only (workflow_dispatch) builds are dynver `-ci`; don't advertise that as a Central coord.
-          specularDisplayVersion := stripCi,
+          // Do not strip -ci first. Past v0.2.0, sbt-dynver-ci names the distance 0.2.1-ci or
+          // 0.3.0-ci, and stripping that suffix is the next line, not a coordinate on Central.
+          // A raw version containing -ci, +, or SNAPSHOT advertises 0.2.0.
+          specularDisplayVersion := { raw =>
+            val distance = raw.contains("-ci") || raw.contains("+") || raw.contains("SNAPSHOT")
+            if raw.nonEmpty && !distance then raw else "0.2.0"
+          },
           // Link docsJS then write marker path for BuildSite.afterBuild → assets/client.js. The site and its
           // preview share one link, and the preview watches docsJS so a client edit reloads the page.
           specularJsLink    := linkDocsClient.value,
