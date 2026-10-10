@@ -27,6 +27,8 @@ enum PaintClass(val cssName: String, val element: String, val description: Strin
   case FragmentLabel   extends PaintClass("fragment-label", "text", "a fragment tab or divider label")
   case FragmentDivider extends PaintClass("fragment-divider", "line", "an alt or par section divider")
   case StartEnd        extends PaintClass("start-end", "on a node wrapper", "`[*]` in a state diagram")
+  case StateEnd        extends PaintClass("state-end", "on a node wrapper", "the final `[*]`, drawn as a bullseye")
+  case StateBar        extends PaintClass("state-bar", "on a node wrapper", "a fork or join bar")
   case SelfLoop extends PaintClass("self-loop", "on an edge wrapper", "edge that starts and ends on the same node")
   case HybridNodeLabel extends PaintClass("mermoid-node-label", "span", "HTML twin of node-label", inSvg = false)
   case IsSelected      extends PaintClass("is-selected", "hybrid node/note", "selected outline", inSvg = false)

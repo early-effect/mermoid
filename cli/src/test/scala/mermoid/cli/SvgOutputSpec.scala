@@ -135,15 +135,19 @@ object SvgOutputSpec extends ZIOSpec[SvgOutputSpec.Corpus]:
 
   /** Node ids the diagram declares, as the renderer keys them. */
   private def declaredNodeIds(diagram: Diagram): Set[String] = diagram match
-    case Diagram.Flowchart(_, stmts)    => StyleResolver.collectNodes(stmts).keySet.map(_.value)
-    case Diagram.StateDiagram(_, stmts) =>
-      val transitions = stmts.collect { case StateStatement.TransitionSt(t) => t }
-      val ends        = transitions.flatMap(t => List(t.from, t.to)).map(_.value).toSet
-      val hasStart    = transitions.exists(_.from == NodeId.stateMarker)
-      val hasEnd      = transitions.exists(_.to == NodeId.stateMarker)
-      if hasStart && hasEnd then ends + NodeId.stateEnd.value
-      else ends
-    case Diagram.Sequence(_) => Set.empty
+    case Diagram.Flowchart(_, stmts) => StyleResolver.collectNodes(stmts).keySet.map(_.value)
+    case state: Diagram.StateDiagram => StateModel.resolve(state).fold(_ => Set.empty, atomIds)
+    case Diagram.Sequence(_)         => Set.empty
+
+  /** Painted state nodes. A composite is a frame, not a node, so its id is not in this set. */
+  private def atomIds(machine: StateMachine): Set[String] =
+    machine.regions.flatMap(atomIds).toSet
+
+  private def atomIds(region: StateRegion): Set[String] =
+    region.nodes.flatMap {
+      case StateNode.Atom(id, _, _, _, _, _)            => Set(id.value)
+      case StateNode.Composite(_, _, _, inner, _, _, _) => inner.flatMap(atomIds)
+    }.toSet
 
   /** Attribute values that are meant to be numbers — the geometry we can check numerically. */
   private val numericAttrs =

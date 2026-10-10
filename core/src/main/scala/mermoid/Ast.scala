@@ -122,9 +122,33 @@ object StateStyle:
     StateStyle(noteAlign = align, paint = props - noteAlignProp)
 end StateStyle
 
+/** How a state is drawn. `Simple` is the rounded box. The others are pseudostates. */
+enum StateForm:
+  case Simple, Choice, Fork, Join, ShallowHistory, DeepHistory
+
 enum StateStatement:
   case TransitionSt(transition: StateTransition)
+  case Description(id: NodeId, text: String)
+  case Form(id: NodeId, form: StateForm)
+
+  /** `regions` is split on `--`. One region is an ordinary composite. */
+  case Composite(id: NodeId, direction: Option[Direction], regions: List[List[StateStatement]])
   case NoteSt(position: NotePosition, stateId: NodeId, text: String, alias: Option[String] = None)
+  case FloatingNote(text: String, alias: NodeId)
   case StyleSt(stateId: NodeId, style: StateStyle)
   case ClassDefSt(className: String, styles: Map[css.CssProperty, String])
   case ClassSt(stateIds: List[NodeId], className: String)
+  case ClickSt(binding: ClickBinding)
+  case HideEmptyDescription
+
+  /** The raw tail of `scale …`, checked by [[StateModel]] so a bad width is [[ParseError.BadScale]]. */
+  case Scale(raw: String)
+  case AccTitle(text: String)
+  case AccDescr(text: String)
+
+  /** `--` outside a composite. [[StateModel]] rejects it. Inside a composite the parser splits regions instead. */
+  case Divider
+
+  /** `<<nope>>` and `[[nope]]`. [[StateModel]] rejects it with the raw name. */
+  case UnknownStereo(id: NodeId, raw: String)
+end StateStatement

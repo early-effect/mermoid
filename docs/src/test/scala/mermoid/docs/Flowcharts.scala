@@ -135,8 +135,9 @@ through invisible waypoints so they do not slice intermediate nodes. A graph wit
     ),
     section("Subgraphs")(
       md"""
-`subgraph <id> [label] … end` draws a dashed frame around its nodes, with an optional `direction` line inside. The frame
-is a `<g class="subgraph" id="subgraph-{id}">` rendered behind the edges and nodes.
+`subgraph <id> [label] … end` is a diagram of its own. A `direction` line inside ranks that subgraph and does not change
+the parent. The frame is a `<g class="subgraph" id="subgraph-{id}">` behind the edges and nodes, and the members stay
+inside it. An edge from outside ends on the member and crosses the frame.
 """,
       example {
         MermoidAscent.svgDiagram(Mermaid("""flowchart TD

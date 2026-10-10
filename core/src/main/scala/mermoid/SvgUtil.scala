@@ -23,11 +23,17 @@ object SvgUtil:
     lines.mkString("\n")
   end wrapLabel
 
-  def computeNodeSize(label: String, shape: NodeShape, config: LayoutConfig): (Double, Double) =
+  def computeNodeSize(
+      label: String,
+      shape: NodeShape,
+      config: LayoutConfig,
+      measure: TextMeasure,
+  ): (Double, Double) =
     val wrapped =
       config.maxLabelWidth.map(w => wrapLabel(label, w, config)).getOrElse(label)
     val lines = wrapped.linesIterator.toList
-    val textW = lines.map(l => l.length * config.charWidthEstimate).maxOption.getOrElse(0.0)
+    val textW =
+      lines.map(l => measure.width(l, config.fontSize.toDouble, config.fontFamily)).maxOption.getOrElse(0.0)
     val textH = Math.max(1, lines.size) * config.lineHeight
     val baseW = Math.max(config.minNodeWidth, textW + config.nodePaddingH * 2)
     val baseH = Math.max(config.nodeHeight, textH + 16.0)

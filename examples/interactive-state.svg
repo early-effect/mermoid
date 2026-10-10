@@ -199,8 +199,9 @@
     <rect class="node-shape" x="47.3125" y="460" width="82" height="50" rx="15" ry="15"/>
     <text class="node-label" x="88.3125" y="485" text-anchor="middle" dominant-baseline="central">Done</text>
   </g>
-  <g class="node node-circle start-end" id="node-[*]-end">
-    <circle class="node-shape" cx="87.125" cy="630" r="8"/>
+  <g class="node node-circle start-end state-end" id="node-[*]-end">
+    <circle class="node-shape" cx="87.125" cy="630" r="8" fill="none"/>
+    <circle class="node-shape" cx="87.125" cy="630" r="3.6"/>
   </g>
   <g class="note" id="note-Idle-0">
     <line class="note-connector" x1="128.375" y1="225" x2="143.375" y2="225"/>

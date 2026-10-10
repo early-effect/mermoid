@@ -7,8 +7,11 @@ object Layout:
       direction: Direction,
       nodes: Map[NodeId, NodeDef],
       edges: List[Edge],
+      sizes: Map[NodeId, (Double, Double)] = Map.empty,
+      measure: Option[TextMeasure] = None,
   ): LayoutResult =
-    val isVertical = direction match
+    val usedMeasure = measure.getOrElse(TextMeasure.fromConfig(config))
+    val isVertical  = direction match
       case Direction.TB | Direction.TD | Direction.BT => true
       case Direction.LR | Direction.RL                => false
 
@@ -48,8 +51,11 @@ object Layout:
     val nodeSizes = allNodeDefs.map { case (id, nd) =>
       if dummyIds.contains(id) then id -> (0.0, 0.0)
       else
-        val label = nd.label.getOrElse(id.value)
-        id -> SvgUtil.computeNodeSize(label, nd.shape, config)
+        sizes.get(id) match
+          case Some(fixed) => id -> fixed
+          case None        =>
+            val label = nd.label.getOrElse(id.value)
+            id -> SvgUtil.computeNodeSize(label, nd.shape, config, usedMeasure)
     }
 
     val selfEdges     = edges.filter(e => e.from == e.to)
@@ -59,7 +65,7 @@ object Layout:
         val loopSize   = nodeRadius * 0.8 + config.selfLoopSize
         val maxLabelW  = selfEs
           .flatMap(_.label)
-          .map(l => SvgUtil.estimateTextWidth(l, config) + config.selfLoopLabelPadding)
+          .map(l => usedMeasure.width(l, config.fontSize.toDouble, config.fontFamily) + config.selfLoopLabelPadding)
           .maxOption
           .getOrElse(0.0)
         val labelCount         = selfEs.size
@@ -89,7 +95,8 @@ object Layout:
           val crossesGap =
             (fromLayer <= gapIdx && toLayer >= gapIdx + 1) ||
               (toLayer <= gapIdx && fromLayer >= gapIdx + 1)
-          if crossesGap then e.label.map(l => SvgUtil.estimateTextWidth(l, config) + config.nodePaddingH)
+          if crossesGap then
+            e.label.map(l => usedMeasure.width(l, config.fontSize.toDouble, config.fontFamily) + config.nodePaddingH)
           else None
         }
         .maxOption

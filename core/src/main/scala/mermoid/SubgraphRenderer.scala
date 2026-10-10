@@ -5,47 +5,38 @@ import mermoid.css.{PaintClass, WrapperClass}
 
 object SubgraphRenderer:
 
-  private val subgraphPadding = 20.0
-  private val labelHeight     = 20.0
+  private val labelHeight = 20.0
 
-  /** `None` when none of the subgraph's members were laid out — there is no box to draw. */
-  def subgraphToSvg(
-      info: StyleResolver.SubgraphInfo,
-      nodeMap: Map[NodeId, LayoutNode],
-  ): Option[SvgNode] =
-    val memberNodes = info.nodeIds.flatMap(nodeMap.get)
-    for
-      left   <- memberNodes.map(n => n.center.x - n.width / 2).minOption
-      top    <- memberNodes.map(n => n.center.y - n.height / 2).minOption
-      right  <- memberNodes.map(n => n.center.x + n.width / 2).maxOption
-      bottom <- memberNodes.map(n => n.center.y + n.height / 2).maxOption
-    yield
-      val minX  = left - subgraphPadding
-      val minY  = top - subgraphPadding - labelHeight
-      val maxX  = right + subgraphPadding
-      val maxY  = bottom + subgraphPadding
-      val w     = maxX - minX
-      val h     = maxY - minY
-      val label = info.label.getOrElse(info.id)
-      val rect  = leaf("rect")(
-        "class"  -> PaintClass.SubgraphRect.cssName,
-        "x"      -> minX.f,
-        "y"      -> minY.f,
-        "width"  -> w.f,
-        "height" -> h.f,
-        "rx"     -> "5",
-        "ry"     -> "5",
+  def subgraphToSvg(frame: PlacedFrame): SvgNode =
+    val label = frame.label.getOrElse(frame.id)
+    val rect  = leaf("rect")(
+      "class"  -> PaintClass.SubgraphRect.cssName,
+      "x"      -> frame.rect.x.f,
+      "y"      -> frame.rect.y.f,
+      "width"  -> frame.rect.w.f,
+      "height" -> frame.rect.h.f,
+      "rx"     -> "5",
+      "ry"     -> "5",
+    )
+    val labelSvg = textElem("text")(
+      "class" -> PaintClass.SubgraphLabel.cssName,
+      "x"     -> (frame.rect.x + 8).f,
+      "y"     -> (frame.rect.y + labelHeight - 4).f,
+    )(label)
+    val dividers = frame.dividers.map { y =>
+      leaf("line")(
+        "class"            -> PaintClass.FragmentDivider.cssName,
+        "x1"               -> (frame.rect.x + 8).f,
+        "y1"               -> y.f,
+        "x2"               -> (frame.rect.x + frame.rect.w - 8).f,
+        "y2"               -> y.f,
+        "stroke-dasharray" -> "4 4",
       )
-      val labelSvg = textElem("text")(
-        "class" -> PaintClass.SubgraphLabel.cssName,
-        "x"     -> (minX + 8).f,
-        "y"     -> (minY + labelHeight - 4).f,
-      )(label)
-      SvgNode.Element(
-        "g",
-        List("class" -> WrapperClass.Subgraph.cssName, "id" -> s"subgraph-${info.id}"),
-        List(rect, labelSvg),
-      )
-    end for
+    }
+    SvgNode.Element(
+      "g",
+      List("class" -> WrapperClass.Subgraph.cssName, "id" -> s"subgraph-${frame.id}"),
+      rect :: labelSvg :: dividers,
+    )
   end subgraphToSvg
 end SubgraphRenderer

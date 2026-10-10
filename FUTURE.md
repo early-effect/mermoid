@@ -30,7 +30,6 @@ None of these parse today; the README says so explicitly.
 
 ## Syntax Gaps in Supported Diagram Types
 
-- State diagrams: composite states, concurrency (`--`), `state X as "…"`
 - Sequence diagrams: `box` bands, `create` / `destroy`, stereotypes (`@{"type": ...}`), `link` / `links`, and
   `click` / `style` / `classDef` inside the sequence. A lifeline is already one span from the header to the last row.
 

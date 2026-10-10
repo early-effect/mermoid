@@ -9,6 +9,8 @@ case class RenderConfig(
     resolveVariables: Boolean = true,
     responsive: ResponsiveConfig = ResponsiveConfig(),
     sequence: SequenceConfig = SequenceConfig(),
+    /** `None` uses the character estimate. A host with a real font passes a measure. */
+    textMeasure: Option[TextMeasure] = None,
 )
 
 object RenderConfig:

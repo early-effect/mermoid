@@ -108,13 +108,34 @@ private[mermoid] object MermaidLift:
   given ToExpr[StateStyle] with
     def apply(x: StateStyle)(using Quotes): Expr[StateStyle] = product(x)
 
+  given ToExpr[StateForm] with
+    def apply(x: StateForm)(using Quotes): Expr[StateForm] = x match
+      case StateForm.Simple         => '{ StateForm.Simple }
+      case StateForm.Choice         => '{ StateForm.Choice }
+      case StateForm.Fork           => '{ StateForm.Fork }
+      case StateForm.Join           => '{ StateForm.Join }
+      case StateForm.ShallowHistory => '{ StateForm.ShallowHistory }
+      case StateForm.DeepHistory    => '{ StateForm.DeepHistory }
+
   given ToExpr[StateStatement] with
     def apply(x: StateStatement)(using Quotes): Expr[StateStatement] = x match
-      case v: StateStatement.TransitionSt => product(v)
-      case v: StateStatement.NoteSt       => product(v)
-      case v: StateStatement.StyleSt      => product(v)
-      case v: StateStatement.ClassDefSt   => product(v)
-      case v: StateStatement.ClassSt      => product(v)
+      case v: StateStatement.TransitionSt      => product(v)
+      case v: StateStatement.Description       => product(v)
+      case v: StateStatement.Form              => product(v)
+      case v: StateStatement.Composite         => product(v)
+      case v: StateStatement.NoteSt            => product(v)
+      case v: StateStatement.FloatingNote      => product(v)
+      case v: StateStatement.StyleSt           => product(v)
+      case v: StateStatement.ClassDefSt        => product(v)
+      case v: StateStatement.ClassSt           => product(v)
+      case v: StateStatement.ClickSt           => product(v)
+      case StateStatement.HideEmptyDescription => '{ StateStatement.HideEmptyDescription }
+      case v: StateStatement.Scale             => product(v)
+      case v: StateStatement.AccTitle          => product(v)
+      case v: StateStatement.AccDescr          => product(v)
+      case StateStatement.Divider              => '{ StateStatement.Divider }
+      case v: StateStatement.UnknownStereo     => product(v)
+  end given
 
   given ToExpr[ParticipantKind] with
     def apply(x: ParticipantKind)(using Quotes): Expr[ParticipantKind] = x match
