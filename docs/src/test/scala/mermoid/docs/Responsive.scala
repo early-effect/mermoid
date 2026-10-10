@@ -205,22 +205,22 @@ Three knobs to turn off. Omitting the `Viewport` altogether is the simplest appr
     section("Measuring text")(
       md"""
 Node and label widths use `TextMeasure`. The default, `TextMeasure.estimate`, counts characters
-(`LayoutConfig.charWidthEstimate`) and ignores the font. That is the measure on the JVM and on Scala.js, so a diagram
-rendered in CI, in the CLI, and in a browser without an explicit measure is the same SVG.
+(`LayoutConfig.charWidthEstimate`) and ignores the font. The CLI, tests, SSR, and `svg` / `svgDiagram` use that
+estimate, so those SVGs stay the same on the JVM and on Scala.js.
 
-A host that has the real font passes its own measure and lays the diagram out again:
+An ascent diagram (`diagram`, `diagramInteractive`, and the responsive variants) that runs where a browser `document`
+exists, and whose caller left `textMeasure` empty, lays out from `DomTextMeasure` instead. A measure the caller passed
+is kept. Static pages on this site use `svgDiagram`, so they stay on the estimate. The interactive examples are
+remounted in the browser, and that mount is the one that measures.
 
 ```scala
 RenderConfig(textMeasure = Some(DomTextMeasure()))
 ```
 
-`DomTextMeasure` lives in `mermoid-ascent` and only compiles for Scala.js. It asks the canvas for
-`measureText`. Core does not take a DOM dependency, and it does not call `java.awt`: a library that paints SVG should
-not pull a font engine onto every platform to improve one of them. When `document` is missing, the width falls back
-to half the font size per character.
-
-The estimate is wrong for proportional fonts. The opt-in measure is right for the browser and wrong for a byte-stable
-snapshot. Pick the one the call site is for.
+`DomTextMeasure` lives in `mermoid-ascent` and only compiles for Scala.js. It asks the canvas for `measureText`. Core
+does not take a DOM dependency, and it does not call `java.awt`. When `document` is missing, the estimate stays in
+place. The canvas helper's own fallback (half the font size per character) is only used when a host passes
+`DomTextMeasure` and the document is gone.
 """
     ),
     section("In hybrid mode")(
@@ -229,7 +229,9 @@ snapshot. Pick the one the call site is for.
 `flipDirectionBelow` is set, direction. Selection state is preserved by node id, so clicking a node before reflow
 keeps it selected after.
 
-See [Interactive](interactive.html) for live Narrow / Medium / Wide controls. The built-in buttons set 360px, 640px,
+`diagramFitting` follows the container: the first paint is unconstrained, then a resize observer re-lays the scene out
+at the container's content width. `diagramResponsive` is the same re-layout when the host already owns the width
+source. See [Interactive](interactive.html) for live Narrow / Medium / Wide controls. Those buttons set 360px, 640px,
 and 900px. Direction changes at 640px only when the diagram opts into `flipDirectionBelow`.
 """,
       example {

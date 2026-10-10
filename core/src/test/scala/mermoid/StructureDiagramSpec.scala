@@ -100,5 +100,50 @@ object StructureDiagramSpec extends ZIOSpecDefault:
         )
       end for
     },
+    test("a wider entity stays on the column, and the shaft is straight with a crow's foot") {
+      val src =
+        """erDiagram
+          |  CUSTOMER ||--o{ ORDER : places
+          |  ORDER ||--|{ LINE-ITEM : contains
+          |""".stripMargin
+      for
+        diagram <- ZIO.fromEither(MermaidParser.parse(src)).mapError(_.message)
+        scene   <- ranked(src)
+      yield
+        val xs         = scene.visibleNodes.map(node => node.id.value -> node.center.x).toMap
+        val sameColumn = List("CUSTOMER", "ORDER", "LINE-ITEM").flatMap(xs.get) match
+          case a :: b :: c :: Nil => Math.abs(a - b) < 1e-6 && Math.abs(b - c) < 1e-6
+          case _                  => false
+        val svg  = SvgRenderer.render(diagram)
+        val path = edgePath(svg, "edge-ORDER-LINE-ITEM-0")
+        val foot = markerBlock(svg, "mark-one-or-more")
+        val bars = markerBlock(svg, "mark-exactly-one-start")
+        assertTrue(
+          sameColumn,
+          path.contains(" L"),
+          !path.contains("Q"),
+          !path.contains("C"),
+          svg.contains("marker-start=\"url(#mark-exactly-one-start)\""),
+          svg.contains("marker-end=\"url(#mark-one-or-more)\""),
+          foot.contains("<path"),
+          foot.contains("fill: none"),
+          !foot.contains("<polygon"),
+          bars.contains("auto-start-reverse"),
+          bars.contains("<line"),
+        )
+      end for
+    },
   )
+
+  private def edgePath(svg: String, edgeId: String): String =
+    val at  = svg.indexOf(s"id=\"$edgeId\"")
+    val key = " d=\""
+    val dAt = if at < 0 then -1 else svg.indexOf(key, at)
+    val end = if dAt < 0 then -1 else svg.indexOf('"', dAt + key.length)
+    if dAt < 0 || end < 0 then "" else svg.substring(dAt + key.length, end)
+
+  private def markerBlock(svg: String, markerId: String): String =
+    val at  = svg.indexOf(s"id=\"$markerId\"")
+    val end = if at < 0 then -1 else svg.indexOf("</marker>", at)
+    if at < 0 || end < 0 then "" else svg.substring(at, end)
 end StructureDiagramSpec

@@ -476,6 +476,10 @@ object EdgeRenderer:
         s"M${first.x.f},${first.y.f} ${segs.mkString(" ")}"
   end smoothPath
 
+  /** Same row or column, including a fraction of a pixel of layout dust.
+    *
+    * An exact `1e-6` test turned a one-pixel column miss into a quadratic bow.
+    */
   private def nearlyAxisAligned(a: Point, b: Point): Boolean =
-    Math.abs(a.x - b.x) < 1e-6 || Math.abs(a.y - b.y) < 1e-6
+    Math.abs(a.x - b.x) < 1.0 || Math.abs(a.y - b.y) < 1.0
 end EdgeRenderer

@@ -86,6 +86,7 @@ private[ascent] object HybridPainter:
       cssFit,
       styleCss,
       Some(scene.direction.toString),
+      AccessibleName.of(scene.accTitle, scene.accDescr),
       SvgBridge.toUi(edgeSvg),
       htmlNodes ++ htmlNotes,
     )
@@ -123,6 +124,7 @@ private[ascent] object HybridPainter:
       cssFit,
       styleCss,
       None,
+      AccessibleName.of(scene.accTitle, scene.accDescr),
       SvgBridge.toUi(edgeSvg),
       actors ++ notes,
     )
@@ -136,6 +138,7 @@ private[ascent] object HybridPainter:
       cssFit: Boolean,
       styleCss: String,
       direction: Option[String],
+      name: Option[String],
       layer: UI[Any],
       html: Seq[UI[Any]],
   ): UI[Any] =
@@ -154,7 +157,13 @@ private[ascent] object HybridPainter:
       if cssFit then s"${HybridClass.Root.cssName} ${HybridClass.Fit.cssName}"
       else HybridClass.Root.cssName
     val directionAttr = direction.toList.map(d => Attr.StaticAttr("data-mermoid-direction", AttrValue.Str(d)))
-    val styleEl       =
+    val nameAttr      = name.toList.flatMap { text =>
+      List(
+        Attr.StaticAttr("role", AttrValue.Str("group")),
+        Attr.StaticAttr("aria-label", AttrValue.Str(text)),
+      )
+    }
+    val styleEl =
       if SvgBridge.cssIsEntitySafe(styleCss) then UI.Element("style", Vector.empty, Vector(UI.Text(styleCss)))
       else UI.Empty
 
@@ -163,7 +172,7 @@ private[ascent] object HybridPainter:
       Vector(
         Attr.StaticAttr("class", AttrValue.Str(rootClass)),
         Attr.StaticAttr("style", AttrValue.Str(wrapStyle)),
-      ),
+      ) ++ nameAttr,
       Vector(
         styleEl,
         UI.Element(

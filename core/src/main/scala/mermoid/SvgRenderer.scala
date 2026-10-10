@@ -64,7 +64,13 @@ object SvgRenderer:
     val css = CssRenderer.render(withClassDefs, config.resolveVariables)
     Option.when(css.nonEmpty)(SvgNode.elem("style")()(SvgNode.Raw(s"\n$css\n")))
 
-  private[mermoid] def svgRoot(width: Double, height: Double, children: List[SvgNode]): SvgNode =
+  private[mermoid] def svgRoot(
+      width: Double,
+      height: Double,
+      children: List[SvgNode],
+      name: Option[String] = None,
+  ): SvgNode =
+    val label = name.toList.map(text => "aria-label" -> text)
     SvgNode.Element(
       "svg",
       List(
@@ -72,9 +78,10 @@ object SvgRenderer:
         "width"   -> width.f,
         "height"  -> height.f,
         "viewBox" -> s"0 0 ${width.f} ${height.f}",
-      ),
+      ) ++ label,
       children,
     )
+  end svgRoot
 
   def render(
       diagram: Diagram,
@@ -159,6 +166,7 @@ object SvgRenderer:
         config,
         scene.classDefRules,
       ).toList ++ (background :: subgraphSvg ++ edgeSvg ++ nodeSvg ++ noteSvg ++ floating),
+      AccessibleName.of(scene.accTitle, scene.accDescr),
     )
   end paintRanked
 

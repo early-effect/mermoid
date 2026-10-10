@@ -16,7 +16,7 @@ object MermoidAscent:
       config: RenderConfig = RenderConfig(),
       viewport: Option[Viewport] = None,
   ): UI[Any] =
-    val cfg = InitDirective.apply(mermaid.source, config)
+    val cfg = HostMeasure.refine(InitDirective.apply(mermaid.source, config))
     fromScene(DiagramLayout.scene(mermaid.diagram, cfg, viewport), selected = None, onSelect = _ => ZIO.unit)
 
   /** Inert SVG embed mapped into ascent UI (byte-stable structure demos). */
@@ -65,7 +65,33 @@ object MermoidAscent:
     )
   end diagramInteractive
 
-  /** Same as [[diagramInteractive]] but accepts an external width source (e.g. host ResizeObserver). */
+  /** Follow the container. The first paint is unconstrained. Once the root is in the document, a resize observer
+    * re-lays the scene out at the container's content width. On the JVM the observer is absent, so the picture stays
+    * unconstrained.
+    */
+  def diagramFitting(
+      mermaid: Mermaid,
+      config: RenderConfig = RenderConfig(),
+  ): UIO[UI[Any]] =
+    for width <- sq(Option.empty[Double])
+    yield
+      val cfg  = HostMeasure.refine(InitDirective.apply(mermaid.source, config))
+      val body = width.map { measured =>
+        val viewport = measured.map(Viewport(_))
+        val scene    = DiagramLayout.scene(mermaid.diagram, cfg, viewport)
+        val scale    = measured.fold(1.0)(scene.fitScale)
+        HybridPainter.paint(scene, None, _ => ZIO.unit, scale, cssFit = measured.isEmpty)
+      }
+      UI.Element(
+        "div",
+        Vector(
+          Attr.StaticAttr("class", AttrValue.Str(HybridClass.Ascent.cssName)),
+          ContainerWatch.watch(width),
+        ),
+        Vector(UI.ReactiveChild(body)),
+      )
+
+  /** Same as [[diagramInteractive]] but accepts an external width source. */
   def diagramResponsive(
       mermaid: Mermaid,
       width: Source[Double],
@@ -118,9 +144,10 @@ object MermoidAscent:
       widthControls: WidthControls,
       onSelect: NodeId => UIO[Unit],
   ): UI[Any] =
+    val measured = HostMeasure.refine(config)
 
     val body = _root_.ascent.squawk.Squawk.zipWith(width, selected) { (w, sel) =>
-      val scene = DiagramLayout.scene(diagram, config, Some(Viewport(w)))
+      val scene = DiagramLayout.scene(diagram, measured, Some(Viewport(w)))
       val scale = scene.fitScale(w)
       HybridPainter.paint(scene, sel, onSelect, scale, cssFit = false)
     }

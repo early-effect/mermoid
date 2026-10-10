@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="974.5" height="234.21875" viewBox="0 0 974.5 234.21875">
+<svg xmlns="http://www.w3.org/2000/svg" width="974.5" height="229.2291259765625" viewBox="0 0 974.5 229.2291259765625">
   <defs>
     <marker id="arrowhead" markerWidth="12" markerHeight="10.2" refX="12" refY="5.1" orient="auto" markerUnits="userSpaceOnUse">
       <polygon class="arrowhead" points="0 0, 12 5.1, 0 10.2"/>
@@ -167,47 +167,47 @@
   stroke: #333;
 }
 </style>
-  <rect class="diagram-bg" x="0" y="0" width="974.5" height="234.21875"/>
+  <rect class="diagram-bg" x="0" y="0" width="974.5" height="229.2291259765625"/>
   <g class="edge edge-arrow" id="edge-A-B-0" data-from="A" data-to="B">
-    <path class="edge-line" d="M120,90 L192,90" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M120,101.26869201660156 Q156.61280193914385,107.39811391080276 192.01940846019696,96.24287777455669" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="edge edge-arrow" id="edge-B-C-0" data-from="B" data-to="C">
-    <path class="edge-line" d="M280,95.8623298033283 Q317.3100291049995,92.49447602522044 352.08455751086495,106.42691604972018" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M280,96.84848848882493 Q316.87390137539376,91.76425677219376 352.03879914407196,103.96933685013985" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="edge edge-arrow" id="edge-C-D-0" data-from="C" data-to="D">
-    <path class="edge-line" d="M450.5,114.00610902255639 Q486.540645718704,122.47694648231487 522.5000883302687,113.66776274280889" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M450.5,108.9508653224859 L522.5001512565221,108.50810710851344" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="edge edge-arrow" id="edge-D-E-0" data-from="D" data-to="E">
-    <path class="edge-line" d="M612.5,107.50578703703704 Q649.7926474586209,110.94138261275518 684.5824326716968,97.0771943472661" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M612.5,103.59889654465664 Q649.496728762016,108.19613736909133 684.5500502267025,95.50136613911744" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="edge edge-arrow" id="edge-E-F-0" data-from="E" data-to="F">
-    <path class="edge-line" d="M774.5,90 L846.5,90" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M774.5,93.5805118157997 Q811.27001144754,88.0820604172504 846.5303324190465,99.87088879927227" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="edge edge-dotted" id="edge-A-F-0" data-from="A" data-to="F">
-    <path class="edge-line" d="M120,110 C140,120 192.45833333333334,155.96354166666666 240,170 C287.5416666666667,184.03645833333334 350,190.3125 405.25,194.21875 C460.5,198.125 516.7916666666666,197.47395833333334 571.5,193.4375 C626.2083333333334,189.40104166666666 687.5273825224788,183.3336375664702 733.5,170 C779.4726174775212,156.6663624335298 828.3630873876064,122.86306216764899 847.3357048651277,113.43567460117879" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M120,121.26869201660156 C140,129.87300872802734 192.45833333333334,161.56785329182944 240,172.89459228515625 C287.5416666666667,184.22133127848306 350,186.67709350585938 405.25,189.2291259765625 C460.5,191.78115844726562 516.7916666666666,191.4116414388021 571.5,188.206787109375 C626.2083333333334,185.0019327799479 687.5671909082357,180.78867769938847 733.5,170 C779.4328090917643,159.21132230061153 828.1640454588212,131.22893409420342 847.0968545505854,123.4747209130441" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="node node-rect" id="node-A">
-    <rect class="node-shape" x="40" y="65" width="80" height="50" rx="0" ry="0"/>
-    <text class="node-label" x="80" y="90" text-anchor="middle" dominant-baseline="central">One</text>
+    <rect class="node-shape" x="40" y="79.06005859375" width="80" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="80" y="104.06005859375" text-anchor="middle" dominant-baseline="central">One</text>
   </g>
   <g class="node node-rect" id="node-B">
-    <rect class="node-shape" x="200" y="65" width="80" height="50" rx="0" ry="0"/>
-    <text class="node-label" x="240" y="90" text-anchor="middle" dominant-baseline="central">Two</text>
+    <rect class="node-shape" x="200" y="67.89459228515625" width="80" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="240" y="92.89459228515625" text-anchor="middle" dominant-baseline="central">Two</text>
   </g>
   <g class="node node-rect" id="node-C">
-    <rect class="node-shape" x="360" y="89.21875" width="90.5" height="50" rx="0" ry="0"/>
-    <text class="node-label" x="405.25" y="114.21875" text-anchor="middle" dominant-baseline="central">Three</text>
+    <rect class="node-shape" x="360" y="84.2291259765625" width="90.5" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="405.25" y="109.2291259765625" text-anchor="middle" dominant-baseline="central">Three</text>
   </g>
   <g class="node node-rect" id="node-D">
-    <rect class="node-shape" x="530.5" y="88.4375" width="82" height="50" rx="0" ry="0"/>
-    <text class="node-label" x="571.5" y="113.4375" text-anchor="middle" dominant-baseline="central">Four</text>
+    <rect class="node-shape" x="530.5" y="83.206787109375" width="82" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="571.5" y="108.206787109375" text-anchor="middle" dominant-baseline="central">Four</text>
   </g>
   <g class="node node-rect" id="node-E">
     <rect class="node-shape" x="692.5" y="65" width="82" height="50" rx="0" ry="0"/>
     <text class="node-label" x="733.5" y="90" text-anchor="middle" dominant-baseline="central">Five</text>
   </g>
   <g class="node node-rect" id="node-F">
-    <rect class="node-shape" x="854.5" y="65" width="80" height="50" rx="0" ry="0"/>
-    <text class="node-label" x="894.5" y="90" text-anchor="middle" dominant-baseline="central">Six</text>
+    <rect class="node-shape" x="854.5" y="79.06005859375" width="80" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="894.5" y="104.06005859375" text-anchor="middle" dominant-baseline="central">Six</text>
   </g>
 </svg>

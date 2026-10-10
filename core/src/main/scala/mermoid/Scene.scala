@@ -1,6 +1,6 @@
 package mermoid
 
-/** Paint-ready diagram. Ranked diagrams (flowchart, state) and sequence diagrams are different geometry. */
+/** Paint-ready diagram. Ranked diagrams (flowchart, state, class, ER) and sequence diagrams are different geometry. */
 enum Scene:
   case Ranked(scene: DiagramScene)
   case Sequence(scene: SequenceScene)

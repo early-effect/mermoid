@@ -61,6 +61,12 @@ object MermoidAscentSpec extends ZIOSpecDefault:
         html <- Html.render(ui)
       yield assertTrue(html.contains("mermoid-diagram"), !html.contains("Narrow"), !html.contains("viewport "))
     },
+    test("diagramFitting paints a diagram before a container width exists") {
+      for
+        ui   <- MermoidAscent.diagramFitting(flow)
+        html <- Html.render(ui)
+      yield assertTrue(html.contains("mermoid-ascent"), html.contains("mermoid-diagram"), html.contains("Start"))
+    },
     test("svgDiagram still embeds svg root") {
       val ui = MermoidAscent.svgDiagram(flow)
       for html <- Html.render(ui)
@@ -232,5 +238,40 @@ object MermoidAscentSpec extends ZIOSpecDefault:
         !html.contains("""class="mermoid-root mermoid-fit""""),
       )
     },
+    test("accTitle and accDescr name the hybrid root, and a diagram without them stays unnamed") {
+      val named =
+        Mermaid("""flowchart LR
+          |accTitle: The pipeline
+          |accDescr: How an order moves
+          |A --> B
+          |""".stripMargin)
+      val titled =
+        Mermaid("""sequenceDiagram
+          |accTitle: The conversation
+          |Alice->>Bob: hi
+          |""".stripMargin)
+      for
+        flowHtml <- Html.render(MermoidAscent.diagram(named))
+        seqHtml  <- Html.render(MermoidAscent.diagram(titled))
+        plain    <- Html.render(MermoidAscent.diagram(flow))
+      yield
+        val flowRoot  = rootOpen(flowHtml)
+        val seqRoot   = rootOpen(seqHtml)
+        val plainRoot = rootOpen(plain)
+        assertTrue(
+          flowRoot.contains("""role="group""""),
+          flowRoot.contains("""aria-label="The pipeline. How an order moves""""),
+          seqRoot.contains("""aria-label="The conversation""""),
+          !plainRoot.contains("aria-label"),
+          !plainRoot.contains("role="),
+        )
+      end for
+    },
   )
+
+  private def rootOpen(html: String): String =
+    val at    = html.indexOf("mermoid-root")
+    val start = if at < 0 then -1 else html.lastIndexOf('<', at)
+    val end   = if at < 0 then -1 else html.indexOf('>', at)
+    if start < 0 || end < 0 then "" else html.substring(start, end)
 end MermoidAscentSpec

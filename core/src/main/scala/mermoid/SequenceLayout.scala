@@ -550,7 +550,8 @@ private[mermoid] object SequenceLayout:
           val left  = tail.foldLeft(head.boxLeft)((acc, col) => math.min(acc, col.boxLeft))
           val right =
             (head :: tail).foldLeft(head.boxLeft + head.boxW)((acc, col) => math.max(acc, col.boxLeft + col.boxW))
-          val lift = if draft.title.isDefined then 18.0 else 0.0
+          // One text line, plus air, so the title sits above the actor's head instead of on it.
+          val lift = if draft.title.isDefined then env.lineH + 14 else 0.0
           Some(
             PlacedBand(
               draft.title,

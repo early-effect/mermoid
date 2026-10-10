@@ -175,10 +175,10 @@
     <path class="edge-line" d="M180.11057692307693,90 Q212.32387232825164,121.00873089297598 226.9547523974727,163.26006389980694" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="edge edge-arrow" id="edge-B-D-0" data-from="B" data-to="D">
-    <path class="edge-line" d="M96.98557692307692,220 Q129.19887232825164,251.00873089297596 143.8297523974727,293.26006389980694" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M97.2665264423077,220 Q129.90679477863094,250.92445519411154 144.95638856359454,293.2944772973319" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="edge edge-arrow" id="edge-C-D-0" data-from="C" data-to="D">
-    <path class="edge-line" d="M231.26442307692307,220 Q199.05112767174836,251.008730892976 184.4202476025273,293.26006389980694" fill="none" marker-end="url(#arrowhead)"/>
+    <path class="edge-line" d="M231.54537259615384,220 Q199.75862943693392,251.09294698205954 185.54606116739885,293.22572870702027" fill="none" marker-end="url(#arrowhead)"/>
   </g>
   <g class="node node-rect" id="node-A">
     <rect class="node-shape" x="118.875" y="40" width="90.5" height="50" rx="0" ry="0"/>
@@ -193,7 +193,7 @@
     <text class="node-label" x="247.25" y="195" text-anchor="middle" dominant-baseline="central">Right</text>
   </g>
   <g class="node node-rect" id="node-D">
-    <rect class="node-shape" x="124.125" y="300" width="80" height="50" rx="0" ry="0"/>
-    <text class="node-label" x="164.125" y="325" text-anchor="middle" dominant-baseline="central">End</text>
+    <rect class="node-shape" x="125.5859375" y="300" width="80" height="50" rx="0" ry="0"/>
+    <text class="node-label" x="165.5859375" y="325" text-anchor="middle" dominant-baseline="central">End</text>
   </g>
 </svg>

@@ -142,9 +142,12 @@ object SequenceSurfaceSpec extends ZIOSpecDefault:
           val seqSvg  = SvgRenderer.render(seqMermaid.diagram)
           assertTrue(
             flowSvg.contains("<title>The pipeline</title>"),
+            flowSvg.contains("aria-label=\"The pipeline\""),
             seqSvg.contains("<title>The conversation</title>"),
+            seqSvg.contains("aria-label=\"The conversation\""),
           )
         case _ => assertTrue(false)
+      end match
     },
     test("an injected measure widens the node") {
       val src =

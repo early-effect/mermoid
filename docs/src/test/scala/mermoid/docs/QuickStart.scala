@@ -79,8 +79,12 @@ MermaidParser.parse(source).foreach { d =>
 If you build a virtual DOM rather than setting `innerHTML`, use `SvgRenderer.renderTree` and map the
 [SvgNode tree](svg-structure.html) to your framework's element type — no string round-trip.
 
-Rendering is deterministic and platform-independent: the same source and config produce byte-identical SVG on the JVM
-and on Scala.js, which is what lets you render server-side and hydrate client-side without a mismatch.
+`SvgRenderer` is deterministic: the same source and config produce the same SVG on the JVM and on Scala.js, which is
+what lets you render server-side and hydrate that markup without a mismatch.
+
+`MermoidAscent.diagramFitting` is the browser layout. It paints, then follows the container with a resize observer and,
+when `document` exists, measures text from the canvas. `MermaidBlocks.install(dom.document)` replaces
+`<pre class="mermaid">` and `<div class="mermaid">` with that fitted diagram. The scope you install it in unmounts them.
 """
     ),
     section("Configure")(
