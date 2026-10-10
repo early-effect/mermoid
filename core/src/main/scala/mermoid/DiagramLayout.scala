@@ -11,12 +11,15 @@ object DiagramLayout:
       viewport: Option[Viewport] = None,
   ): Scene =
     diagram match
-      case Diagram.Flowchart(dir, stmts) =>
+      case Diagram.Flowchart(dir, raw) =>
+        val stmts = LinkStyle.decorateFlow(raw)
         val scene =
           if FlowLayout.containsSubgraph(stmts) then FlowLayout.scene(dir, stmts, config, viewport)
           else flowchartScene(dir, stmts, config, viewport)
-        Scene.Ranked(scene)
-      case Diagram.StateDiagram(dir, stmts) =>
+        val (title, descr) = LinkStyle.flowAccess(stmts)
+        Scene.Ranked(scene.copy(accTitle = title, accDescr = descr))
+      case Diagram.StateDiagram(dir, raw) =>
+        val stmts = LinkStyle.decorateState(raw)
         val scene = StateModel.resolve(Diagram.StateDiagram(dir, stmts)) match
           case Right(machine) if !StateModel.isLegacy(machine) =>
             StateLayout.scene(machine, config, viewport)
@@ -115,7 +118,7 @@ object DiagramLayout:
     val interactions  = StyleResolver.collectInteractions(stmts)
     val lc            = compressLayout(config.layout, config.responsive, viewport, nodeDefs.size, dir)
     val cfg           = config.copy(layout = lc)
-    val laid          = Layout.layout(lc, dir, nodeDefs, edges)
+    val laid          = Layout.layout(lc, dir, nodeDefs, edges, measure = Some(TextMeasure.resolve(cfg)))
     val layoutNodes   = laid.nodes.map { n =>
       n.copy(
         cssClasses = nodeClasses.getOrElse(n.id, Nil),
@@ -187,7 +190,7 @@ object DiagramLayout:
     val edges: List[Edge] =
       transitions.map { t =>
         val to = if splitStartEnd && t.to == NodeId.stateMarker then endId else t.to
-        Edge(t.from, to, EdgeStyle.Arrow, t.label)
+        Edge(t.from, to, EdgeStyle.Arrow, t.label, inline = t.inline)
       }
     val stateIds = (edges.map(_.from) ++ edges.map(_.to)).distinct
     val nodeDefs = stateIds.map { id =>
@@ -197,7 +200,7 @@ object DiagramLayout:
 
     val lc          = compressLayout(config.layout, config.responsive, viewport, nodeDefs.size, dir)
     val cfg         = config.copy(layout = lc)
-    val laid        = Layout.layout(lc, dir, nodeDefs, edges)
+    val laid        = Layout.layout(lc, dir, nodeDefs, edges, measure = Some(TextMeasure.resolve(cfg)))
     val layoutNodes = laid.nodes.map { n =>
       val user   = nodeClasses.getOrElse(n.id, Nil)
       val styles = inlineStyles.getOrElse(n.id, Map.empty)

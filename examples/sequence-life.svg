@@ -1,0 +1,239 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="574.5" height="586" viewBox="0 0 574.5 586">
+  <defs>
+    <marker id="seq-head" markerWidth="9" markerHeight="6" refX="9" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon class="arrowhead" points="0 0, 9 3, 0 6"/>
+    </marker>
+    <marker id="seq-tail" markerWidth="9" markerHeight="6" refX="9" refY="3" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <polygon class="arrowhead" points="0 0, 9 3, 0 6"/>
+    </marker>
+    <marker id="seq-open" markerWidth="9" markerHeight="6" refX="9" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <polyline class="arrow-open" points="0 0, 9 3, 0 6" fill="none"/>
+    </marker>
+    <marker id="seq-cross" markerWidth="9" markerHeight="6" refX="9" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path class="arrow-cross" d="M 0 0 L 9 6 M 0 6 L 9 0" fill="none"/>
+    </marker>
+  </defs>
+  <style>
+:root {
+  --mermoid-background: #ffffff;
+  --mermoid-edge-label-bg: #ffffff;
+  --mermoid-font-family: sans-serif;
+  --mermoid-font-size: 14px;
+  --mermoid-line: #333;
+  --mermoid-main-bkg: #ECECFF;
+  --mermoid-node-border: #9370DB;
+  --mermoid-note-bg: #ffffcc;
+  --mermoid-note-border: #333333;
+  --mermoid-note-text: #333333;
+  --mermoid-primary: #1f77b4;
+  --mermoid-primary-border: #1a5a8a;
+  --mermoid-primary-text: #333;
+  --mermoid-secondary: #ffffde;
+  --mermoid-secondary-border: #aaaa33;
+  --mermoid-secondary-text: #333;
+  --mermoid-selection: #333;
+  --mermoid-tertiary: #f4f4f4;
+  --mermoid-tertiary-border: #cccccc;
+  --mermoid-tertiary-text: #333;
+  --mermoid-text: #333;
+}
+.diagram-bg {
+  fill: #ffffff;
+  stroke: none;
+}
+.node-shape {
+  fill: #ECECFF;
+  stroke: #9370DB;
+  stroke-width: 2;
+}
+.node-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+.edge-line {
+  stroke: #333;
+  stroke-width: 2;
+}
+.edge-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.edge-label-bg {
+  fill: #ffffff;
+}
+.note-rect {
+  fill: #ffffcc;
+  stroke: #333333;
+  stroke-width: 1;
+  stroke-dasharray: 4,2;
+}
+.note-text {
+  fill: #333333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.note-connector {
+  stroke: #333333;
+  stroke-width: 1;
+  stroke-dasharray: 4,2;
+}
+.subgraph-rect {
+  fill: none;
+  stroke: #9370DB;
+  stroke-width: 1;
+  stroke-dasharray: 6,3;
+}
+.subgraph-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+.edge-thick .edge-line {
+  stroke-width: 3;
+}
+.edge-dotted .edge-line {
+  stroke-dasharray: 5,5;
+}
+.edge-dotted-open .edge-line {
+  stroke-dasharray: 5,5;
+}
+.arrowhead {
+  fill: #333;
+}
+.arrow-open {
+  fill: none;
+  stroke: #333;
+  stroke-width: 2;
+}
+.arrow-cross {
+  fill: none;
+  stroke: #333;
+  stroke-width: 2;
+}
+.actor-box {
+  fill: #ECECFF;
+  stroke: #9370DB;
+  stroke-width: 2;
+}
+.actor-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+.actor-figure {
+  fill: none;
+  stroke: #9370DB;
+  stroke-width: 2;
+}
+.lifeline {
+  stroke: #333;
+  stroke-width: 1;
+  fill: none;
+  stroke-dasharray: 4,4;
+}
+.message-line {
+  stroke: #333;
+  stroke-width: 2;
+  fill: none;
+}
+.message-dashed .message-line {
+  stroke-dasharray: 6,4;
+}
+.message-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.activation {
+  fill: #333;
+  stroke: none;
+  fill-opacity: 0.25;
+}
+.fragment-frame {
+  fill: none;
+  stroke: #9370DB;
+  stroke-width: 1;
+}
+.fragment-tab {
+  fill: #ECECFF;
+  stroke: #9370DB;
+  stroke-width: 1;
+}
+.fragment-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.fragment-divider {
+  stroke: #9370DB;
+  stroke-width: 1;
+  fill: none;
+}
+.start-end .node-shape {
+  fill: #333;
+  stroke: #333;
+}
+</style>
+  <rect class="diagram-bg" x="0" y="0" width="574.5" height="586"/>
+  <g id="band-0" class="band">
+    <rect x="40" y="40" width="264" height="506" style="fill: rgb(220, 232, 246); fill-opacity: 0.35; stroke: none"/>
+    <text class="fragment-label" x="48" y="54" text-anchor="start">People</text>
+  </g>
+  <g id="fragment-0" class="fragment">
+    <rect class="fragment-frame" x="40" y="300" width="416" height="162" rx="4"/>
+    <rect class="fragment-tab" x="40" y="300" width="92.5" height="26"/>
+    <text class="fragment-label" x="48" y="318" text-anchor="start">alt ready</text>
+    <rect class="fragment-tab" x="40" y="376" width="101" height="22"/>
+    <line class="fragment-divider" x1="40" y1="396" x2="456" y2="396"/>
+    <text class="fragment-label" x="48" y="392" text-anchor="start">else later</text>
+  </g>
+  <line id="lifeline-Alice" class="lifeline" x1="96" y1="122" x2="96" y2="546"/>
+  <line id="lifeline-Bob" class="lifeline" x1="248" y1="122" x2="248" y2="546"/>
+  <g>
+    <line id="lifeline-Carol" class="lifeline" x1="400" y1="242" x2="400" y2="510"/>
+    <line class="actor-figure" x1="394" y1="504" x2="406" y2="516"/>
+    <line class="actor-figure" x1="394" y1="516" x2="406" y2="504"/>
+  </g>
+  <g id="message-0" class="message message-solid">
+    <path class="message-line" d="M 96 164 L 248 164" fill="none" marker-end="url(#seq-head)"/>
+    <text class="message-label" x="172" y="160" text-anchor="middle">hello</text>
+  </g>
+  <g id="message-1" class="message message-solid">
+    <path class="message-line" d="M 248 270 L 400 270" fill="none" marker-end="url(#seq-head)"/>
+    <text class="message-label" x="324" y="266" text-anchor="middle">start</text>
+  </g>
+  <g id="message-2" class="message message-dashed">
+    <path class="message-line" d="M 400 348 L 248 348" fill="none" marker-end="url(#seq-head)"/>
+    <text class="message-label" x="324" y="344" text-anchor="middle">yes</text>
+  </g>
+  <g id="message-3" class="message message-dashed">
+    <path class="message-line" d="M 400 426 L 248 426" fill="none" marker-end="url(#seq-head)"/>
+    <text class="message-label" x="324" y="422" text-anchor="middle">wait</text>
+  </g>
+  <g id="note-0" class="note">
+    <path class="note-rect" d="M 408 464 L 524.5 464 L 534.5 474 L 534.5 494 L 408 494 Z"/>
+    <path class="note-rect" style="fill: none" d="M 524.5 464 L 524.5 474 L 534.5 474"/>
+    <text class="note-text" x="416" y="480" text-anchor="start">held the lock</text>
+  </g>
+  <g id="actor-Alice" class="actor actor-person">
+    <circle class="actor-figure" cx="96" cy="65" r="7"/>
+    <line class="actor-figure" x1="96" y1="72" x2="96" y2="88"/>
+    <line class="actor-figure" x1="87" y1="78.9" x2="105" y2="78.9"/>
+    <line class="actor-figure" x1="96" y1="88" x2="89" y2="100"/>
+    <line class="actor-figure" x1="96" y1="88" x2="103" y2="100"/>
+    <text class="actor-label" x="96" y="113" text-anchor="middle" dominant-baseline="middle">Alice</text>
+  </g>
+  <g id="actor-Bob" class="actor actor-stereotype">
+    <line class="actor-figure" x1="238.9" y1="77.9" x2="238.9" y2="96.1"/>
+    <line class="actor-figure" x1="238.9" y1="87" x2="246.05" y2="87"/>
+    <circle class="actor-figure" cx="251.25" cy="87" r="6.5"/>
+    <text class="actor-label" x="248" y="113" text-anchor="middle" dominant-baseline="middle">Bob</text>
+  </g>
+  <g id="actor-Carol" class="actor actor-stereotype">
+    <circle class="actor-figure" cx="400" cy="208.3" r="7.15"/>
+    <polygon class="actor-figure" points="400,194 404.55,202.45 398.05,202.45"/>
+    <text class="actor-label" x="400" y="233" text-anchor="middle" dominant-baseline="middle">Carol</text>
+  </g>
+</svg>

@@ -33,6 +33,10 @@ enum HybridClass(val cssName: String, val description: String):
   case ActorPerson extends HybridClass("mermoid-actor-person", "stick-figure actor")
   case ActorHead   extends HybridClass("mermoid-actor-head", "actor head")
   case ActorStem   extends HybridClass("mermoid-actor-stem", "actor stem")
+  case ActorArms   extends HybridClass("mermoid-actor-arms", "actor arms")
+  case ActorLegs   extends HybridClass("mermoid-actor-legs", "actor legs")
+  case ActorLeg    extends HybridClass("mermoid-actor-leg", "one actor leg")
+  case NoteFold    extends HybridClass("mermoid-note-fold", "folded corner of a sequence note")
   case ActorLabel  extends HybridClass("mermoid-actor-label", "participant or actor name")
   case DiamondFill extends HybridClass("mermoid-node-diamond-fill", "inner fill of a rhombus")
   case Tooltip     extends HybridClass("mermoid-tooltip", "hover label from a click tooltip")
@@ -203,8 +207,8 @@ object HybridChrome
       ),
       HybridTokens.rule(HybridClass.ActorHead.sel)(
         S.display.block,
-        S.width.px(16),
-        S.height.px(16),
+        S.width.px(14),
+        S.height.px(14),
         S.boxSizing.borderBox,
         S.borderRadius.pct(50),
         S.border.solid(Length.px(2), HybridTokens.themeColor(ThemeVar.NodeBorder, "#9370db")),
@@ -213,10 +217,30 @@ object HybridChrome
       HybridTokens.rule(HybridClass.ActorStem.sel)(
         S.display.block,
         S.width.px(2),
-        S.height.px(18),
-        S.marginTop.px(4),
+        S.height.px(16),
         S.background(HybridTokens.themeColor(ThemeVar.NodeBorder, "#9370db")),
         S.flexShrink(0),
+      ),
+      HybridTokens.rule(HybridClass.ActorArms.sel)(
+        S.display.block,
+        S.width.px(18),
+        S.height.px(2),
+        S.marginTop.px(-12),
+        S.background(HybridTokens.themeColor(ThemeVar.NodeBorder, "#9370db")),
+        S.flexShrink(0),
+      ),
+      HybridTokens.rule(HybridClass.ActorLegs.sel)(
+        S.display.flex,
+        S.width.px(18),
+        S.height.px(12),
+        S.justifyContent.spaceBetween,
+        S.flexShrink(0),
+      ),
+      HybridTokens.rule(HybridClass.ActorLeg.sel)(
+        S.display.block,
+        S.width.px(2),
+        S.height.px(12),
+        S.background(HybridTokens.themeColor(ThemeVar.NodeBorder, "#9370db")),
       ),
       HybridTokens.rule(HybridClass.ActorPerson.sel.descendant(HybridClass.ActorLabel.sel))(
         S.display.block,
@@ -291,6 +315,15 @@ object HybridChrome
         S.whiteSpace.preWrap,
         S.zIndex(2),
         S.borderRadius.px(3),
+      ),
+      HybridTokens.rule(HybridClass.NoteFold.sel)(
+        S.position.absolute,
+        S.top.zero,
+        S.right.zero,
+        S.width.px(10),
+        S.height.px(10),
+        S.background(HybridTokens.themeColor(ThemeVar.NoteBorder, "#333")),
+        S.clipPath("polygon(100% 0, 0 0, 100% 100%)"),
       ),
       HybridTokens.rule(HybridClass.Note.sel.cls(PaintClass.IsSelected.cssName))(
         S.outline.solid(Length.px(2), Color.keyword(HybridTokens.selectionStroke))

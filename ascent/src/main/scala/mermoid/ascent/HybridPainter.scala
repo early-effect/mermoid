@@ -188,35 +188,62 @@ private[ascent] object HybridPainter:
       selected: Option[NodeId],
       onSelect: NodeId => UIO[Unit],
   ): UI[Any] =
-    val box   = person.box
-    val isSel = selected.contains(person.id)
-    val kind  = person.kind match
-      case ParticipantKind.Participant => HybridClass.ActorBox.cssName
-      case ParticipantKind.Actor       => HybridClass.ActorPerson.cssName
+    val box    = person.box
+    val isSel  = selected.contains(person.id)
+    val figure = person.stereotype match
+      case Some(SequenceStereotype.Actor) => true
+      case Some(_)                        => false
+      case None                           => person.kind == ParticipantKind.Actor
+    val kind =
+      if figure || person.stereotype.isDefined then HybridClass.ActorPerson.cssName
+      else HybridClass.ActorBox.cssName
     val classes =
-      List(HybridClass.Actor.cssName, kind) ++ Option.when(isSel)(PaintClass.IsSelected.cssName)
-    val style          = s"left:${box.x.f}px;top:${box.y.f}px;width:${box.w.f}px;height:${box.h.f}px"
+      List(HybridClass.Actor.cssName, kind) ++ person.cssClasses ++ Option.when(isSel)(PaintClass.IsSelected.cssName)
+    val paint          = ShapeRenderer.inlineStyle(person.styles).map(extra => s";$extra").getOrElse("")
+    val style          = s"left:${box.x.f}px;top:${box.y.f}px;width:${box.w.f}px;height:${box.h.f}px$paint"
     val label: UI[Any] = UI.Element(
       "span",
       Vector(Attr.StaticAttr("class", AttrValue.Str(HybridClass.ActorLabel.cssName))),
       Vector(UI.Text(person.label)),
     )
-    val kids: Vector[UI[Any]] = person.kind match
-      case ParticipantKind.Participant => Vector(label)
-      case ParticipantKind.Actor       =>
+    val leg: Int => UI[Any] = degrees =>
+      UI.Element(
+        "span",
         Vector(
-          UI.Element(
-            "span",
-            Vector(Attr.StaticAttr("class", AttrValue.Str(HybridClass.ActorHead.cssName))),
-            Vector.empty,
-          ),
-          UI.Element(
-            "span",
-            Vector(Attr.StaticAttr("class", AttrValue.Str(HybridClass.ActorStem.cssName))),
-            Vector.empty,
-          ),
-          label,
-        )
+          Attr.StaticAttr("class", AttrValue.Str(HybridClass.ActorLeg.cssName)),
+          Attr.StaticAttr("style", AttrValue.Str(s"transform:rotate(${degrees}deg)")),
+        ),
+        Vector.empty,
+      )
+    val stick: Vector[UI[Any]] = Vector(
+      UI.Element(
+        "span",
+        Vector(Attr.StaticAttr("class", AttrValue.Str(HybridClass.ActorHead.cssName))),
+        Vector.empty,
+      ),
+      UI.Element(
+        "span",
+        Vector(Attr.StaticAttr("class", AttrValue.Str(HybridClass.ActorArms.cssName))),
+        Vector.empty,
+      ),
+      UI.Element(
+        "span",
+        Vector(Attr.StaticAttr("class", AttrValue.Str(HybridClass.ActorStem.cssName))),
+        Vector.empty,
+      ),
+      UI.Element(
+        "span",
+        Vector(Attr.StaticAttr("class", AttrValue.Str(HybridClass.ActorLegs.cssName))),
+        Vector(leg(24), leg(-24)),
+      ),
+      label,
+    )
+    val kids: Vector[UI[Any]] =
+      if figure then stick
+      else
+        person.stereotype match
+          case Some(stereo) => Vector(SvgBridge.toUi(SequenceRenderer.icon(stereo)), label)
+          case None         => Vector(label)
     UI.Element(
       "button",
       Vector(
@@ -242,7 +269,14 @@ private[ascent] object HybridPainter:
         Attr.StaticAttr("style", AttrValue.Str(style)),
         Attr.StaticAttr("role", AttrValue.Str("note")),
       ),
-      Vector(UI.Text(note.lines.mkString("\n"))),
+      Vector(
+        UI.Element(
+          "span",
+          Vector(Attr.StaticAttr("class", AttrValue.Str(HybridClass.NoteFold.cssName))),
+          Vector.empty,
+        ),
+        UI.Text(note.lines.mkString("\n")),
+      ),
     )
   end sequenceNote
 

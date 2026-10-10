@@ -73,7 +73,7 @@ object SequenceParserSpec extends ZIOSpecDefault:
           |""".stripMargin
       val labels = MermaidParser.parse(src) match
         case Right(Diagram.Sequence(stmts)) =>
-          stmts.collect { case SequenceStatement.Declare(id, label, _) if id.value == "Alice" => label }
+          stmts.collect { case SequenceStatement.Declare(id, label, _, _) if id.value == "Alice" => label }
         case _ => Nil
       assertTrue(labels == List(Some("One"), Some("One"), None))
     },

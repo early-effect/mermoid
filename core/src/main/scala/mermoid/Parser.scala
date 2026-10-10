@@ -135,6 +135,34 @@ object MermaidParser:
   private[mermoid] def styleProperties(using P[Any]): P[Map[CssProperty, String]] =
     P(styleProperty.rep(sep = ws ~ "," ~ ws)).map(_.toMap)
 
+  private[mermoid] def linkStyleSt(using P[Any]): P[FlowStatement.LinkStyleSt] =
+    P("linkStyle" ~ ws ~ linkIndex ~ ws ~ styleProperties).map { (index, props) =>
+      FlowStatement.LinkStyleSt(index, props)
+    }
+
+  private def linkIndex(using P[Any]): P[Option[Int]] =
+    P(
+      ("default" ~ !CharPred(c => c.isLetterOrDigit || c == '_')).map(_ => Option.empty[Int]) |
+        CharsWhileIn("0-9", 1).!.flatMap { raw =>
+          raw.toIntOption match
+            case Some(n) => Pass(Some(n))
+            case None    => Fail
+        }
+    )
+
+  private[mermoid] def accTitleSt(using P[Any]): P[FlowStatement.AccTitle] =
+    P("accTitle" ~ ws ~ ":" ~ ws ~ CharsWhile(c => c != '\n' && c != '\r', 0).!).map(text =>
+      FlowStatement.AccTitle(text.trim)
+    )
+
+  private[mermoid] def accDescrSt(using P[Any]): P[FlowStatement] =
+    P(
+      ("accDescr" ~ ws ~ "{" ~ (!"}" ~ AnyChar).rep.! ~ "}").map(text => FlowStatement.AccDescr(text.trim)) |
+        ("accDescr" ~ ws ~ ":" ~ ws ~ CharsWhile(c => c != '\n' && c != '\r', 0).!).map(text =>
+          FlowStatement.AccDescr(text.trim)
+        )
+    )
+
   private[mermoid] def styleSt(using P[Any]): P[FlowStatement.StyleSt] =
     P("style" ~ ws ~ nodeId ~ ws ~ styleProperties).map { case (id, props) =>
       FlowStatement.StyleSt(id, props)
@@ -240,6 +268,9 @@ object MermaidParser:
     P(
       !endKeyword ~ (
         subgraphSt.map(s => List[FlowStatement](s)) |
+          linkStyleSt.map(s => List(s)) |
+          accDescrSt.map(s => List(s)) |
+          accTitleSt.map(s => List(s)) |
           styleSt.map(s => List(s)) |
           classDefSt.map(s => List(s)) |
           classSt.map(s => List(s)) |

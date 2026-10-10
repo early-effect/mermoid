@@ -202,6 +202,27 @@ Three knobs to turn off. Omitting the `Viewport` altogether is the simplest appr
         )
       ),
     ),
+    section("Measuring text")(
+      md"""
+Node and label widths use `TextMeasure`. The default, `TextMeasure.estimate`, counts characters
+(`LayoutConfig.charWidthEstimate`) and ignores the font. That is the measure on the JVM and on Scala.js, so a diagram
+rendered in CI, in the CLI, and in a browser without an explicit measure is the same SVG.
+
+A host that has the real font passes its own measure and lays the diagram out again:
+
+```scala
+RenderConfig(textMeasure = Some(DomTextMeasure()))
+```
+
+`DomTextMeasure` lives in `mermoid-ascent` and only compiles for Scala.js. It asks the canvas for
+`measureText`. Core does not take a DOM dependency, and it does not call `java.awt`: a library that paints SVG should
+not pull a font engine onto every platform to improve one of them. When `document` is missing, the width falls back
+to half the font size per character.
+
+The estimate is wrong for proportional fonts. The opt-in measure is right for the browser and wrong for a byte-stable
+snapshot. Pick the one the call site is for.
+"""
+    ),
     section("In hybrid mode")(
       md"""
 `mermoid-ascent` recomputes the entire `Scene` on every width change: geometry, edge routes, and, when

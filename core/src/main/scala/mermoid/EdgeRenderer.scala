@@ -262,13 +262,20 @@ object EdgeRenderer:
     )
   end edgeToSvg
 
-  private def curve(d: String, marker: List[(String, String)], dashed: Boolean = false): SvgNode =
-    val dash = if dashed then List("stroke-dasharray" -> "6 4") else Nil
+  private def curve(
+      d: String,
+      marker: List[(String, String)],
+      dashed: Boolean,
+      inline: Map[css.CssProperty, String],
+  ): SvgNode =
+    val dash  = if dashed then List("stroke-dasharray" -> "6 4") else Nil
+    val style = ShapeRenderer.inlineStyle(inline).toList.map("style" -> _)
     SvgNode.Element(
       "path",
-      List("class" -> PaintClass.EdgeLine.cssName, "d" -> d, "fill" -> "none") ++ dash ++ marker,
+      List("class" -> PaintClass.EdgeLine.cssName, "d" -> d, "fill" -> "none") ++ dash ++ style ++ marker,
       Nil,
     )
+  end curve
 
   private def renderSelfLoop(
       lc: LayoutConfig,
@@ -303,6 +310,8 @@ object EdgeRenderer:
         curve(
           s"M${startX.f},${startY.f} C${apexX.f},${startY.f} ${apexX.f},${apexY.f} ${shortened.x.f},${shortened.y.f}",
           marker,
+          false,
+          edge.inline,
         )
       )
       val labelX     = apexX - loopSize * 0.2
@@ -324,6 +333,8 @@ object EdgeRenderer:
         curve(
           s"M${startX.f},${startY.f} C${startX.f},${apexY.f} ${endX.f},${apexY.f} ${shortened.x.f},${shortened.y.f}",
           marker,
+          false,
+          edge.inline,
         )
       )
       val labelBaseY = apexY + loopSize * 0.35
@@ -399,7 +410,7 @@ object EdgeRenderer:
       else List(start, end)
 
     val d    = smoothPath(points)
-    val line = curve(d, marker, edge.mark.exists(_.dashed))
+    val line = curve(d, marker, edge.mark.exists(_.dashed), edge.inline)
 
     val label = edge.label
       .map { lbl =>

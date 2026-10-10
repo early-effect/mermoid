@@ -228,10 +228,10 @@ Try the same source under hybrid selection and hover on [Interactive](interactiv
 | Case | Behaviour |
 |---|---|
 | Chained edges `A --> B --> C` | One hop per pair, same as writing each edge on its own line. |
-| `%%` comments / `%%{init:…}%%` | Comments are ignored. Init directives are skipped; they do not pick a theme. |
+| `%%` comments / `%%{init:…}%%` | Comments are ignored. Init contributes a theme name when `RenderConfig.theme` is still `Default`. Other keys are ignored. |
 | Parallel edges (same endpoints twice) | Both render, offset so they do not overlap. Alias with `as` if you CSS-select one. |
 | Cycles / back-edges | Back edges are reversed for ranking and drawn forward, so a retry sits on the next rank. Barycenter cuts crossings. Long edges use waypoints. |
-| `linkStyle` | Not implemented. |
+| `linkStyle` | `linkStyle <n> prop:value,…` paints that edge. `linkStyle default` paints every edge, and a numbered line overrides it. |
 | Nested subgraphs | Supported; frames paint behind edges and nodes. |
 | Semicolon separators | OK as statement separators (in addition to newlines). |
 | `end` vs `endpoint` | Bare `end` closes a subgraph; ids like `endpoint` are fine. |

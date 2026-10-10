@@ -77,6 +77,8 @@ case class Edge(
     alias: Option[String] = None,
     /** Set for a class or ER relation. Flowchart edges leave it empty. */
     mark: Option[RelationMark] = None,
+    /** `linkStyle` paint. Empty means the theme stroke. */
+    inline: Map[css.CssProperty, String] = Map.empty,
 )
 
 /** A Mermaid `click` binding: tooltip and/or link and/or opaque callback name. */
@@ -96,6 +98,10 @@ enum FlowStatement:
   case ClassDefSt(className: String, styles: Map[css.CssProperty, String])
   case ClassSt(nodeIds: List[NodeId], className: String)
   case ClickSt(binding: ClickBinding)
+  case LinkStyleSt(index: Option[Int], styles: Map[css.CssProperty, String])
+  case AccTitle(text: String)
+  case AccDescr(text: String)
+end FlowStatement
 
 // -- State Diagram ------------------------------------------------------------
 
@@ -111,6 +117,7 @@ case class StateTransition(
     label: Option[String],
     fromClasses: List[String] = Nil,
     toClasses: List[String] = Nil,
+    inline: Map[css.CssProperty, String] = Map.empty,
 )
 
 case class StateStyle(
@@ -155,6 +162,7 @@ enum StateStatement:
   case Scale(raw: String)
   case AccTitle(text: String)
   case AccDescr(text: String)
+  case LinkStyleSt(index: Option[Int], styles: Map[css.CssProperty, String])
 
   /** `--` outside a composite. [[StateModel]] rejects it. Inside a composite the parser splits regions instead. */
   case Divider

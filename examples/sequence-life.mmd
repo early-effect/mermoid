@@ -1,0 +1,15 @@
+sequenceDiagram
+    box rgb(220, 232, 246) People
+        actor Alice
+        participant Bob@{"type": "boundary"}
+    end
+    Alice->>Bob: hello
+    create participant Carol@{"type": "control"}
+    Bob->>Carol: start
+    alt ready
+        Carol-->>Bob: yes
+    else later
+        Carol-->>Bob: wait
+    end
+    note right of Carol: held the lock
+    destroy Carol

@@ -13,7 +13,10 @@ private[mermoid] object SequenceParser:
     P(sequenceStatement.rep(sep = MermaidParser.sep) ~ MermaidParser.wsnl).map(_.toList)
 
   private def sequenceStatement(using P[Any]): P[SequenceStatement] =
-    P(declare | numbering | activation | note | group | message)
+    P(
+      accTitle | accDescr | linkLine | click | classDef | classApply | style | box | created | destroyed | declare |
+        numbering | activation | note | group | message
+    )
 
   private def keyword(word: String)(using P[Any]): P[Unit] =
     P(word ~ !CharPred(c => c.isLetterOrDigit || c == '_'))
@@ -38,10 +41,63 @@ private[mermoid] object SequenceParser:
   private def id(using P[Any]): P[NodeId] =
     P(MermaidParser.identifier).map(NodeId.trusted(_))
 
-  private def declare(using P[Any]): P[SequenceStatement.Declare] =
-    P(keywordKind ~ MermaidParser.ws ~ id ~ alias.?).map { case (kind, pid, label) =>
-      SequenceStatement.Declare(pid, label.map(_.trim).filter(_.nonEmpty), kind)
+  private def declare(using P[Any]): P[SequenceStatement] =
+    P(keywordKind ~ MermaidParser.ws ~ id ~ alias.? ~ stereoSuffix).map { case (kind, pid, label, stereo) =>
+      named(pid, label, kind, stereo, created = false)
     }
+
+  private def created(using P[Any]): P[SequenceStatement] =
+    P(keyword("create") ~ MermaidParser.ws ~ keywordKind ~ MermaidParser.ws ~ id ~ alias.? ~ stereoSuffix).map {
+      case (kind, pid, label, stereo) =>
+        named(pid, label, kind, stereo, created = true)
+    }
+
+  private def destroyed(using P[Any]): P[SequenceStatement.Destroy] =
+    P(keyword("destroy") ~ MermaidParser.ws ~ id).map(SequenceStatement.Destroy(_))
+
+  private enum StereoRead:
+    case Absent
+    case Known(value: SequenceStereotype)
+    case Unknown(raw: String)
+
+  private def named(
+      pid: NodeId,
+      label: Option[String],
+      kind: ParticipantKind,
+      stereo: StereoRead,
+      created: Boolean,
+  ): SequenceStatement =
+    val text = label.map(_.trim).filter(_.nonEmpty)
+    stereo match
+      case StereoRead.Unknown(raw) => SequenceStatement.BadStereotype(raw)
+      case StereoRead.Absent       =>
+        if created then SequenceStatement.Create(pid, text, kind, None)
+        else SequenceStatement.Declare(pid, text, kind, None)
+      case StereoRead.Known(value) =>
+        if created then SequenceStatement.Create(pid, text, kind, Some(value))
+        else SequenceStatement.Declare(pid, text, kind, Some(value))
+  end named
+
+  private def stereoSuffix(using P[Any]): P[StereoRead] =
+    P((MermaidParser.ws ~ "@{" ~ CharsWhile(_ != '}', 0).! ~ "}").?).map {
+      case None       => StereoRead.Absent
+      case Some(body) => readStereo(body)
+    }
+
+  private def readStereo(body: String): StereoRead =
+    val lower = body.toLowerCase
+    val key   = "\"type\""
+    val at    = lower.indexOf(key)
+    if at < 0 then StereoRead.Absent
+    else
+      val after = body.substring(at + key.length).dropWhile(c => c.isWhitespace || c == ':' || c == '"' || c == '\'')
+      val raw   = after.takeWhile(c => c != '"' && c != '\'' && c != ',' && c != '}').trim
+      if raw.isEmpty then StereoRead.Absent
+      else
+        SequenceStereotype.parse(raw) match
+          case Some(value) => StereoRead.Known(value)
+          case None        => StereoRead.Unknown(raw)
+  end readStereo
 
   private def keywordKind(using P[Any]): P[ParticipantKind] =
     P(
@@ -50,7 +106,10 @@ private[mermoid] object SequenceParser:
     )
 
   private def alias(using P[Any]): P[String] =
-    P(MermaidParser.ws ~ "as" ~ MermaidParser.ws ~ (MermaidParser.quotedString | lineRest))
+    P(
+      MermaidParser.ws ~ keyword("as") ~ MermaidParser.ws ~
+        (MermaidParser.quotedString | CharsWhile(c => c != '\n' && c != '\r' && c != '@', 1).!)
+    )
 
   private def numbering(using P[Any]): P[SequenceStatement.Autonumber] =
     P("autonumber" ~ MermaidParser.ws ~ numberingMode).map(SequenceStatement.Autonumber(_))
@@ -143,6 +202,78 @@ private[mermoid] object SequenceParser:
       SequenceStatement.Group(GroupKind.Par, sections)
     }
   end parGroup
+
+  private def box(using P[Any]): P[SequenceStatement.Box] =
+    P(keyword("box") ~ MermaidParser.ws ~ boxColor ~ lineRest ~ block(keyword("end")) ~ keyword("end")).map {
+      (fill, title, body) =>
+        SequenceStatement.Box(Option(title.trim).filter(_.nonEmpty), fill, body)
+    }
+
+  private def boxColor(using P[Any]): P[String] =
+    P(
+      rgbColor.map(_.show) |
+        ("#" ~ CharsWhileIn("0-9A-Fa-f", 3)).!.map(hex => s"#$hex") |
+        CharsWhile(_.isLetter, 1).!
+    )
+
+  private def linkLine(using P[Any]): P[SequenceStatement.Link] =
+    P((keyword("links") | keyword("link")) ~ MermaidParser.ws ~ id ~ MermaidParser.ws ~ ":" ~ lineRest).map {
+      (pid, rest) =>
+        SequenceStatement.Link(pid, splitLinks(rest))
+    }
+
+  private def splitLinks(rest: String): List[(String, String)] =
+    rest.split(',').toList.map(_.trim).filter(_.nonEmpty).flatMap { part =>
+      val at = part.lastIndexOf(" @ ")
+      if at < 0 then None
+      else
+        val label = part.substring(0, at).trim
+        val href  = part.substring(at + 3).trim
+        if label.isEmpty || href.isEmpty then None else Some((label, href))
+    }
+
+  private def click(using P[Any]): P[SequenceStatement.ClickSt] =
+    P(keyword("click") ~ MermaidParser.ws ~ id ~ MermaidParser.ws ~ lineRest).map { (pid, rest) =>
+      SequenceStatement.ClickSt(MermaidParser.parseClickRest(pid, rest.trim))
+    }
+
+  private def classDef(using P[Any]): P[SequenceStatement.ClassDefSt] =
+    P(
+      keyword(
+        "classDef"
+      ) ~ MermaidParser.ws ~ MermaidParser.identifier ~ MermaidParser.ws ~ MermaidParser.styleProperties
+    )
+      .map { (name, props) =>
+        SequenceStatement.ClassDefSt(name, props)
+      }
+
+  private def classApply(using P[Any]): P[SequenceStatement.ClassSt] =
+    P(
+      keyword("class") ~ MermaidParser.ws ~ id.rep(sep = MermaidParser.ws ~ "," ~ MermaidParser.ws, min = 1) ~
+        MermaidParser.ws ~ MermaidParser.identifier
+    ).map { (ids, name) =>
+      SequenceStatement.ClassSt(ids.toList, name)
+    }
+
+  private def style(using P[Any]): P[SequenceStatement.StyleSt] =
+    P(keyword("style") ~ MermaidParser.ws ~ id ~ MermaidParser.ws ~ MermaidParser.styleProperties).map { (pid, props) =>
+      SequenceStatement.StyleSt(pid, props)
+    }
+
+  private def accTitle(using P[Any]): P[SequenceStatement.AccTitle] =
+    P(keyword("accTitle") ~ MermaidParser.ws ~ ":" ~ MermaidParser.ws ~ lineRest).map(text =>
+      SequenceStatement.AccTitle(text.trim)
+    )
+
+  private def accDescr(using P[Any]): P[SequenceStatement] =
+    P(
+      (keyword("accDescr") ~ MermaidParser.ws ~ "{" ~ (!"}" ~ AnyChar).rep.! ~ "}").map(text =>
+        SequenceStatement.AccDescr(text.trim)
+      ) |
+        (keyword("accDescr") ~ MermaidParser.ws ~ ":" ~ MermaidParser.ws ~ lineRest).map(text =>
+          SequenceStatement.AccDescr(text.trim)
+        )
+    )
 
   private def rectGroup(using P[Any]): P[SequenceStatement.Group] =
     P(keyword("rect") ~ MermaidParser.ws ~ rgbColor ~ block(keyword("end")) ~ keyword("end")).map { (color, stmts) =>

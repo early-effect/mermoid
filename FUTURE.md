@@ -28,12 +28,11 @@ None of these parse today; the README says so explicitly.
 
 ## Syntax Gaps in Supported Diagram Types
 
-- Sequence diagrams: `box` bands, `create` / `destroy`, stereotypes (`@{"type": ...}`), `link` / `links`, and
-  `click` / `style` / `classDef` inside the sequence. A lifeline is already one span from the header to the last row.
+- State `entry` / `exit` actions. A colon line is the description, not an action.
 
 ## Mermaid Compatibility
 
-- Mermaid directive parsing (`%%{init: {'theme': 'dark'}}%%`)
+- `%%{init}%%` keys other than the theme name. `theme` is read when the caller left `RenderConfig.theme` at `Default`.
 - Executing Mermaid JS `click` callbacks (`securityLevel`); today callback **names** are stored for the host
 
 ## Browser Integration
@@ -44,8 +43,8 @@ None of these parse today; the README says so explicitly.
 
 ## Rendering Improvements
 
-- DOM-based text measurement in Scala.js for accurate layout. Note the trade: this would break the
-  byte-identical JVM/Scala.js output the README advertises, so it must be opt-in.
+- DOM text measurement stays opt-in (`DomTextMeasure` in `mermoid-ascent` on Scala.js). The default remains the
+  character-width estimate so JVM and Scala.js SVGs stay byte-identical.
 - Animation support via CSS transitions
 - Per-node text wrapping under a viewport
 

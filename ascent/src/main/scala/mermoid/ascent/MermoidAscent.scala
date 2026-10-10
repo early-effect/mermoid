@@ -16,15 +16,16 @@ object MermoidAscent:
       config: RenderConfig = RenderConfig(),
       viewport: Option[Viewport] = None,
   ): UI[Any] =
-    fromScene(DiagramLayout.scene(mermaid.diagram, config, viewport), selected = None, onSelect = _ => ZIO.unit)
+    val cfg = InitDirective.apply(mermaid.source, config)
+    fromScene(DiagramLayout.scene(mermaid.diagram, cfg, viewport), selected = None, onSelect = _ => ZIO.unit)
 
   /** Inert SVG embed mapped into ascent UI (byte-stable structure demos). */
   def svgDiagram(mermaid: Mermaid, config: RenderConfig = RenderConfig()): UI[Any] =
-    SvgBridge.toUi(SvgRenderer.renderTree(mermaid.diagram, config))
+    SvgBridge.toUi(SvgRenderer.renderTree(mermaid.diagram, InitDirective.apply(mermaid.source, config)))
 
   /** SVG markup string for the same source. */
   def svg(mermaid: Mermaid, config: RenderConfig = RenderConfig()): String =
-    SvgRenderer.render(mermaid.diagram, config)
+    SvgRenderer.render(mermaid.diagram, InitDirective.apply(mermaid.source, config))
 
   def fromScene(
       scene: Scene,
@@ -54,7 +55,14 @@ object MermoidAscent:
     for
       selected <- sq(Option.empty[NodeId])
       width    <- sq(initialWidth)
-    yield interactiveRoot(mermaid.diagram, config, selected, width, widthControls, toggleSelect(selected))
+    yield interactiveRoot(
+      mermaid.diagram,
+      InitDirective.apply(mermaid.source, config),
+      selected,
+      width,
+      widthControls,
+      toggleSelect(selected),
+    )
   end diagramInteractive
 
   /** Same as [[diagramInteractive]] but accepts an external width source (e.g. host ResizeObserver). */
@@ -65,7 +73,14 @@ object MermoidAscent:
       widthControls: WidthControls = WidthControls.Hidden,
   ): UIO[UI[Any]] =
     for selected <- sq(Option.empty[NodeId])
-    yield interactiveRoot(mermaid.diagram, config, selected, width, widthControls, toggleSelect(selected))
+    yield interactiveRoot(
+      mermaid.diagram,
+      InitDirective.apply(mermaid.source, config),
+      selected,
+      width,
+      widthControls,
+      toggleSelect(selected),
+    )
 
   /** Host-driven selection and width. Mechanoid live FSMs use this instead of reimplementing chrome.
     *
@@ -80,7 +95,14 @@ object MermoidAscent:
       config: RenderConfig = RenderConfig(),
       widthControls: WidthControls = WidthControls.Hidden,
   ): UI[Any] =
-    interactiveRoot(mermaid.diagram, config, selected, width, widthControls, onSelect)
+    interactiveRoot(
+      mermaid.diagram,
+      InitDirective.apply(mermaid.source, config),
+      selected,
+      width,
+      widthControls,
+      onSelect,
+    )
 
   private def toggleSelect(selected: Source[Option[NodeId]]): NodeId => UIO[Unit] = id =>
     selected.get.flatMap {

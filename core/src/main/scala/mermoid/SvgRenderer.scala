@@ -28,6 +28,7 @@ object SvgRenderer:
         edgeIndex = idx,
         edgeCount = pairCounts((e.from, e.to)),
         mark = e.mark,
+        inline = e.inline,
       )
     }
   end buildLayoutEdges
