@@ -91,6 +91,23 @@ object ShapeRenderer:
             "fill"  -> "none",
           ),
         )
+      case NodeShape.Circle if node.cssClasses.contains(PaintClass.StateEnd.cssName) =>
+        val r = Math.max(hw, hh)
+        List(
+          leaf("circle")(
+            "class" -> PaintClass.NodeShape.cssName,
+            "cx"    -> cx.f,
+            "cy"    -> cy.f,
+            "r"     -> r.f,
+            "fill"  -> "none",
+          ),
+          leaf("circle")(
+            "class" -> PaintClass.NodeShape.cssName,
+            "cx"    -> cx.f,
+            "cy"    -> cy.f,
+            "r"     -> (r * 0.45).f,
+          ),
+        )
       case NodeShape.Circle =>
         val r = Math.max(hw, hh)
         List(leaf("circle")("class" -> PaintClass.NodeShape.cssName, "cx" -> cx.f, "cy" -> cy.f, "r" -> r.f))

@@ -150,7 +150,12 @@ viewport stays left to right.
 | Transitions | `A --> B: label` |
 | Start / end | `[*] --> A`, `A --> [*]` (separate markers when both roles appear) |
 | Self-transitions | `A --> A: retry` (labels stack) |
-| Notes | `note right of A` / `note left of A` … `end note` |
+| Descriptions | `state "long name" as id`, `id : long name` |
+| Composites | `state Name { ... }`, nested, with `direction` inside |
+| Concurrency | `--` splits a composite into regions |
+| Choice, fork, join | `state id <<choice>>`, `<<fork>>`, `<<join>>` |
+| History | `<<history>>`, `<<deepHistory>>`, `[H]`, `[H*]` |
+| Notes | `note right of A` / `note left of A` … `end note`, or `note left of A: text` |
 | Styling | `style`, `classDef`, `class`, `A:::className` (same as flowcharts) |
 | Note alignment | `style A noteAlign:center` (`left` / `center` / `right`) |
 | Note aliases | `note right of A as myNote` |
@@ -185,11 +190,11 @@ Documented so adopters are not surprised:
 | Parallel edges `A --> B` twice | Both render; offset so they do not sit on top of each other. Use `as` if you CSS-select one. |
 | Cycles / back-edges | A greedy feedback arc set reverses back edges for ranking and draws them in the original direction, so a retry sits on the next rank instead of ranking as a root. Barycenter ordering cuts crossings. Long edges route through waypoints. |
 | Self-loops | Attach right (vertical flow) or top (horizontal); stacked labels get room in the bbox. |
-| Nested subgraphs | Supported; frames paint behind edges and nodes. |
+| Nested subgraphs | A subgraph is its own ranked diagram. `direction` inside it does not change the parent. Members stay in the frame. |
 | State notes vs neighbours | Notes dodge other nodes when the preferred side would overlap (especially in LR). |
 | Decision diamonds (hybrid) | HTML uses the same AABB diamond polygon as SVG (`clip-path`), not a CSS-rotated square. |
 | `click` callbacks | Names and tooltips are stored; **JS is not executed**. Hosts decide what `callbackName` means. |
-| `click` on state diagrams | Not supported (flowchart-only). |
+| `click` on state diagrams | Same binding as a flowchart: href, tooltip, callback name. JS is not executed. |
 | Semicolon separators | OK as statement separators (alongside newlines). |
 | `end` vs `endpoint` | Bare `end` closes a subgraph; ids that start with `end` (e.g. `endpoint`) parse as ids. |
 | `securityLevel` / Mermaid JS click | Out of scope for the library; see [FUTURE.md](FUTURE.md). |
@@ -198,7 +203,7 @@ Documented so adopters are not surprised:
 
 - Diagram types: class, ER, Gantt, pie, journey, git graph
 - Sequence: `box` bands, `create` / `destroy`, stereotypes, `link` / `links`, `click` / `style` / `classDef`
-- State: composite states, concurrency (`--`), `state X as "…"`
+- State: `entry` / `exit` actions (a colon line is the description, not an action)
 - Flowchart: `linkStyle`, Mermaid theme directives
 
 ## Layout and responsive

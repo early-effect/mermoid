@@ -31,8 +31,8 @@ the diagram keeps the direction it names.
     },
     section("Transitions")(
       md"""
-`From --> To` declares a transition; `: label` names it. States do not need declaring — every id mentioned by a
-transition becomes a state, rendered as a `Round` node labelled with its own id.
+`From --> To` declares a transition; `: label` names it. An id that has not been declared becomes a state, drawn as a
+rounded box. The label is the id until a description replaces it.
 """,
       example {
         MermoidAscent.svgDiagram(Mermaid("""stateDiagram-v2
@@ -46,11 +46,12 @@ That is a two-state cycle, and it lays out rather than looping forever — layer
     ),
     section("Start and end")(
       md"""
-`[*]` is the start/end pseudo-state: a filled 16×16 circle carrying the `start-end` class, with no label. Whether it
-reads as start or end is positional: `[*] --> A` versus `A --> [*]`.
+`[*]` is the start or the end, depending on which side of the arrow it sits on. The start is a filled circle. The end
+is a bullseye: a ring and a filled center, class `state-end`. Both carry `start-end` and neither has a label.
 
-When a diagram uses both, mermoid paints **two** markers (start keeps id `[*]`, end is `[*]-end`) so ranking does not
-cycle through a shared node and flip the layout. A diagram that only has one role still uses a single `[*]` node.
+When a diagram uses both, mermoid paints two markers (start keeps id `[*]`, end is `[*]-end`) so ranking does not
+cycle through a shared node. Each composite and each concurrent region gets its own pair. A diagram that only has one
+role still uses a single `[*]` node.
 """,
       example {
         MermoidAscent.svgDiagram(Mermaid("""stateDiagram-v2
@@ -199,12 +200,132 @@ sink lands on the last rank.
                             |""".stripMargin))
       },
     ),
-    section("Not yet implemented")(
+    section("Descriptions")(
       md"""
-Composite (nested) states, concurrency (`--`), and `state X as "long name"` declarations are not implemented. `click`
-is flowchart-only; state diagrams have no click statement. A state diagram that needs nesting can be expressed as a
-[flowchart](flowcharts.html) with subgraphs today.
-"""
+The id stays the id. The words on the box are the description.
+
+```
+state "Waiting for a worker" as Idle
+Idle : no job yet
+```
+
+`id : text` and `state "text" as id` are the same fact. A second, different description is a parse error that names
+both strings. `hide empty description` paints no label on a state that was never described, and no title band on a
+composite that was never described.
+""",
+      example {
+        MermoidAscent.svgDiagram(Mermaid("""stateDiagram-v2
+                            |    state "Waiting for a worker" as Idle
+                            |    Running : a job is in flight
+                            |    [*] --> Idle
+                            |    Idle --> Running: start
+                            |    Running --> Idle: stop
+                            |""".stripMargin))
+      },
+    ),
+    section("Composite states")(
+      md"""
+`state Name { ... }` draws a frame. The frame is a node in the parent diagram, and the statements inside are a diagram
+of their own. A `direction` line inside applies only there. An edge that names the composite stops on the frame. An
+edge that names a member ends on that member and crosses the frame; the member stays inside.
+
+The same id cannot belong to two composites. The error names the id and both places. An edge between two composites,
+or from a member out to a sibling of the composite, is drawn. Mermaid's renderer often pulls the child out of the box.
+This one does not.
+""",
+      example {
+        MermoidAscent.svgDiagram(Mermaid("""stateDiagram-v2
+                            |    direction LR
+                            |    [*] --> Review
+                            |    state Review {
+                            |        [*] --> Screening
+                            |        Screening --> Decision
+                            |    }
+                            |    Review --> Published: approved
+                            |    Decision --> Draft: rejected
+                            |    Published --> [*]
+                            |""".stripMargin))
+      },
+    ),
+    section("Concurrency")(
+      md"""
+`--` on its own line, inside a composite, splits the body into regions. Each region is ranked on its own and stacked
+in the frame, with a dashed divider between them. An edge whose ends sit in two regions of the same composite is a
+parse error. An edge from a state in any region out to a state outside the composite is an exit, including from a
+region that is not the first.
+""",
+      example {
+        MermoidAscent.svgDiagram(Mermaid("""stateDiagram-v2
+                            |    [*] --> Active
+                            |    state Active {
+                            |        [*] --> NumLockOff
+                            |        NumLockOff --> NumLockOn : toggle
+                            |        --
+                            |        [*] --> CapsLockOff
+                            |        CapsLockOff --> CapsLockOn : toggle
+                            |    }
+                            |    Active --> [*]
+                            |""".stripMargin))
+      },
+    ),
+    section("Choice, fork, and join")(
+      md"""
+`state Id <<choice>>` is a diamond. `<<fork>>` and `<<join>>` are bars. A vertical flow draws a horizontal bar, and a
+horizontal flow draws a vertical bar. The bar stretches to cover the centers of the states it synchronizes. `[[choice]]`,
+`[[fork]]`, and `[[join]]` are the same three forms.
+""",
+      example {
+        MermoidAscent.svgDiagram(Mermaid("""stateDiagram-v2
+                            |    state if_state <<choice>>
+                            |    [*] --> IsPositive
+                            |    IsPositive --> if_state
+                            |    if_state --> False: if n < 0
+                            |    if_state --> True: if n >= 0
+                            |    state fork_state <<fork>>
+                            |    True --> fork_state
+                            |    fork_state --> Left
+                            |    fork_state --> Right
+                            |    state join_state <<join>>
+                            |    Left --> join_state
+                            |    Right --> join_state
+                            |    join_state --> [*]
+                            |""".stripMargin))
+      },
+    ),
+    section("History")(
+      md"""
+`state H <<history>>` and `state H <<deepHistory>>` are pseudostates, drawn as a circle labelled `H` or `H*`. `[H]` and
+`[H*]` are the same two nodes written as a transition endpoint. The diagram shows the pseudostate. It does not remember
+which substate was last active.
+""",
+      example {
+        MermoidAscent.svgDiagram(Mermaid("""stateDiagram-v2
+                            |    [*] --> Active
+                            |    state Active {
+                            |        [*] --> Playing
+                            |        Playing --> Paused
+                            |        state back <<history>>
+                            |        Paused --> back
+                            |    }
+                            |""".stripMargin))
+      },
+    ),
+    section("Click and the accessible name")(
+      md"""
+`click` is the same binding as on a flowchart: an href, a tooltip, or a callback name. `accTitle` and `accDescr` become
+the SVG `<title>` and `<desc>`. `classDef`, `class`, `:::`, and `style` apply inside a composite, on the frame, on a
+choice, on a bar, and on a marker. `classDef default` is the paint for a state that has no other class.
+""",
+      example {
+        MermoidAscent.svgDiagram(Mermaid("""stateDiagram-v2
+                            |    accTitle: review
+                            |    classDef hot fill:#5c2a2a,stroke:#f0a0a0
+                            |    [*] --> Draft
+                            |    Draft --> Live: publish
+                            |    class Live hot
+                            |    click Live href "https://example.com" "Open"
+                            |""".stripMargin))
+      },
     ),
   )
 end StateDiagrams

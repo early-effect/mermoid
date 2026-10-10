@@ -100,7 +100,7 @@ object SvgRenderer:
     val visible = scene.visibleNodes
 
     val subgraphSvg =
-      scene.subgraphs.flatMap(sg => SubgraphRenderer.subgraphToSvg(sg, nodeMap.filter(!_._2.dummy)))
+      scene.subgraphs.map(SubgraphRenderer.subgraphToSvg)
 
     val edgeSvg = scene.edges
       .filter(e => nodeMap.contains(e.from) && nodeMap.contains(e.to))
@@ -140,13 +140,38 @@ object SvgRenderer:
       "height" -> scene.height.f,
     )
 
+    val meta =
+      scene.accTitle.toList.map(text => SvgNode.elem("title")()(SvgNode.Text(text))) ++
+        scene.accDescr.toList.map(text => SvgNode.elem("desc")()(SvgNode.Text(text)))
+    val floating = scene.floatingNotes.map(floatingNote)
     svgRoot(
       scene.width,
       scene.height,
-      arrowheadDefs(config) :: styleBlock(
+      meta ++ (arrowheadDefs(config) :: styleBlock(
         config,
         scene.classDefRules,
-      ).toList ++ (background :: subgraphSvg ++ edgeSvg ++ nodeSvg ++ noteSvg),
+      ).toList) ++ (background :: subgraphSvg ++ edgeSvg ++ nodeSvg ++ noteSvg ++ floating),
     )
   end paintRanked
+
+  private def floatingNote(box: FloatingNoteBox): SvgNode =
+    SvgNode.elem("g")(
+      "class" -> "note",
+      "id"    -> s"note-${box.alias.value}",
+    )(
+      SvgNode.leaf("rect")(
+        "class"  -> PaintClass.NoteRect.cssName,
+        "x"      -> box.rect.x.f,
+        "y"      -> box.rect.y.f,
+        "width"  -> box.rect.w.f,
+        "height" -> box.rect.h.f,
+        "rx"     -> "3",
+      ),
+      SvgNode.textElem("text")(
+        "class"       -> PaintClass.NoteText.cssName,
+        "x"           -> (box.rect.x + 8).f,
+        "y"           -> (box.rect.y + 18).f,
+        "text-anchor" -> "start",
+      )(box.text),
+    )
 end SvgRenderer

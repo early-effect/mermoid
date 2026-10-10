@@ -1,0 +1,210 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="933" height="285" viewBox="0 0 933 285">
+  <defs>
+    <marker id="arrowhead" markerWidth="12" markerHeight="10.2" refX="12" refY="5.1" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon class="arrowhead" points="0 0, 12 5.1, 0 10.2"/>
+    </marker>
+  </defs>
+  <style>
+:root {
+  --mermoid-background: #ffffff;
+  --mermoid-edge-label-bg: #ffffff;
+  --mermoid-font-family: sans-serif;
+  --mermoid-font-size: 14px;
+  --mermoid-line: #333;
+  --mermoid-main-bkg: #ECECFF;
+  --mermoid-node-border: #9370DB;
+  --mermoid-note-bg: #ffffcc;
+  --mermoid-note-border: #333333;
+  --mermoid-note-text: #333333;
+  --mermoid-primary: #1f77b4;
+  --mermoid-primary-border: #1a5a8a;
+  --mermoid-primary-text: #333;
+  --mermoid-secondary: #ffffde;
+  --mermoid-secondary-border: #aaaa33;
+  --mermoid-secondary-text: #333;
+  --mermoid-selection: #333;
+  --mermoid-tertiary: #f4f4f4;
+  --mermoid-tertiary-border: #cccccc;
+  --mermoid-tertiary-text: #333;
+  --mermoid-text: #333;
+}
+.diagram-bg {
+  fill: #ffffff;
+  stroke: none;
+}
+.node-shape {
+  fill: #ECECFF;
+  stroke: #9370DB;
+  stroke-width: 2;
+}
+.node-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+.edge-line {
+  stroke: #333;
+  stroke-width: 2;
+}
+.edge-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.edge-label-bg {
+  fill: #ffffff;
+}
+.note-rect {
+  fill: #ffffcc;
+  stroke: #333333;
+  stroke-width: 1;
+  stroke-dasharray: 4,2;
+}
+.note-text {
+  fill: #333333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.note-connector {
+  stroke: #333333;
+  stroke-width: 1;
+  stroke-dasharray: 4,2;
+}
+.subgraph-rect {
+  fill: none;
+  stroke: #9370DB;
+  stroke-width: 1;
+  stroke-dasharray: 6,3;
+}
+.subgraph-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+.edge-thick .edge-line {
+  stroke-width: 3;
+}
+.edge-dotted .edge-line {
+  stroke-dasharray: 5,5;
+}
+.edge-dotted-open .edge-line {
+  stroke-dasharray: 5,5;
+}
+.arrowhead {
+  fill: #333;
+}
+.arrow-open {
+  fill: none;
+  stroke: #333;
+  stroke-width: 2;
+}
+.arrow-cross {
+  fill: none;
+  stroke: #333;
+  stroke-width: 2;
+}
+.actor-box {
+  fill: #ECECFF;
+  stroke: #9370DB;
+  stroke-width: 2;
+}
+.actor-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+.actor-figure {
+  fill: none;
+  stroke: #9370DB;
+  stroke-width: 2;
+}
+.lifeline {
+  stroke: #333;
+  stroke-width: 1;
+  fill: none;
+  stroke-dasharray: 4,4;
+}
+.message-line {
+  stroke: #333;
+  stroke-width: 2;
+  fill: none;
+}
+.message-dashed .message-line {
+  stroke-dasharray: 6,4;
+}
+.message-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.activation {
+  fill: #333;
+  stroke: none;
+  fill-opacity: 0.25;
+}
+.fragment-frame {
+  fill: none;
+  stroke: #9370DB;
+  stroke-width: 1;
+}
+.fragment-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.fragment-divider {
+  stroke: #9370DB;
+  stroke-width: 1;
+  fill: none;
+}
+.start-end .node-shape {
+  fill: #333;
+  stroke: #333;
+}
+</style>
+  <rect class="diagram-bg" x="0" y="0" width="933" height="285"/>
+  <g class="subgraph" id="subgraph-Review">
+    <rect class="subgraph-rect" x="136" y="90" width="444.5" height="100" rx="5" ry="5"/>
+    <text class="subgraph-label" x="144" y="106">Review</text>
+  </g>
+  <g class="edge edge-arrow" id="edge-Decision-Draft-0" data-from="Decision" data-to="Draft">
+    <path class="edge-line" d="M566.5,168.68839779005526 Q628.3953229897467,172.43561268214896 681.8479414062864,203.86633351175144" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="591.3739707031432" y="176.27736565090333" width="65.6" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="624.1739707031431" y="186.27736565090333" text-anchor="middle" dominant-baseline="central" style="font-size: 12px">rejected</text>
+  </g>
+  <g class="edge edge-arrow" id="edge-Published-[*]-end-0" data-from="Published" data-to="[*]-end">
+    <path class="edge-line" d="M797,82.95673876871881 Q834.0296684962894,87.52996161287922 869.1014409585628,74.79883862698458" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  <g class="edge edge-arrow" id="edge-[*]-start@Review#0-Screening-0" data-from="[*]-start@Review#0" data-to="Screening">
+    <path class="edge-line" d="M165.94927952071865,134.8994193134923 Q202.9789480170081,130.32619646933185 238.05072047928135,143.0573194552265" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  <g class="edge edge-arrow" id="edge-Screening-Decision-0" data-from="Screening" data-to="Decision">
+    <path class="edge-line" d="M370.5,151 L442.5,151" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  <g class="node node-circle start-end" id="node-[*]">
+    <circle class="node-shape" cx="48" cy="98" r="8"/>
+  </g>
+  <g class="node node-round" id="node-Published">
+    <rect class="node-shape" x="672.5" y="65" width="124.5" height="50" rx="15" ry="15"/>
+    <text class="node-label" x="734.75" y="90" text-anchor="middle" dominant-baseline="central">Published</text>
+  </g>
+  <g class="node node-round" id="node-Draft">
+    <rect class="node-shape" x="689.5" y="195" width="90.5" height="50" rx="15" ry="15"/>
+    <text class="node-label" x="734.75" y="220" text-anchor="middle" dominant-baseline="central">Draft</text>
+  </g>
+  <g class="node node-circle start-end state-end" id="node-[*]-end">
+    <circle class="node-shape" cx="885" cy="73" r="8" fill="none"/>
+    <circle class="node-shape" cx="885" cy="73" r="3.6"/>
+  </g>
+  <g class="node node-circle start-end" id="node-[*]-start@Review#0">
+    <circle class="node-shape" cx="158" cy="134" r="8"/>
+  </g>
+  <g class="node node-round" id="node-Screening">
+    <rect class="node-shape" x="246" y="126" width="124.5" height="50" rx="15" ry="15"/>
+    <text class="node-label" x="308.25" y="151" text-anchor="middle" dominant-baseline="central">Screening</text>
+  </g>
+  <g class="node node-round" id="node-Decision">
+    <rect class="node-shape" x="450.5" y="126" width="116" height="50" rx="15" ry="15"/>
+    <text class="node-label" x="508.5" y="151" text-anchor="middle" dominant-baseline="central">Decision</text>
+  </g>
+</svg>

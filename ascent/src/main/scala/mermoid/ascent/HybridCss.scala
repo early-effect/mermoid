@@ -272,7 +272,9 @@ object HybridChrome
           ),
         ),
       ),
-      HybridTokens.rule(HybridTokens.node.cls(PaintClass.StartEnd.cssName).descendant(HybridTokens.shape))(
+      HybridTokens.rule(
+        PseudoClass.where(HybridTokens.node.cls(PaintClass.StartEnd.cssName)).descendant(HybridTokens.shape)
+      )(
         S.padding.zero,
         S.borderRadius.pct(50),
         S.background(HybridTokens.themeColor(ThemeVar.Line, "#333")),

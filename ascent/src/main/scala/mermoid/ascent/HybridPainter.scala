@@ -61,7 +61,7 @@ private[ascent] object HybridPainter:
       NoteRenderer.noteToSvg(cfg, note, scene.nodeMap, selfLoopExtents).toList.flatMap(extractConnector)
     }
     val subgraphSvg =
-      scene.subgraphs.flatMap(sg => SubgraphRenderer.subgraphToSvg(sg, scene.nodeMap.filter(!_._2.dummy)))
+      scene.subgraphs.map(SubgraphRenderer.subgraphToSvg)
 
     val edgeSvg = SvgNode.Element(
       "svg",
@@ -321,7 +321,7 @@ private[ascent] object HybridPainter:
         ShapeRenderer.inlineStyle(shapeStyle).map(s => Attr.StaticAttr("style", AttrValue.Str(s)))
     val shapeEl: UI[Any] = UI.Element("span", shapeAttrs, Vector.empty)
     val label: UI[Any]   =
-      if node.id == NodeId.stateMarker then UI.Empty
+      if node.cssClasses.contains(PaintClass.StartEnd.cssName) then UI.Empty
       else
         UI.Element(
           "span",
@@ -384,25 +384,26 @@ private[ascent] object HybridPainter:
     if names.isEmpty then sheet
     else
       val extra = sheet.rules.flatMap { rule =>
-        boostedSelector(rule.selector, names).map(sel => rule.copy(selector = sel))
+        boostedSelectors(rule.selector, names).map(sel => rule.copy(selector = sel))
       }
       sheet.copy(rules = sheet.rules ++ extra)
 
-  private def boostedSelector(sel: CssSelector, names: Set[String]): Option[CssSelector] =
+  private def boostedSelectors(sel: CssSelector, names: Set[String]): List[CssSelector] =
     val node = CssSelector.Class(HybridClass.Node.cssName)
     sel match
       case CssSelector.Class(name) if names.contains(name) =>
-        Some(CssSelector.Compound(List(node, CssSelector.Class(name))))
+        List(CssSelector.Compound(List(node, CssSelector.Class(name))))
       case CssSelector.Descendant(CssSelector.Class(name), child) if names.contains(name) =>
-        Some(
-          CssSelector.Descendant(
-            CssSelector.Compound(List(node, CssSelector.Class(name))),
-            child,
-          )
-        )
-      case _ => None
+        val compound = CssSelector.Compound(List(node, CssSelector.Class(name)))
+        val shaped   = CssSelector.Descendant(compound, child)
+        val diamond  =
+          if child == PaintClass.NodeShape.selector then
+            List(CssSelector.Descendant(compound, CssSelector.Class(HybridClass.DiamondFill.cssName)))
+          else Nil
+        shaped :: diamond
+      case _ => Nil
     end match
-  end boostedSelector
+  end boostedSelectors
 
   private def noteCard(
       note: StateNote,

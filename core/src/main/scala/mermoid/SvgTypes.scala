@@ -29,6 +29,18 @@ case class LayoutEdge(
     edgeCount: Int = 1,
 )
 
+/** A frame whose geometry was decided by layout, not measured afterwards from its members. */
+case class PlacedFrame(
+    id: String,
+    label: Option[String],
+    rect: Rect,
+    /** Absolute y of a dashed divider inside the frame. */
+    dividers: List[Double] = Nil,
+)
+
+/** A note with no state to point at. `rect` is top-left in scene coordinates. */
+case class FloatingNoteBox(text: String, alias: NodeId, rect: Rect)
+
 case class StateNote(
     position: NotePosition,
     stateId: NodeId,

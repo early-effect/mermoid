@@ -48,6 +48,9 @@ object StyleResolver:
   ): Map[NodeId, List[String]] =
     classes.foldLeft(acc)(appendClass(_, id, _))
 
+  private[mermoid] def classDefRulesFor(name: String, styles: Map[CssProperty, String]): List[CssRule] =
+    classDefRules(name, styles)
+
   private def classDefRules(name: String, styles: Map[CssProperty, String]): List[CssRule] =
     val decls = styles.toList.map { case (prop, value) => CssDeclaration(prop, CssValue.Str(value)) }
     List(

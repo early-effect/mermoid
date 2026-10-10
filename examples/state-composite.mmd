@@ -1,0 +1,10 @@
+stateDiagram-v2
+    direction LR
+    [*] --> Review
+    state Review {
+        [*] --> Screening
+        Screening --> Decision
+    }
+    Review --> Published: approved
+    Decision --> Draft: rejected
+    Published --> [*]

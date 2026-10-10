@@ -11,9 +11,21 @@ object DiagramLayout:
       viewport: Option[Viewport] = None,
   ): Scene =
     diagram match
-      case Diagram.Flowchart(dir, stmts)    => Scene.Ranked(flowchartScene(dir, stmts, config, viewport))
-      case Diagram.StateDiagram(dir, stmts) => Scene.Ranked(stateScene(dir, stmts, config, viewport))
-      case Diagram.Sequence(stmts)          => Scene.Sequence(SequenceLayout.place(stmts, config, viewport))
+      case Diagram.Flowchart(dir, stmts) =>
+        val scene =
+          if FlowLayout.containsSubgraph(stmts) then FlowLayout.scene(dir, stmts, config, viewport)
+          else flowchartScene(dir, stmts, config, viewport)
+        Scene.Ranked(scene)
+      case Diagram.StateDiagram(dir, stmts) =>
+        val scene = StateModel.resolve(Diagram.StateDiagram(dir, stmts)) match
+          case Right(machine) if !StateModel.isLegacy(machine) =>
+            StateLayout.scene(machine, config, viewport)
+          case Right(machine) =>
+            stateScene(dir, stmts, config, viewport).copy(accTitle = machine.accTitle, accDescr = machine.accDescr)
+          case Left(_) =>
+            stateScene(dir, stmts, config, viewport)
+        Scene.Ranked(scene)
+      case Diagram.Sequence(stmts) => Scene.Sequence(SequenceLayout.place(stmts, config, viewport))
 
   private[mermoid] def effectiveDirection(
       author: Direction,
@@ -89,7 +101,6 @@ object DiagramLayout:
     val inlineStyles  = StyleResolver.collectInlineStyles(stmts)
     val classDefRules = StyleResolver.classDefsToRules(stmts)
     val interactions  = StyleResolver.collectInteractions(stmts)
-    val subgraphs     = StyleResolver.collectSubgraphs(stmts)
     val lc            = compressLayout(config.layout, config.responsive, viewport, nodeDefs.size, dir)
     val cfg           = config.copy(layout = lc)
     val laid          = Layout.layout(lc, dir, nodeDefs, edges)
@@ -127,7 +138,7 @@ object DiagramLayout:
       nodes = shiftedNodes,
       edges = layoutEdges,
       routes = shiftedRoutes,
-      subgraphs = subgraphs,
+      subgraphs = Nil,
       notes = Nil,
       interactions = interactions,
       loopSide = loopSide,
@@ -179,13 +190,17 @@ object DiagramLayout:
       val user   = nodeClasses.getOrElse(n.id, Nil)
       val styles = inlineStyles.getOrElse(n.id, Map.empty)
       if n.id == NodeId.stateMarker || n.id == endId then
+        val marker =
+          if n.id == endId then List(PaintClass.StartEnd.cssName, PaintClass.StateEnd.cssName)
+          else List(PaintClass.StartEnd.cssName)
         n.copy(
           width = 16,
           height = 16,
-          cssClasses = PaintClass.StartEnd.cssName :: user,
+          cssClasses = marker ++ user,
           styles = styles,
         )
       else n.copy(cssClasses = user, styles = styles)
+      end if
     }
     val routes      = laid.routes
     val layoutEdges = SvgRenderer.buildLayoutEdges(edges)

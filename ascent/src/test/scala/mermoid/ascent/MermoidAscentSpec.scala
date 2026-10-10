@@ -127,6 +127,29 @@ object MermoidAscentSpec extends ZIOSpecDefault:
         html.contains("border-color: #7dcea0") || html.contains("border-color:#7dcea0"),
       )
     },
+    test("classDef fill on a choice paints the diamond") {
+      val src =
+        Mermaid("""stateDiagram-v2
+          |  classDef hot fill:#112233
+          |  state if_state <<choice>>
+          |  [*] --> if_state
+          |  class if_state hot
+          |""".stripMargin)
+      for html <- Html.render(MermoidAscent.diagram(src))
+      yield assertTrue(
+        html.contains("mermoid-node-diamond-fill"),
+        html.contains("#112233"),
+      )
+    },
+    test("classDef fill on the start marker is in the stylesheet") {
+      val src =
+        Mermaid("""stateDiagram-v2
+          |  classDef hot fill:#abcdef
+          |  [*]:::hot --> Idle
+          |""".stripMargin)
+      for html <- Html.render(MermoidAscent.diagram(src))
+      yield assertTrue(html.contains("hot"), html.contains("#abcdef"), html.contains("start-end"))
+    },
     test("state classDef beats a theme rule of equal chrome specificity") {
       val src =
         Mermaid("""stateDiagram-v2

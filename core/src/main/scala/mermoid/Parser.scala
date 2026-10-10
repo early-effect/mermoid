@@ -254,79 +254,14 @@ object MermaidParser:
 
   // -- State Diagram -----------------------------------------------------------
 
-  private[mermoid] def stateId(using P[Any]): P[NodeId] =
-    P("[*]".!.map(NodeId.trusted) | nodeId)
-
-  /** `A:::cls --> B:::other: label` — classes default to Nil when the suffix is absent. */
   private[mermoid] def stateTransition(using P[Any]): P[StateStatement.TransitionSt] =
-    P(
-      stateId ~ classSuffix.? ~ ws ~ "-->" ~ ws ~ stateId ~ classSuffix.? ~
-        (":" ~ ws ~ CharsWhile(_ != '\n', 1).!).?
-    ).map {
-      (from: NodeId, fromCls: Option[List[String]], to: NodeId, toCls: Option[List[String]], label: Option[String]) =>
-        StateStatement.TransitionSt(
-          StateTransition(from, to, label.map(_.trim), fromCls.getOrElse(Nil), toCls.getOrElse(Nil))
-        )
-    }
-
-  private[mermoid] def notePosition(using P[Any]): P[NotePosition] =
-    P(
-      "right of".!.map(_ => NotePosition.RightOf) |
-        "left of".!.map(_ => NotePosition.LeftOf)
-    )
+    StateParser.transition
 
   private[mermoid] def noteSt(using P[Any]): P[StateStatement.NoteSt] =
-    P(
-      "note" ~ ws ~ notePosition ~ ws ~ nodeId ~ asAlias.? ~ nl ~
-        (!("end note") ~ AnyChar).rep.! ~
-        "end note"
-    ).map { case (pos, id, alias, text) =>
-      StateStatement.NoteSt(pos, id, text.linesIterator.map(_.trim).filter(_.nonEmpty).mkString("\n"), alias)
-    }
-
-  private[mermoid] def stateStyleSt(using P[Any]): P[StateStatement.StyleSt] =
-    P("style" ~ ws ~ stateId ~ ws ~ styleProperties).map { case (id, props) =>
-      StateStatement.StyleSt(id, StateStyle.fromProperties(props))
-    }
-
-  private[mermoid] def stateClassDefSt(using P[Any]): P[StateStatement.ClassDefSt] =
-    P("classDef" ~ ws ~ identifier ~ ws ~ styleProperties).map { case (name, props) =>
-      StateStatement.ClassDefSt(name, props)
-    }
-
-  private[mermoid] def stateClassSt(using P[Any]): P[StateStatement.ClassSt] =
-    P("class" ~ ws ~ stateId.rep(sep = ws ~ "," ~ ws, min = 1) ~ ws ~ identifier).map { case (ids, className) =>
-      StateStatement.ClassSt(ids.toList, className)
-    }
-
-  private[mermoid] def stateStatement(using P[Any]): P[StateStatement] =
-    P(noteSt | stateClassDefSt | stateClassSt | stateStyleSt | stateTransition)
-
-  /** `direction LR` anywhere among the statements. A following letter (`directional`) or `-->` fails this alternative
-    * so the id can still be a state.
-    */
-  private[mermoid] def stateDirectionLine(using P[Any]): P[Direction] =
-    P("direction" ~ CharsWhileIn(" \t", 1) ~ direction ~ !CharPred(c => c.isLetterOrDigit || c == '_'))
-
-  private enum StateLine:
-    case Dir(direction: Direction)
-    case Stmt(statement: StateStatement)
-
-  private def stateLine(using P[Any]): P[StateLine] =
-    P(stateDirectionLine.map(StateLine.Dir(_)) | stateStatement.map(StateLine.Stmt(_)))
-
-  private def stateLines(using P[Any]): P[List[StateLine]] =
-    P(wsnl ~ stateLine.rep(sep = sep) ~ wsnl).map(_.toList)
-
-  private[mermoid] def stateDiagramHeader(using P[Any]): P[Unit] =
-    P("stateDiagram-v2" ~ nl)
+    StateParser.note
 
   private[mermoid] def stateDiagram(using P[Any]): P[Diagram.StateDiagram] =
-    P(wsnl ~ stateDiagramHeader ~ stateLines ~ wsnl ~ End).map { lines =>
-      val dir   = lines.collect { case StateLine.Dir(d) => d }.lastOption.getOrElse(Direction.TB)
-      val stmts = lines.collect { case StateLine.Stmt(s) => s }
-      Diagram.StateDiagram(dir, stmts)
-    }
+    StateParser.document
 
   // -- Top-level --------------------------------------------------------------
 
@@ -346,6 +281,8 @@ object MermaidParser:
     fastparse.parse(input, diagram(using _)) match
       case Parsed.Success(Diagram.Sequence(stmts), _) =>
         SequenceModel.resolve(stmts).map(Diagram.Sequence(_))
+      case Parsed.Success(diagram: Diagram.StateDiagram, _) =>
+        StateModel.resolve(diagram).map(_ => diagram)
       case Parsed.Success(value, _) => Right(value)
       case f: Parsed.Failure        => Left(ParseError.fromFastparse(f))
 end MermaidParser

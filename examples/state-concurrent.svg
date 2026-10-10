@@ -1,0 +1,216 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="249.5" height="892" viewBox="0 0 249.5 892">
+  <defs>
+    <marker id="arrowhead" markerWidth="12" markerHeight="10.2" refX="12" refY="5.1" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon class="arrowhead" points="0 0, 12 5.1, 0 10.2"/>
+    </marker>
+  </defs>
+  <style>
+:root {
+  --mermoid-background: #ffffff;
+  --mermoid-edge-label-bg: #ffffff;
+  --mermoid-font-family: sans-serif;
+  --mermoid-font-size: 14px;
+  --mermoid-line: #333;
+  --mermoid-main-bkg: #ECECFF;
+  --mermoid-node-border: #9370DB;
+  --mermoid-note-bg: #ffffcc;
+  --mermoid-note-border: #333333;
+  --mermoid-note-text: #333333;
+  --mermoid-primary: #1f77b4;
+  --mermoid-primary-border: #1a5a8a;
+  --mermoid-primary-text: #333;
+  --mermoid-secondary: #ffffde;
+  --mermoid-secondary-border: #aaaa33;
+  --mermoid-secondary-text: #333;
+  --mermoid-selection: #333;
+  --mermoid-tertiary: #f4f4f4;
+  --mermoid-tertiary-border: #cccccc;
+  --mermoid-tertiary-text: #333;
+  --mermoid-text: #333;
+}
+.diagram-bg {
+  fill: #ffffff;
+  stroke: none;
+}
+.node-shape {
+  fill: #ECECFF;
+  stroke: #9370DB;
+  stroke-width: 2;
+}
+.node-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+.edge-line {
+  stroke: #333;
+  stroke-width: 2;
+}
+.edge-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.edge-label-bg {
+  fill: #ffffff;
+}
+.note-rect {
+  fill: #ffffcc;
+  stroke: #333333;
+  stroke-width: 1;
+  stroke-dasharray: 4,2;
+}
+.note-text {
+  fill: #333333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.note-connector {
+  stroke: #333333;
+  stroke-width: 1;
+  stroke-dasharray: 4,2;
+}
+.subgraph-rect {
+  fill: none;
+  stroke: #9370DB;
+  stroke-width: 1;
+  stroke-dasharray: 6,3;
+}
+.subgraph-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+.edge-thick .edge-line {
+  stroke-width: 3;
+}
+.edge-dotted .edge-line {
+  stroke-dasharray: 5,5;
+}
+.edge-dotted-open .edge-line {
+  stroke-dasharray: 5,5;
+}
+.arrowhead {
+  fill: #333;
+}
+.arrow-open {
+  fill: none;
+  stroke: #333;
+  stroke-width: 2;
+}
+.arrow-cross {
+  fill: none;
+  stroke: #333;
+  stroke-width: 2;
+}
+.actor-box {
+  fill: #ECECFF;
+  stroke: #9370DB;
+  stroke-width: 2;
+}
+.actor-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 14px;
+}
+.actor-figure {
+  fill: none;
+  stroke: #9370DB;
+  stroke-width: 2;
+}
+.lifeline {
+  stroke: #333;
+  stroke-width: 1;
+  fill: none;
+  stroke-dasharray: 4,4;
+}
+.message-line {
+  stroke: #333;
+  stroke-width: 2;
+  fill: none;
+}
+.message-dashed .message-line {
+  stroke-dasharray: 6,4;
+}
+.message-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.activation {
+  fill: #333;
+  stroke: none;
+  fill-opacity: 0.25;
+}
+.fragment-frame {
+  fill: none;
+  stroke: #9370DB;
+  stroke-width: 1;
+}
+.fragment-label {
+  fill: #333;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.fragment-divider {
+  stroke: #9370DB;
+  stroke-width: 1;
+  fill: none;
+}
+.start-end .node-shape {
+  fill: #333;
+  stroke: #333;
+}
+</style>
+  <rect class="diagram-bg" x="0" y="0" width="249.5" height="892"/>
+  <g class="subgraph" id="subgraph-Active">
+    <rect class="subgraph-rect" x="40" y="136" width="169.5" height="620" rx="5" ry="5"/>
+    <text class="subgraph-label" x="48" y="152">Active</text>
+    <line class="fragment-divider" x1="48" y1="457" x2="201.5" y2="457" stroke-dasharray="4 4"/>
+  </g>
+  <g class="edge edge-arrow" id="edge-[*]-start@Active#0-NumLockOff-0" data-from="[*]-start@Active#0" data-to="NumLockOff">
+    <path class="edge-line" d="M120.5,188 L120.5,260" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  <g class="edge edge-arrow" id="edge-NumLockOff-NumLockOn-0" data-from="NumLockOff" data-to="NumLockOn">
+    <path class="edge-line" d="M120.5,318 L120.5,390" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="94.9" y="344" width="51.199999999999996" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="120.5" y="354" text-anchor="middle" dominant-baseline="central" style="font-size: 12px">toggle</text>
+  </g>
+  <g class="edge edge-arrow" id="edge-[*]-start@Active#1-CapsLockOff-0" data-from="[*]-start@Active#1" data-to="CapsLockOff">
+    <path class="edge-line" d="M124.75,482 L124.75,554" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  <g class="edge edge-arrow" id="edge-CapsLockOff-CapsLockOn-0" data-from="CapsLockOff" data-to="CapsLockOn">
+    <path class="edge-line" d="M124.75,612 L124.75,684" fill="none" marker-end="url(#arrowhead)"/>
+    <rect class="edge-label-bg" x="99.15" y="638" width="51.199999999999996" height="20" rx="3" ry="3"/>
+    <text class="edge-label" x="124.75" y="648" text-anchor="middle" dominant-baseline="central" style="font-size: 12px">toggle</text>
+  </g>
+  <g class="node node-circle start-end" id="node-[*]">
+    <circle class="node-shape" cx="124.75" cy="48" r="8"/>
+  </g>
+  <g class="node node-circle start-end state-end" id="node-[*]-end">
+    <circle class="node-shape" cx="124.75" cy="844" r="8" fill="none"/>
+    <circle class="node-shape" cx="124.75" cy="844" r="3.6"/>
+  </g>
+  <g class="node node-circle start-end" id="node-[*]-start@Active#0">
+    <circle class="node-shape" cx="120.5" cy="180" r="8"/>
+  </g>
+  <g class="node node-round" id="node-NumLockOff">
+    <rect class="node-shape" x="54" y="268" width="133" height="50" rx="15" ry="15"/>
+    <text class="node-label" x="120.5" y="293" text-anchor="middle" dominant-baseline="central">NumLockOff</text>
+  </g>
+  <g class="node node-round" id="node-NumLockOn">
+    <rect class="node-shape" x="58.25" y="398" width="124.5" height="50" rx="15" ry="15"/>
+    <text class="node-label" x="120.5" y="423" text-anchor="middle" dominant-baseline="central">NumLockOn</text>
+  </g>
+  <g class="node node-circle start-end" id="node-[*]-start@Active#1">
+    <circle class="node-shape" cx="124.75" cy="474" r="8"/>
+  </g>
+  <g class="node node-round" id="node-CapsLockOff">
+    <rect class="node-shape" x="54" y="562" width="141.5" height="50" rx="15" ry="15"/>
+    <text class="node-label" x="124.75" y="587" text-anchor="middle" dominant-baseline="central">CapsLockOff</text>
+  </g>
+  <g class="node node-round" id="node-CapsLockOn">
+    <rect class="node-shape" x="58.25" y="692" width="133" height="50" rx="15" ry="15"/>
+    <text class="node-label" x="124.75" y="717" text-anchor="middle" dominant-baseline="central">CapsLockOn</text>
+  </g>
+</svg>

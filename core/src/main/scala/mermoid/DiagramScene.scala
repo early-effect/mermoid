@@ -55,7 +55,7 @@ case class DiagramScene(
     nodes: List[LayoutNode],
     edges: List[LayoutEdge],
     routes: Map[(NodeId, NodeId), List[Point]],
-    subgraphs: List[StyleResolver.SubgraphInfo],
+    subgraphs: List[PlacedFrame],
     notes: List[StateNote],
     interactions: Map[NodeId, NodeInteraction],
     loopSide: SelfLoopSide,
@@ -63,6 +63,9 @@ case class DiagramScene(
     config: RenderConfig,
     /** Effective direction after optional responsive flip. */
     direction: Direction,
+    accTitle: Option[String] = None,
+    accDescr: Option[String] = None,
+    floatingNotes: List[FloatingNoteBox] = Nil,
 ):
   def visibleNodes: List[LayoutNode]          = nodes.filter(!_.dummy)
   def nodeMap: Map[NodeId, LayoutNode]        = nodes.map(n => n.id -> n).toMap
