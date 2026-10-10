@@ -1,0 +1,9 @@
+classDiagram
+    direction LR
+    namespace Billing {
+        class Invoice
+        class Payment
+        Invoice --> Payment : settled by
+    }
+    class Customer
+    Customer --> Invoice : receives

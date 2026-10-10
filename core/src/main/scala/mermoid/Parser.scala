@@ -273,7 +273,8 @@ object MermaidParser:
       Diagram.Flowchart(dir, stmts)
     }
 
-  def diagram(using P[Any]): P[Diagram] = P(SequenceParser.diagram | stateDiagram | flowchart)
+  def diagram(using P[Any]): P[Diagram] =
+    P(SequenceParser.diagram | stateDiagram | ClassParser.document | ErParser.document | flowchart)
 
   // -- Public API -------------------------------------------------------------
 
@@ -283,6 +284,10 @@ object MermaidParser:
         SequenceModel.resolve(stmts).map(Diagram.Sequence(_))
       case Parsed.Success(diagram: Diagram.StateDiagram, _) =>
         StateModel.resolve(diagram).map(_ => diagram)
+      case Parsed.Success(diagram: Diagram.ClassDiagram, _) =>
+        ClassModel.resolve(diagram).map(_ => diagram)
+      case Parsed.Success(diagram: Diagram.ErDiagram, _) =>
+        ErModel.resolve(diagram).map(_ => diagram)
       case Parsed.Success(value, _) => Right(value)
       case f: Parsed.Failure        => Left(ParseError.fromFastparse(f))
 end MermaidParser

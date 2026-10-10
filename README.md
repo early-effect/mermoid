@@ -5,8 +5,9 @@
 [![Maven Central](https://img.shields.io/maven-central/v/rocks.earlyeffect/mermoid_3?logo=apachemaven)](https://central.sonatype.com/artifact/rocks.earlyeffect/mermoid_3)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
-**[Mermaid](https://mermaid.js.org) → SVG (and optional interactive HTML) in Scala 3.** Parse flowchart /
-`stateDiagram-v2` source, lay it out, and paint a self-contained SVG on the JVM and in the browser via Scala.js.
+**[Mermaid](https://mermaid.js.org) → SVG (and optional interactive HTML) in Scala 3.** Parse flowchart,
+`stateDiagram-v2`, `classDiagram`, and `erDiagram` source, lay it out, and paint a self-contained SVG on the JVM and
+in the browser via Scala.js.
 No headless Chrome, no Node build step, no JavaScript required at page load for static embeds.
 
 The SVG is **styled by CSS**: stable classes and ids, plus a `<style>` block built from `--mermoid-*` custom
@@ -160,6 +161,17 @@ viewport stays left to right.
 | Note alignment | `style A noteAlign:center` (`left` / `center` / `right`) |
 | Note aliases | `note right of A as myNote` |
 
+### Class diagrams: `classDiagram`
+
+A class is three bands: name, attributes, operations. `()` makes a member an operation. `+` `-` `#` `~` are visibility.
+`<|--` `*--` `o--` `-->` `..>` `..|>` are the UML heads. `namespace Id { ... }` is a frame. `hideEmptyMembersBox` drops
+empty bands.
+
+### ER diagrams: `erDiagram`
+
+`CUSTOMER ||--o{ ORDER : places` is exactly-one to zero-or-more. `|o` is zero or one, `}|` is one or more. `PK` and
+`FK` mark attributes. `..` is the same feet on a dashed line.
+
 ### Sequence diagrams: `sequenceDiagram`
 
 Columns are participants in first-seen order. Rows are statements in source order. There is no ranker and no direction
@@ -201,7 +213,7 @@ Documented so adopters are not surprised:
 
 **Not yet implemented** (parse-fail or ignored):
 
-- Diagram types: class, ER, Gantt, pie, journey, git graph
+- Diagram types: Gantt, pie, journey, git graph
 - Sequence: `box` bands, `create` / `destroy`, stereotypes, `link` / `links`, `click` / `style` / `classDef`
 - State: `entry` / `exit` actions (a colon line is the description, not an action)
 - Flowchart: `linkStyle`, Mermaid theme directives

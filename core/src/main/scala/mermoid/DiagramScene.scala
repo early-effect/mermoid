@@ -66,6 +66,7 @@ case class DiagramScene(
     accTitle: Option[String] = None,
     accDescr: Option[String] = None,
     floatingNotes: List[FloatingNoteBox] = Nil,
+    compartments: List[CompartmentBox] = Nil,
 ):
   def visibleNodes: List[LayoutNode]          = nodes.filter(!_.dummy)
   def nodeMap: Map[NodeId, LayoutNode]        = nodes.map(n => n.id -> n).toMap

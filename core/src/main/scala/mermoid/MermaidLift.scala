@@ -199,9 +199,71 @@ private[mermoid] object MermaidLift:
       case v: SequenceStatement.Autonumber => product(v)
       case v: SequenceStatement.Group      => product(v)
 
+  given ToExpr[MarkKind] with
+    def apply(x: MarkKind)(using Quotes): Expr[MarkKind] = x match
+      case MarkKind.Triangle    => '{ MarkKind.Triangle }
+      case MarkKind.Diamond     => '{ MarkKind.Diamond }
+      case MarkKind.OpenDiamond => '{ MarkKind.OpenDiamond }
+      case MarkKind.Arrow       => '{ MarkKind.Arrow }
+      case MarkKind.Lollipop    => '{ MarkKind.Lollipop }
+      case MarkKind.ExactlyOne  => '{ MarkKind.ExactlyOne }
+      case MarkKind.ZeroOrOne   => '{ MarkKind.ZeroOrOne }
+      case MarkKind.OneOrMore   => '{ MarkKind.OneOrMore }
+      case MarkKind.ZeroOrMore  => '{ MarkKind.ZeroOrMore }
+  end given
+
+  given ToExpr[RelationMark] with
+    def apply(x: RelationMark)(using Quotes): Expr[RelationMark] = product(x)
+
+  given ToExpr[ClassVisibility] with
+    def apply(x: ClassVisibility)(using Quotes): Expr[ClassVisibility] = x match
+      case ClassVisibility.Public    => '{ ClassVisibility.Public }
+      case ClassVisibility.Private   => '{ ClassVisibility.Private }
+      case ClassVisibility.Protected => '{ ClassVisibility.Protected }
+      case ClassVisibility.Package   => '{ ClassVisibility.Package }
+
+  given ToExpr[ClassClassifier] with
+    def apply(x: ClassClassifier)(using Quotes): Expr[ClassClassifier] = x match
+      case ClassClassifier.None     => '{ ClassClassifier.None }
+      case ClassClassifier.Abstract => '{ ClassClassifier.Abstract }
+      case ClassClassifier.Static   => '{ ClassClassifier.Static }
+
+  given ToExpr[ClassMember] with
+    def apply(x: ClassMember)(using Quotes): Expr[ClassMember] = product(x)
+
+  given ToExpr[ClassStatement] with
+    def apply(x: ClassStatement)(using Quotes): Expr[ClassStatement] = x match
+      case v: ClassStatement.Declare       => product(v)
+      case v: ClassStatement.Member        => product(v)
+      case v: ClassStatement.Stereotype    => product(v)
+      case v: ClassStatement.Relation      => product(v)
+      case v: ClassStatement.Namespace     => product(v)
+      case v: ClassStatement.Note          => product(v)
+      case v: ClassStatement.ClickSt       => product(v)
+      case v: ClassStatement.ClassDefSt    => product(v)
+      case v: ClassStatement.StyleSt       => product(v)
+      case ClassStatement.HideEmptyMembers => '{ ClassStatement.HideEmptyMembers }
+      case v: ClassStatement.AccTitle      => product(v)
+      case v: ClassStatement.AccDescr      => product(v)
+  end given
+
+  given ToExpr[ErAttribute] with
+    def apply(x: ErAttribute)(using Quotes): Expr[ErAttribute] = product(x)
+
+  given ToExpr[ErStatement] with
+    def apply(x: ErStatement)(using Quotes): Expr[ErStatement] = x match
+      case v: ErStatement.Entity     => product(v)
+      case v: ErStatement.Relation   => product(v)
+      case v: ErStatement.ClassDefSt => product(v)
+      case v: ErStatement.StyleSt    => product(v)
+      case v: ErStatement.AccTitle   => product(v)
+      case v: ErStatement.AccDescr   => product(v)
+
   given ToExpr[Diagram] with
     def apply(x: Diagram)(using Quotes): Expr[Diagram] = x match
       case v: Diagram.Flowchart    => product(v)
       case v: Diagram.StateDiagram => product(v)
       case v: Diagram.Sequence     => product(v)
+      case v: Diagram.ClassDiagram => product(v)
+      case v: Diagram.ErDiagram    => product(v)
 end MermaidLift

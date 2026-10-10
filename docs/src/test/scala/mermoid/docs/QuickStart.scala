@@ -123,7 +123,9 @@ val scene: Either[ParseError, Scene] =
     section("Next steps")(
       md"""
 - [Flowcharts](flowcharts.html): shapes, edges, subgraphs, styling, clicks
-- [State diagrams](state-diagrams.html): transitions, notes, `[*]`
+- [State diagrams](state-diagrams.html): transitions, composites, notes, `[*]`
+- [Class diagrams](class-diagrams.html): members, relations, namespaces
+- [ER diagrams](er-diagrams.html): entities, keys, crow's feet
 - [Sequence diagrams](sequence-diagrams.html): participants, messages, fragments
 - [Interactive](interactive.html): hybrid HTML + SVG with reflow
 """

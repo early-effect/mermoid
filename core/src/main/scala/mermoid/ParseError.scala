@@ -29,6 +29,7 @@ enum ParseError:
   case DividerOutsideComposite
   case UnknownStereotype(raw: String)
   case BadScale(raw: String)
+  case ClassInTwoNamespaces(id: NodeId, first: String, second: String)
 
   def message: String = this match
     case Failed(index, expected) =>
@@ -52,6 +53,8 @@ enum ParseError:
       s"unknown stereotype <<$raw>>"
     case BadScale(raw) =>
       s"scale wants a width in pixels, not \"$raw\""
+    case ClassInTwoNamespaces(id, first, second) =>
+      s"${id.value} is in $first and in $second"
 end ParseError
 
 object ParseError:

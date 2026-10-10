@@ -135,9 +135,12 @@ object SvgOutputSpec extends ZIOSpec[SvgOutputSpec.Corpus]:
 
   /** Node ids the diagram declares, as the renderer keys them. */
   private def declaredNodeIds(diagram: Diagram): Set[String] = diagram match
-    case Diagram.Flowchart(_, stmts) => StyleResolver.collectNodes(stmts).keySet.map(_.value)
-    case state: Diagram.StateDiagram => StateModel.resolve(state).fold(_ => Set.empty, atomIds)
-    case Diagram.Sequence(_)         => Set.empty
+    case Diagram.Flowchart(_, stmts)   => StyleResolver.collectNodes(stmts).keySet.map(_.value)
+    case state: Diagram.StateDiagram   => StateModel.resolve(state).fold(_ => Set.empty, atomIds)
+    case diagram: Diagram.ClassDiagram =>
+      ClassModel.resolve(diagram).fold(_ => Set.empty, ClassModel.nodeIds)
+    case diagram: Diagram.ErDiagram => ErModel.resolve(diagram).fold(_ => Set.empty, ErModel.nodeIds)
+    case Diagram.Sequence(_)        => Set.empty
 
   /** Painted state nodes. A composite is a frame, not a node, so its id is not in this set. */
   private def atomIds(machine: StateMachine): Set[String] =
@@ -205,9 +208,11 @@ object SvgOutputSpec extends ZIOSpec[SvgOutputSpec.Corpus]:
               case _: Diagram.Flowchart    => "flowchart"
               case _: Diagram.StateDiagram => "stateDiagram-v2"
               case _: Diagram.Sequence     => "sequence"
+              case _: Diagram.ClassDiagram => "classDiagram"
+              case _: Diagram.ErDiagram    => "erDiagram"
             }
             .toSet
-          assertTrue(kinds == Set("flowchart", "stateDiagram-v2", "sequence"))
+          assertTrue(kinds == Set("flowchart", "stateDiagram-v2", "sequence", "classDiagram", "erDiagram"))
       },
     ),
     forEachExample("is well-formed XML with a conforming root") { r =>
@@ -267,16 +272,20 @@ object SvgOutputSpec extends ZIOSpec[SvgOutputSpec.Corpus]:
       assertTrue((rects ++ circles).forall(identity))
     },
     forEachExample("carries exactly one stylesheet and the markers for its diagram") { r =>
-      val styles   = r.root.byTag("style")
-      val markers  = r.root.byTag("marker").flatMap(_.attr("id"))
-      val css      = styles.flatMap(_.text).mkString
+      val styles    = r.root.byTag("style")
+      val markers   = r.root.byTag("marker").flatMap(_.attr("id"))
+      val css       = styles.flatMap(_.text).mkString
+      val structure = r.diagram match
+        case _: Diagram.ClassDiagram | _: Diagram.ErDiagram => true
+        case _                                              => false
       val expected = r.diagram match
         case _: Diagram.Sequence => Set("seq-head", "seq-open", "seq-cross", "seq-tail")
         case _                   => Set("arrowhead")
       assertTrue(
         styles.size == 1,
         css.contains("--mermoid"),
-        markers.toSet == expected,
+        if structure then markers.nonEmpty && markers.exists(_.startsWith("mark-"))
+        else markers.toSet == expected,
       )
     },
     forEachExample("every element id is unique") { r =>
