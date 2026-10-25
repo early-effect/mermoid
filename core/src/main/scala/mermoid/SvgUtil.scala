@@ -21,7 +21,6 @@ object SvgUtil:
       }
       .reverse
     lines.mkString("\n")
-  end wrapLabel
 
   def computeNodeSize(
       label: String,
@@ -51,8 +50,6 @@ object SvgUtil:
         (baseW + config.trapezoidIndent, baseH)
       case _ =>
         (baseW, baseH)
-    end match
-  end computeNodeSize
 
   def connectionPoint(node: LayoutNode, target: Point): (Double, Double) =
     val cx = node.center.x
@@ -83,6 +80,5 @@ object SvgUtil:
           else
             val signY = if dy > 0 then 1.0 else -1.0
             (cx + dx * hh / absDy, cy + signY * hh)
-    end if
   end connectionPoint
 end SvgUtil

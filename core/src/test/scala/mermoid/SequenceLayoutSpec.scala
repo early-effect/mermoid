@@ -27,7 +27,6 @@ object SequenceLayoutSpec extends ZIOSpecDefault:
                   )
                 case MessagePath.Hook(_, _, _, _) => assertTrue(false)
             case _ => assertTrue(false)
-          end match
     },
     test("the two replies are dashed and point back toward the caller") {
       SequenceFixture.laid(SequenceFixture.span) match
@@ -84,7 +83,6 @@ object SequenceLayoutSpec extends ZIOSpecDefault:
                 math.abs(line.y0 - (alice.box.y + alice.box.h)) < 0.01,
               )
             case _ => assertTrue(false)
-      end match
     },
     test("stacked activation bars step to the right") {
       val src =
@@ -111,8 +109,6 @@ object SequenceLayoutSpec extends ZIOSpecDefault:
                 endY.exists(y1 => outer.rect.y + outer.rect.h < y1),
               )
             case _ => assertTrue(false)
-          end match
-      end match
     },
     test("a minus after the arrow closes the sender") {
       val src =
@@ -140,8 +136,6 @@ object SequenceLayoutSpec extends ZIOSpecDefault:
                 end < note.box.y,
               )
             case _ => assertTrue(false)
-          end match
-      end match
     },
     test("a self message hooks out and back to the same lifeline") {
       val src =
@@ -164,7 +158,6 @@ object SequenceLayoutSpec extends ZIOSpecDefault:
                   )
                 case MessagePath.Straight(_, _) => assertTrue(false)
             case _ => assertTrue(false)
-      end match
     },
     test("an empty sequence still has a canvas") {
       SequenceFixture.laid("sequenceDiagram\n") match
@@ -229,7 +222,6 @@ object SequenceLayoutSpec extends ZIOSpecDefault:
               val gap   = alice.box.y - band.rect.y
               assertTrue(gap >= lineH + 14)
             case _ => assertTrue(false)
-      end match
     },
   )
 end SequenceLayoutSpec

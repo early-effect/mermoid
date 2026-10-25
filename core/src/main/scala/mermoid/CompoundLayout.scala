@@ -22,7 +22,6 @@ private[mermoid] object CompoundLayout:
         classes: List[String],
         styles: Map[CssProperty, String],
     )
-  end Item
 
   case class Region(items: List[Item], edges: List[Edge])
 
@@ -204,7 +203,6 @@ private[mermoid] object CompoundLayout:
       xs.maxOption.getOrElse(0.0),
       ys.maxOption.getOrElse(0.0),
     )
-  end bounds
 
   private def stack(parts: List[Placed]): Placed = parts match
     case Nil        => Placed(Nil, Map.empty, Nil, Nil, Nil)

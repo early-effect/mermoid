@@ -22,7 +22,6 @@ private[mermoid] object SequenceRenderer:
       ) ++ messages(scene) ++ notes(scene) ++ headers(scene))),
       AccessibleName.of(scene.accTitle, scene.accDescr),
     )
-  end paint
 
   /** SVG layer for hybrid paint. Headers and notes are HTML. No background and no second stylesheet. */
   def chrome(scene: SequenceScene): List[SvgNode] =
@@ -180,7 +179,6 @@ private[mermoid] object SequenceRenderer:
       "id"    -> s"fragment-${group.index}",
       "class" -> "fragment",
     )((rect :: tabPlate ++ tab ++ dividers)*)
-  end frame
 
   private def bands(scene: SequenceScene): List[SvgNode] =
     val lineH = scene.config.layout.lineHeight
@@ -208,7 +206,6 @@ private[mermoid] object SequenceRenderer:
         ) :: title)*
       )
     }
-  end bands
 
   private def lifelines(scene: SequenceScene): List[SvgNode] =
     scene.lifelines.map { line =>
@@ -286,7 +283,6 @@ private[mermoid] object SequenceRenderer:
       "id"    -> s"message-${message.index}",
       "class" -> s"message $dash",
     )((shaft :: labels)*)
-  end message
 
   private def markerAttrs(arrow: SequenceArrow): List[(String, String)] =
     val head = arrow.head match
@@ -298,7 +294,6 @@ private[mermoid] object SequenceRenderer:
       case SequenceHead.Filled => List("marker-start" -> "url(#seq-tail)")
       case _                   => Nil
     head ++ tail
-  end markerAttrs
 
   private def pathD(path: MessagePath): String = path match
     case MessagePath.Straight(from, to) =>
@@ -338,7 +333,6 @@ private[mermoid] object SequenceRenderer:
         ) :: lines)*
       )
     }
-  end notes
 
   private def headers(scene: SequenceScene): List[SvgNode] =
     val lineH = scene.config.layout.lineHeight
@@ -359,7 +353,6 @@ private[mermoid] object SequenceRenderer:
         case (_, href) :: Nil => SvgNode.Element("a", List("href" -> href), List(group))
         case _                => group
     }
-  end headers
 
   private def headerTitle(person: PlacedParticipant): List[SvgNode] =
     val fromLinks = person.links.map((label, href) => s"$label ($href)")
@@ -413,8 +406,6 @@ private[mermoid] object SequenceRenderer:
             stick(person).map(paintStyle(_, style)) ++ List(
               labelAt(box.y + ActorMetrics.height(lineH) - lineH / 2)
             )
-    end match
-  end headerBody
 
   private def paintStyle(node: SvgNode, style: List[(String, String)]): SvgNode =
     if style.isEmpty then node
@@ -441,7 +432,6 @@ private[mermoid] object SequenceRenderer:
       line(cx, hipY, cx - ActorMetrics.legSpread, hipY + ActorMetrics.leg),
       line(cx, hipY, cx + ActorMetrics.legSpread, hipY + ActorMetrics.leg),
     )
-  end stick
 
   private def line(x1: Double, y1: Double, x2: Double, y2: Double): SvgNode =
     SvgNode.leaf("line")(
@@ -533,6 +523,4 @@ private[mermoid] object SequenceRenderer:
           "points" ->
             s"${(cx - s * 0.8).f},${(cy - s * 0.35).f} ${(cx + s * 0.55).f},${(cy - s * 0.7).f} ${(cx + s * 0.8).f},${(cy + s * 0.35).f} ${(cx - s * 0.55).f},${(cy + s * 0.7).f}",
         ) :: Nil
-    end match
-  end iconShapes
 end SequenceRenderer

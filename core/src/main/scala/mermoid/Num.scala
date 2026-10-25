@@ -12,6 +12,7 @@ private[mermoid] object Num:
     if d.isNaN || d.isInfinite then d.toString
     else if d == Math.floor(d) && Math.abs(d) < 1e15 then d.toLong.toString
     else d.toString
+end Num
 
 /** `x.f` — the formatted form of a coordinate, for attribute values and interpolated path data. */
 extension (d: Double) private[mermoid] def f: String = Num.format(d)

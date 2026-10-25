@@ -145,7 +145,6 @@ object StateDiagramSpec extends ZIOSpecDefault:
           inner.rect.x + inner.rect.w <= wrap.rect.x + wrap.rect.w
         }
         assertTrue(held)
-      end for
     },
     test("an exit from the second region reaches the outside state") {
       val src =
@@ -190,7 +189,6 @@ object StateDiagramSpec extends ZIOSpecDefault:
         val parentHorizontal = outerA.zip(frame).exists((a, box) => a.center.x < box.rect.x)
         val held = aNode.zip(frame).zip(bNode).exists { case ((a, box), b) => inside(a, box) && inside(b, box) }
         assertTrue(scene.direction == Direction.LR, vertical, parentHorizontal, held)
-      end for
     },
     test("a fork bar covers its successor centers") {
       val src =
@@ -210,7 +208,6 @@ object StateDiagramSpec extends ZIOSpecDefault:
           lefts.forall(other => other.center.x >= x0 && other.center.x <= x1)
         }
         assertTrue(covers, lefts.size == 2)
-      end for
     },
     test("the end marker is a bullseye and the start marker is a circle") {
       val src =
@@ -229,7 +226,6 @@ object StateDiagramSpec extends ZIOSpecDefault:
           end.exists(_.cssClasses.contains(css.PaintClass.StateEnd.cssName)),
           svg.contains("state-end"),
         )
-      end for
     },
     test("a flowchart subgraph ranks on its own direction inside its frame") {
       val src =

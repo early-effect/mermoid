@@ -38,7 +38,6 @@ object MermoidAscent:
       case ContainerFit.Off        => false)
     val scale = containerWidth.fold(1.0)(scene.fitScale)
     HybridPainter.paint(scene, selected, onSelect, scale, cssFit)
-  end fromScene
 
   /** Interactive diagram: selection + viewport-driven re-layout.
     *
@@ -63,7 +62,6 @@ object MermoidAscent:
       widthControls,
       toggleSelect(selected),
     )
-  end diagramInteractive
 
   /** Follow the container. The first paint is unconstrained. Once the root is in the document, a resize observer
     * re-lays the scene out at the container's content width. On the JVM the observer is absent, so the picture stays

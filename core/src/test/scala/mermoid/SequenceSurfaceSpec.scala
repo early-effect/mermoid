@@ -98,7 +98,6 @@ object SequenceSurfaceSpec extends ZIOSpecDefault:
                   assertTrue(tab.x == group.frame.x, tab.y == group.frame.y, svg.contains("fragment-tab"))
                 case None => assertTrue(false)
             case None => assertTrue(false)
-      end match
     },
     test("a note is drawn with a folded corner") {
       val src =
@@ -147,7 +146,6 @@ object SequenceSurfaceSpec extends ZIOSpecDefault:
             seqSvg.contains("aria-label=\"The conversation\""),
           )
         case _ => assertTrue(false)
-      end match
     },
     test("an injected measure widens the node") {
       val src =

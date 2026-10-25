@@ -65,3 +65,4 @@ object ParseError:
   private[mermoid] def expectedLabels(failure: Parsed.Failure): List[String] =
     val traced = failure.trace()
     (traced.stack.map(_._1) :+ traced.label).filter(_.nonEmpty).distinct
+end ParseError

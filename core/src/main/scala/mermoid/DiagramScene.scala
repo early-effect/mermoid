@@ -18,6 +18,7 @@ enum ContainerFit:
     * `floor` is in (0, 1]. Below the floor the fit root scrolls horizontally.
     */
   case ToWidth(floor: Double)
+end ContainerFit
 
 object ContainerFit:
   /** A 16px label stays at least 8px, and a scene up to twice the column fits without a scrollbar. */
@@ -71,4 +72,3 @@ case class DiagramScene(
   def visibleNodes: List[LayoutNode]          = nodes.filter(!_.dummy)
   def nodeMap: Map[NodeId, LayoutNode]        = nodes.map(n => n.id -> n).toMap
   def visibleNodeMap: Map[NodeId, LayoutNode] = visibleNodes.map(n => n.id -> n).toMap
-end DiagramScene

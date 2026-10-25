@@ -38,7 +38,6 @@ object NodeShape:
       .map(s => s"| `A${s.mermaid.replace("\\", "\\\\")}` | `${s.productPrefix}` | `${s.wrapperClass}` |")
       .mkString("\n")
     s"| Syntax | `NodeShape` | CSS class |\n|---|---|---|\n$rows"
-end NodeShape
 
 case class NodeDef(
     id: NodeId,
@@ -67,7 +66,6 @@ object EdgeStyle:
       }
       .mkString("\n")
     s"| Syntax | `EdgeStyle` | CSS class | Arrowhead |\n|---|---|---|\n$rows"
-end EdgeStyle
 
 case class Edge(
     from: NodeId,
@@ -101,7 +99,6 @@ enum FlowStatement:
   case LinkStyleSt(index: Option[Int], styles: Map[css.CssProperty, String])
   case AccTitle(text: String)
   case AccDescr(text: String)
-end FlowStatement
 
 // -- State Diagram ------------------------------------------------------------
 

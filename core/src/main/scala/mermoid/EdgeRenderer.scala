@@ -34,7 +34,6 @@ object EdgeRenderer:
             val my = y1 + (y2 - y1) * t
             if !nodes.exists(n => overlapsNode(mx, my, halfW, halfH, n)) then break((mx, my))
       ((x1 + x2) / 2, (y1 + y2) / 2)
-  end findLabelPosition
 
   /** Estimated bounding box of an edge label, used both for placement and for the label background. */
   private[mermoid] def labelSize(lbl: String, lc: LayoutConfig): (Double, Double) =
@@ -54,7 +53,6 @@ object EdgeRenderer:
         if edge.from == edge.to then selfLoopInk(lc, edge, from, loopSide)
         else routedEdgeInk(lc, edge, from, to, nodeMap, waypoints)
       case _ => Nil
-  end edgeInk
 
   private def selfLoopInk(
       lc: LayoutConfig,
@@ -221,7 +219,6 @@ object EdgeRenderer:
         "style" -> s"font-size: ${lc.edgeLabelFontSize}px",
       )(lbl),
     )
-  end edgeLabelSvg
 
   private def edgeId(edge: LayoutEdge): String =
     edge.alias.getOrElse(s"${edge.from}-${edge.to}-${edge.edgeIndex}")
@@ -275,7 +272,6 @@ object EdgeRenderer:
       List("class" -> PaintClass.EdgeLine.cssName, "d" -> d, "fill" -> "none") ++ dash ++ style ++ marker,
       Nil,
     )
-  end curve
 
   private def renderSelfLoop(
       lc: LayoutConfig,
@@ -340,7 +336,6 @@ object EdgeRenderer:
       val labelBaseY = apexY + loopSize * 0.35
       val label      = edge.label.map(lbl => edgeLabelSvg(lbl, cx, labelBaseY + labelYOffset, lc)).getOrElse(Nil)
       line.toList ++ label
-    end if
   end renderSelfLoop
 
   private def hasArrow(style: EdgeStyle): Boolean = style match
@@ -474,7 +469,6 @@ object EdgeRenderer:
           s"C${c1.x.f},${c1.y.f} ${c2.x.f},${c2.y.f} ${p2.x.f},${p2.y.f}"
         }
         s"M${first.x.f},${first.y.f} ${segs.mkString(" ")}"
-  end smoothPath
 
   /** Same row or column, including a fraction of a pixel of layout dust.
     *

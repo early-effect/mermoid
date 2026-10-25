@@ -69,7 +69,6 @@ private[mermoid] object FlowLayout:
       config = cfg,
       direction = dir,
     )
-  end scene
 
   private def regionOf(
       stmts: List[FlowStatement],
@@ -99,7 +98,6 @@ private[mermoid] object FlowLayout:
       CompoundLayout.Item.Leaf(defn, Nil, Map.empty, None)
     }
     CompoundLayout.Region(leaves ++ groups, edges)
-  end regionOf
 
   private def idsOf(region: CompoundLayout.Region): Set[NodeId] =
     region.items.flatMap {

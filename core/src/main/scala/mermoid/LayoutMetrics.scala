@@ -36,7 +36,6 @@ object LayoutMetrics:
       case (acc, (u1, l1) :: later) => acc + later.count { case (u2, l2) => (u1 < u2) != (l1 < l2) }
       case (acc, Nil)               => acc
     }
-  end countLayerCrossings
 
   /** Total crossings across all consecutive layer pairs for the given layering and undirected edge ends. */
   private[mermoid] def totalCrossings(layers: List[List[NodeId]], edges: List[(NodeId, NodeId)]): Int =
@@ -59,7 +58,6 @@ object LayoutMetrics:
         }
       case (acc, Nil) => acc
     }
-  end edgeCrossings
 
   private def segmentsCross(p1: Point, p2: Point, p3: Point, p4: Point): Boolean =
     val d1 = cross(p3, p4, p1)

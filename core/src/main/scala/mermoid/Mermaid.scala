@@ -14,7 +14,6 @@ final class Mermaid @publicInBinary private (val source: String, val diagram: Di
     case _          => false
   override def hashCode: Int    = source.hashCode
   override def toString: String = s"Mermaid($source)"
-end Mermaid
 
 object Mermaid:
 
@@ -43,8 +42,6 @@ object Mermaid:
           case Right(diagram) => '{ new Mermaid(${ Expr(src) }, ${ Expr(diagram) }) }
           case Left(error)    =>
             report.errorAndAbort(s"Not a Mermaid diagram: ${error.message}", errorPosition(raw, src, error))
-    end match
-  end literal
 
   /** The failing character when the literal's text is its source (no escapes, no margin), else the whole literal. */
   private def errorPosition(raw: Expr[String], src: String, error: ParseError)(using Quotes): quotes.reflect.Position =
@@ -61,6 +58,4 @@ object Mermaid:
           Position(pos.sourceFile, at, at)
         }
       case _ => pos
-    end match
-  end errorPosition
 end Mermaid

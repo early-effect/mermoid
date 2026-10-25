@@ -220,7 +220,6 @@ object MermaidParser:
         ClickBinding(nodeId, None, None, None, Some(cb))
       case _ =>
         ClickBinding(nodeId, None, None, None, tokens.headOption)
-    end match
   end parseClickRest
 
   private def isLinkTarget(s: String): Boolean =
@@ -242,7 +241,6 @@ object MermaidParser:
         val j   = if end < 0 then rest.length else end
         loop(j, rest.substring(i, j) :: acc)
     loop(0, Nil)
-  end tokenizeClickRest
 
   private[mermoid] def subgraphSt(using P[Any]): P[FlowStatement.SubgraphSt] =
     P(

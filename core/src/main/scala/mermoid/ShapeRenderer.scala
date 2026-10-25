@@ -28,7 +28,6 @@ object ShapeRenderer:
         val linkAttrs = List("href" -> url) ++ interaction.flatMap(_.linkTarget).map("target" -> _)
         SvgNode.Element("a", linkAttrs, List(group))
       case None => group
-  end nodeToSvg
 
   /** The shape primitives for a node — most shapes are one element, a few need two or three. */
   def shapeToSvg(node: LayoutNode, config: RenderConfig): List[SvgNode] =
@@ -165,7 +164,6 @@ object ShapeRenderer:
               s"${(cx + hw - indent).f},${(cy + hh).f} ${(cx - hw + indent).f},${(cy + hh).f}"
           )
         )
-    end match
   end shapeToSvg
 
   def labelToSvg(node: LayoutNode): SvgNode =

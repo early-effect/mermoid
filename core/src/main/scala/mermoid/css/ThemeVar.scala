@@ -99,3 +99,4 @@ object ThemeVar:
   def markdownTable: String =
     val rows = values.map(v => s"| `${v.cssName}` | ${v.description} |").mkString("\n")
     s"| Variable | Used by |\n|---|---|\n$rows"
+end ThemeVar

@@ -55,7 +55,6 @@ object BuildSite extends DocsSite:
           )
         ),
       )
-  end site
 
   override def layers: ZLayer[Any, Nothing, SiteBuilder] =
     EarlyEffectTheme.layers
@@ -71,7 +70,6 @@ object BuildSite extends DocsSite:
         SiteError.WriteFailed(index, err)
       }
     promote *> EarlyEffectTheme.writeLogo(out) *> copyClientBundle(out)
-  end afterBuild
 
   /** The linked client named by [[clientJsMarker]], else the first fastopt bundle under `target/out`. */
   private def copyClientBundle(out: Path): IO[SiteError, Unit] =
@@ -111,8 +109,6 @@ object BuildSite extends DocsSite:
           .findFirst()
         found.toScala
       finally stream.close()
-    end if
-  end walkTargetOut
 
   private def repoRoot: Path =
     Iterator

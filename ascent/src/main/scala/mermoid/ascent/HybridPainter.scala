@@ -128,7 +128,6 @@ private[ascent] object HybridPainter:
       SvgBridge.toUi(edgeSvg),
       actors ++ notes,
     )
-  end paintSequence
 
   private def shell(
       config: RenderConfig,
@@ -265,7 +264,6 @@ private[ascent] object HybridPainter:
       ),
       kids,
     )
-  end actorButton
 
   private def sequenceNote(note: PlacedNote): UI[Any] =
     val box   = note.box
@@ -287,7 +285,6 @@ private[ascent] object HybridPainter:
         UI.Text(note.lines.mkString("\n")),
       ),
     )
-  end sequenceNote
 
   private def arrowheadDefs(config: RenderConfig): SvgNode =
     val lc = config.layout
@@ -309,7 +306,6 @@ private[ascent] object HybridPainter:
         )
       )
     )
-  end arrowheadDefs
 
   private def markIncident(node: SvgNode, edge: LayoutEdge, selected: Option[NodeId]): SvgNode =
     val incident = selected.exists(id => edge.from == id || edge.to == id)
@@ -324,8 +320,6 @@ private[ascent] object HybridPainter:
             kids,
           )
         case other => other
-    end if
-  end markIncident
 
   /** Keep only the connector line from a note group for the SVG layer. */
   private def extractConnector(noteGroup: SvgNode): List[SvgNode] = noteGroup match
@@ -418,7 +412,6 @@ private[ascent] object HybridPainter:
         UI.Element("a", linkAttrs, kids)
       case None =>
         UI.Element("button", attrs, kids)
-    end match
   end nodeButton
 
   /** Copy classDef rules onto `.mermoid-node.<name>` so they outrank `.mermoid-node .node-shape` (0, 2, 0). */
@@ -445,8 +438,6 @@ private[ascent] object HybridPainter:
           else Nil
         shaped :: diamond
       case _ => Nil
-    end match
-  end boostedSelectors
 
   private def noteCard(
       note: StateNote,

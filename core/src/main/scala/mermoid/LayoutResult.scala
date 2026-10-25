@@ -9,4 +9,3 @@ case class LayoutResult(
   def visibleNodes: List[LayoutNode]          = nodes.filter(!_.dummy)
   def nodeMap: Map[NodeId, LayoutNode]        = nodes.map(n => n.id -> n).toMap
   def visibleNodeMap: Map[NodeId, LayoutNode] = visibleNodes.map(n => n.id -> n).toMap
-end LayoutResult

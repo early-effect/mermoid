@@ -37,8 +37,6 @@ object InitDirective:
         case "forest"  => Some(css.ThemeName.Forest)
         case "neutral" => Some(css.ThemeName.Neutral)
         case _         => None
-    end if
-  end themeName
 
   /** Index of `word` as a whole word, or -1. */
   private def wordAt(text: String, word: String): Int =
@@ -51,5 +49,4 @@ object InitDirective:
         val next   = if after >= text.length then true else !text.charAt(after).isLetter
         if before && next then at else go(after)
     go(0)
-  end wordAt
 end InitDirective

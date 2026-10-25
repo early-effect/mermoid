@@ -15,6 +15,7 @@ enum SvgNode:
 
   /** Verbatim content — used for the `<style>` body, which is CSS and must never be XML-escaped. */
   case Raw(content: String)
+end SvgNode
 
 object SvgNode:
 

@@ -31,7 +31,6 @@ object SvgRenderer:
         inline = e.inline,
       )
     }
-  end buildLayoutEdges
 
   private def arrowheadDefs(config: RenderConfig): SvgNode =
     val lc = config.layout
@@ -53,7 +52,6 @@ object SvgRenderer:
         )
       )
     )
-  end arrowheadDefs
 
   /** `None` when the resolved stylesheet renders empty. */
   private[mermoid] def styleBlock(config: RenderConfig, classDefRules: List[css.CssRule]): Option[SvgNode] =
@@ -81,7 +79,6 @@ object SvgRenderer:
       ) ++ label,
       children,
     )
-  end svgRoot
 
   def render(
       diagram: Diagram,

@@ -71,4 +71,3 @@ object WrapperClass:
       .map(w => s"| ${w.cssName} | ${w.classList} | ${w.idPattern} |")
       .mkString("\n")
     s"| Element | Class | Id |\n|---|---|---|\n$rows"
-end WrapperClass

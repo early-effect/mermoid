@@ -37,7 +37,6 @@ private[mermoid] object StructurePainter:
       "class" -> s"${WrapperClass.Node.cssName} ${node.shape.wrapperClass}${node.cssClasses.map(c => s" $c").mkString}",
       "id"    -> s"node-${node.id.value}",
     )((rect :: headerLine ++ attrLine ++ stereo ++ List(title) ++ attrs ++ ops)*)
-  end box
 
   def markers(kinds: Set[MarkKind]): SvgNode =
     SvgNode.elem("defs")()(kinds.toList.flatMap(kind => List(marker(kind, start = false), marker(kind, start = true)))*)
@@ -112,7 +111,6 @@ private[mermoid] object StructurePainter:
       "orient"       -> orient,
       "markerUnits"  -> "userSpaceOnUse",
     )(body*)
-  end marker
 
   private def polygon(points: String, fill: String): List[SvgNode] =
     List(

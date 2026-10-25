@@ -39,7 +39,6 @@ object DummyVertices:
             a.copy(layers = updated, dummies = a.dummies.updated(id, stub))
         }
         withNodes.copy(routes = withNodes.routes.updated((edge.from, edge.to), dummyIds))
-      end if
     }
   end expand
 

@@ -47,7 +47,6 @@ object DocPagesSpec extends ZIOSpecDefault:
       ) &&
         (html.contains("mermoid-node") || html.contains("<svg"))
     (svgRoot || hybrid) && !html.contains("NaN") && !html.contains("Infinity")
-  end looksLikeDiagram
 
   private def pageTests(p: DocPage): Vector[Spec[Any, Nothing]] =
     examplesOf(p.children).map { ex =>

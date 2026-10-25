@@ -80,7 +80,6 @@ private[mermoid] object ErParser:
       foreign = keys.exists(_.startsWith("FK")),
       comment = comment,
     )
-  end parseAttribute
 
   private def foot(using P[Any]): P[MarkKind] =
     P(
@@ -123,7 +122,6 @@ private[mermoid] object ErModel:
         accDescr = acc.accDescr,
       )
     )
-  end resolve
 
   def nodeIds(resolved: ResolvedEr): Set[String] = resolved.entities.map(_.id.value).toSet
 
@@ -235,7 +233,6 @@ private[mermoid] object ErModel:
       accDescr = resolved.accDescr,
       compartments = boxes,
     )
-  end scene
 
   private def entitySize(entity: EntityNode, config: RenderConfig, measure: TextMeasure): (Double, Double) =
     val lc     = config.layout
@@ -258,7 +255,6 @@ private[mermoid] object ErModel:
       0,
       entity = true,
     )
-  end entityBox
 
   def showAttribute(attribute: ErAttribute): String =
     val keys =

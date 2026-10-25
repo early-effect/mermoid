@@ -91,3 +91,4 @@ object Stylesheet:
       variables = base.variables ++ overrides.variables,
       rules = base.rules ++ overrides.rules,
     )
+end Stylesheet

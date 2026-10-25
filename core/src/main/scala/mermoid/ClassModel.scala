@@ -24,8 +24,6 @@ private[mermoid] object ClassModel:
             accDescr = acc.accDescr,
           )
         )
-    end match
-  end resolve
 
   def nodeIds(resolved: ResolvedClass): Set[String] =
     def fromNs(ns: ClassNamespace): Set[String] =
@@ -129,7 +127,6 @@ private[mermoid] object ClassModel:
               interaction = interaction.orElse(prev.interaction),
             ))
           )
-      end match
 
   private def setStereo(acc: Acc, id: NodeId, name: String): Acc =
     annotate(acc, id, None, None, Some(name), Nil, Nil, Map.empty, None)
@@ -171,7 +168,6 @@ private[mermoid] object ClassModel:
       ClassNamespace(id, label, built.nodes, built.namespaces, built.edges)
     }
     Built(nodes, edges, namespaces)
-  end build
 
   private def edgeOf(relation: ClassStatement.Relation): Edge =
     val text = List(relation.fromCard, relation.label, relation.toCard).flatten.mkString(" ")
@@ -197,7 +193,6 @@ private[mermoid] object ClassModel:
       data.styles,
       data.interaction,
     )
-  end nodeOf
 
   def scene(resolved: ResolvedClass, config: RenderConfig, viewport: Option[Viewport]): DiagramScene =
     val dir     = DiagramLayout.effectiveDirection(resolved.direction, config.responsive, viewport)
@@ -231,7 +226,6 @@ private[mermoid] object ClassModel:
       )
     }
     CompoundLayout.Region(leaves ++ groups, edges)
-  end regionOf
 
   private def compartments(resolved: ResolvedClass, config: RenderConfig): List[CompartmentBox] =
     def walk(nodes: List[ClassNode], namespaces: List[ClassNamespace]): List[CompartmentBox] =
@@ -254,7 +248,6 @@ private[mermoid] object ClassModel:
       attrH,
       opH,
     )
-  end boxOf
 
   private def titleOf(node: ClassNode): String =
     node.generic match
@@ -282,7 +275,6 @@ private[mermoid] object ClassModel:
       case ClassClassifier.Static   => "$"
       case ClassClassifier.None     => ""
     s"$vis$body$mark"
-  end showMember
 
   private def band(count: Int, hideEmpty: Boolean, line: Double): Double =
     if count == 0 && hideEmpty then 0
@@ -301,7 +293,6 @@ private[mermoid] object ClassModel:
     val width  = Math.max(lc.minNodeWidth, textW + lc.nodePaddingH * 2)
     val height = box.headerHeight + box.attributeHeight + box.operationHeight + 8
     (width, Math.max(lc.nodeHeight, height))
-  end boxSize
 
   private def finish(
       placed: CompoundLayout.Placed,
@@ -346,7 +337,6 @@ private[mermoid] object ClassModel:
       accDescr = resolved.accDescr,
       compartments = boxes,
     )
-  end finish
 
   private def interactionsOf(resolved: ResolvedClass): Map[NodeId, NodeInteraction] =
     def walk(nodes: List[ClassNode], namespaces: List[ClassNamespace]): Map[NodeId, NodeInteraction] =

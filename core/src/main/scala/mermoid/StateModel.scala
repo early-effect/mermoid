@@ -41,7 +41,6 @@ private[mermoid] enum StateNode:
       styles: Map[CssProperty, String],
       interaction: Option[NodeInteraction],
   )
-end StateNode
 
 /** Claims each state once, then builds the region tree. A flat machine keeps today's ids for `[*]`. */
 private[mermoid] object StateModel:
@@ -68,8 +67,6 @@ private[mermoid] object StateModel:
             defaultClass = acc.classDefs.keys.find(_ == "default"),
           )
         }
-    end match
-  end resolve
 
   /** No composites, no pseudostate other than start and end, no description that replaces an id. */
   def isLegacy(machine: StateMachine): Boolean =
@@ -138,7 +135,6 @@ private[mermoid] object StateModel:
                 case Some(StateForm.Simple)              => claimed.copy(forms = claimed.forms + (id -> form))
                 case Some(_) if form == StateForm.Simple => claimed
                 case _                                   => claimed.copy(forms = claimed.forms + (id -> form))
-            end if
           case StateStatement.Composite(id, dir, regions) =>
             val claimed = claim(acc, id, scope)
             if claimed.bodies.contains(id) then fail(claimed, ParseError.DuplicateComposite(id))
@@ -151,7 +147,6 @@ private[mermoid] object StateModel:
                   regions.zipWithIndex.foldLeft(withBody) { case (a, (inner, index)) =>
                     walk(inner, Scope.In(id, index), a)
                   }
-            end if
           case StateStatement.TransitionSt(t) =>
             claim(claim(acc, t.from, scope), t.to, scope)
           case StateStatement.NoteSt(_, id, _, _) => claim(acc, id, scope)
@@ -256,7 +251,6 @@ private[mermoid] object StateModel:
       notes = stmts.collect { case n: StateStatement.NoteSt => n },
       floating = stmts.collect { case n: StateStatement.FloatingNote => n },
     )
-  end buildRegion
 
   private def nodeFor(
       id: NodeId,
@@ -337,7 +331,6 @@ private[mermoid] object StateModel:
         )
       else Nil
     start ++ end
-  end markerNodes
 
   private def historyNodes(
       scope: Scope,
@@ -364,7 +357,6 @@ private[mermoid] object StateModel:
         )
       else Nil
     shallow ++ deep
-  end historyNodes
 
   private def classesIn(
       stmts: List[StateStatement],
@@ -389,7 +381,6 @@ private[mermoid] object StateModel:
           t.toClasses.foldLeft(t.fromClasses.foldLeft(accMap)(append(_, from, _)))(append(_, to, _))
         case _ => accMap
     }
-  end classesIn
 
   private def stylesIn(stmts: List[StateStatement]): Map[NodeId, Map[CssProperty, String]] =
     stmts.foldLeft(Map.empty[NodeId, Map[CssProperty, String]]) { (acc, stmt) =>
@@ -416,7 +407,6 @@ private[mermoid] object StateModel:
           acc + (id -> NodeInteraction(binding.tooltip, binding.href, binding.linkTarget, binding.callbackName))
         case _ => acc
     }
-  end clicksIn
 
   private def realEnd(stmt: StateStatement): Boolean = stmt match
     case StateStatement.TransitionSt(t)     => t.from.value == "end" || t.to.value == "end"

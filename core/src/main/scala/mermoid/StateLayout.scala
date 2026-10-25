@@ -24,8 +24,6 @@ private[mermoid] object StateLayout:
         )
         lay(machine, config.copy(layout = shrunk), viewport, dir, shrunk)
       case _ => first
-    end match
-  end scene
 
   private def lay(
       machine: StateMachine,
@@ -40,7 +38,6 @@ private[mermoid] object StateLayout:
     val notes   = machine.regions.flatMap(collectNotes)
     val floats  = machine.regions.flatMap(collectFloating)
     finish(placed, notes, floats, interactions(machine), machine, config, direction)
-  end lay
 
   private def convert(
       region: StateRegion,
@@ -71,7 +68,6 @@ private[mermoid] object StateLayout:
         )
     }
     CompoundLayout.Region(items, region.edges)
-  end convert
 
   private val barThick = 8.0
 
@@ -170,7 +166,6 @@ private[mermoid] object StateLayout:
       accDescr = machine.accDescr,
       floatingNotes = movedFloats,
     )
-  end finish
 
   private def placeFloating(
       notes: List[StateStatement.FloatingNote],
@@ -184,5 +179,4 @@ private[mermoid] object StateLayout:
       val h     = 28.0
       FloatingNoteBox(note.text, note.alias, Rect(right, 12.0 + index * (h + 8), w, h))
     }
-  end placeFloating
 end StateLayout

@@ -165,7 +165,6 @@ object Layout:
               if reaches(next, id) then feedback += ((id, next))
         }
         color(id) = 2
-      end dfs
 
       val indeg = uniq.groupBy(_._2).map((to, es) => to -> es.size)
       nodeIds.foreach { id =>
@@ -247,7 +246,6 @@ object Layout:
           Map.empty,
           dummy = isDummy,
         )
-      end for
     }
   end layoutVertical
 
@@ -301,7 +299,6 @@ object Layout:
           Map.empty,
           dummy = isDummy,
         )
-      end for
     }
   end layoutHorizontal
 
@@ -337,8 +334,6 @@ object Layout:
           (next, mains :+ offset, thicknesses :+ thickness)
       } match
       case (_, mains, thicknesses) => (mains, thicknesses)
-    end match
-  end layerMainAxis
 
   private def neighborPositions(edges: List[(NodeId, NodeId)]): Map[NodeId, List[NodeId]] =
     edges.foldLeft(Map.empty[NodeId, List[NodeId]]) { case (acc, (a, b)) =>
@@ -398,8 +393,6 @@ object Layout:
             // Clamping each rank here pins a wide node to the left edge and shoves it off the column.
             val shift = want - center
             packed.map((id, x, _) => id -> (x + shift)).toMap
-        end match
-    end packLayer
 
     def initialPack: Map[NodeId, Double] =
       layers.foldLeft(Map.empty[NodeId, Double]) { (acc, layer) =>

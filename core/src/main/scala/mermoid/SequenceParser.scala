@@ -76,7 +76,6 @@ private[mermoid] object SequenceParser:
       case StereoRead.Known(value) =>
         if created then SequenceStatement.Create(pid, text, kind, Some(value))
         else SequenceStatement.Declare(pid, text, kind, Some(value))
-  end named
 
   private def stereoSuffix(using P[Any]): P[StereoRead] =
     P((MermaidParser.ws ~ "@{" ~ CharsWhile(_ != '}', 0).! ~ "}").?).map {
@@ -97,7 +96,6 @@ private[mermoid] object SequenceParser:
         SequenceStereotype.parse(raw) match
           case Some(value) => StereoRead.Known(value)
           case None        => StereoRead.Unknown(raw)
-  end readStereo
 
   private def keywordKind(using P[Any]): P[ParticipantKind] =
     P(
@@ -190,7 +188,6 @@ private[mermoid] object SequenceParser:
       val sections = oneSection(label, first) :: rest.map { (l, b) => oneSection(l, b) }.toList
       SequenceStatement.Group(GroupKind.Alt, sections)
     }
-  end altGroup
 
   private def parGroup(using P[Any]): P[SequenceStatement.Group] =
     P(
@@ -201,7 +198,6 @@ private[mermoid] object SequenceParser:
       val sections = oneSection(label, first) :: rest.map { (l, b) => oneSection(l, b) }.toList
       SequenceStatement.Group(GroupKind.Par, sections)
     }
-  end parGroup
 
   private def box(using P[Any]): P[SequenceStatement.Box] =
     P(keyword("box") ~ MermaidParser.ws ~ boxColor ~ lineRest ~ block(keyword("end")) ~ keyword("end")).map {
