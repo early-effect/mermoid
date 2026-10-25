@@ -39,7 +39,6 @@ object SvgOutputSpec extends ZIOSpec[SvgOutputSpec.Corpus]:
     lazy val descendants: List[Elem]       = this :: children.flatMap(_.descendants)
     def byTag(t: String): List[Elem]       = descendants.filter(_.tag == t)
     def withClass(c: String): List[Elem]   = descendants.filter(_.classes.contains(c))
-  end Elem
 
   object Elem:
     def from(e: Element): Elem =
@@ -93,7 +92,6 @@ object SvgOutputSpec extends ZIOSpec[SvgOutputSpec.Corpus]:
       from = Path.of(dir).toAbsolutePath
       root <- up(from).someOrFail(CorpusError.NoExamplesDirectory(from))
     yield root
-  end repoRoot
 
   private def read(path: Path): IO[CorpusError, String] =
     ZIO.attemptBlockingIO(Files.readString(path)).mapError(CorpusError.Unreadable(path, _))
@@ -111,8 +109,6 @@ object SvgOutputSpec extends ZIOSpec[SvgOutputSpec.Corpus]:
       mmd = paths.filter(_.getFileName.toString.endsWith(".mmd")).sortBy(_.getFileName.toString)
       examples <- ZIO.foreach(mmd)(p => read(p).map(Example(p.getFileName.toString, _)))
     yield examples
-    end for
-  end examplesIn
 
   private def render(example: Example): IO[CorpusError, Rendered] =
     for

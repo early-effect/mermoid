@@ -48,7 +48,6 @@ enum ClassStatement:
   case HideEmptyMembers
   case AccTitle(text: String)
   case AccDescr(text: String)
-end ClassStatement
 
 private[mermoid] case class ClassNode(
     id: NodeId,
@@ -105,8 +104,6 @@ private[mermoid] object ClassMembers:
     else
       val (typeName, name) = splitTypeAndName(afterClassif)
       ClassMember(visibility, operation = false, name, typeName, None, None, classifier)
-    end if
-  end parse
 
   private def splitVisibility(raw: String): (Option[ClassVisibility], String) =
     raw.headOption match
@@ -134,7 +131,6 @@ private[mermoid] object ClassMembers:
         val name     = raw.drop(index + 1).trim
         (Option.when(typeName.nonEmpty)(typeName), if name.nonEmpty then name else raw.trim)
       case None => (None, raw.trim)
-  end splitTypeAndName
 end ClassMembers
 
 private[mermoid] object ClassParser:

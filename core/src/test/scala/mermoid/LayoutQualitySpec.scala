@@ -74,7 +74,6 @@ object LayoutQualitySpec extends ZIOSpecDefault:
         else List(item) :: current :: rest
     }
     groups.reverse.zipWithIndex.flatMap((group, idx) => group.map((id, _) => id -> idx)).toMap
-  end ranks
 
   private def rankOk(ranked: Map[NodeId, Int]): Boolean =
     val layer = ranked.map((id, rank) => id.value -> rank)
@@ -102,7 +101,6 @@ object LayoutQualitySpec extends ZIOSpecDefault:
         }
       case (acc, Nil) => acc
     }
-  end routedCrossings
 
   private def segmentsCross(p1: Point, p2: Point, p3: Point, p4: Point): Boolean =
     def cross(a: Point, b: Point, c: Point): Double =
@@ -237,7 +235,6 @@ object LayoutQualitySpec extends ZIOSpecDefault:
           routedCrossings(tb) <= 8,
           routedCrossings(lr) <= 8,
         )
-        end for
       },
       test("long-span edges emit cubic segments through waypoints") {
         val src =

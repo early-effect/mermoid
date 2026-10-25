@@ -38,6 +38,4 @@ object LayoutBounds:
           shiftY = shiftY,
         )
       case _ => FittedCanvas(padding * 2, padding * 2, 0.0, 0.0)
-    end match
-  end fit
 end LayoutBounds

@@ -69,7 +69,6 @@ object StructureDiagramSpec extends ZIOSpecDefault:
           inside(nodeA, frameA) && inside(nodeB, frameB)
         }
         assertTrue(edge, held)
-      end for
     },
     test("an ER crow's foot is one-and-only to zero-or-more, and the key is marked") {
       val src =
@@ -98,7 +97,6 @@ object StructureDiagramSpec extends ZIOSpecDefault:
           svg.contains(MarkKind.ZeroOrMore.markerId),
           !svg.contains("arrowhead"),
         )
-      end for
     },
     test("a wider entity stays on the column, and the shaft is straight with a crow's foot") {
       val src =
@@ -131,7 +129,6 @@ object StructureDiagramSpec extends ZIOSpecDefault:
           bars.contains("auto-start-reverse"),
           bars.contains("<line"),
         )
-      end for
     },
   )
 

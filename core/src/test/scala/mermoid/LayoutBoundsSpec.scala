@@ -103,7 +103,6 @@ object LayoutBoundsSpec extends ZIOSpecDefault:
           clipped.isEmpty,
           labelBoxes(svg).nonEmpty,
         )
-      end for
     },
     test("direction LR keeps a retry self-loop and its back edge on the canvas") {
       val src =
@@ -131,7 +130,6 @@ object LayoutBoundsSpec extends ZIOSpecDefault:
           clipped.isEmpty,
           labelBoxes(svg).nonEmpty,
         )
-      end for
     },
     test("order FSM ranks start above end (split [*])") {
       for

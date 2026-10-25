@@ -100,8 +100,6 @@ object DiagramLayout:
               padding = Math.max(12.0, layout.padding * scale),
               parallelEdgeSpacing = layout.parallelEdgeSpacing * scale,
             )
-      end match
-  end compressLayout
 
   private def flowchartScene(
       authorDir: Direction,
@@ -215,7 +213,6 @@ object DiagramLayout:
           styles = styles,
         )
       else n.copy(cssClasses = user, styles = styles)
-      end if
     }
     val routes      = laid.routes
     val layoutEdges = SvgRenderer.buildLayoutEdges(edges)

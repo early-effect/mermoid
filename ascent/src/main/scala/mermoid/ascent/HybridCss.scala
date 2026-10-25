@@ -57,6 +57,7 @@ enum HybridVar(val cssName: String):
   case ScaleFloor  extends HybridVar("--mermoid-scale-floor")
 
   def cssVar: String = s"var($cssName)"
+end HybridVar
 
 private object HybridTokens:
   val selectionStroke: String =

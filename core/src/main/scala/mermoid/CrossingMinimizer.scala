@@ -20,7 +20,6 @@ object CrossingMinimizer:
         val down = sweepForward(current, adj)
         sweepBackward(down, adj)
       }
-  end orderLayers
 
   private def undirectedAdj(edges: List[(NodeId, NodeId)]): Map[NodeId, List[NodeId]] =
     edges
@@ -61,7 +60,6 @@ object CrossingMinimizer:
         (sorted :: placed, sorted)
       }
       ._1
-  end sweep
 
   /** Stable sort by mean neighbor position; nodes with no neighbors keep relative order via index. */
   private def sortByBarycenter(
@@ -77,5 +75,4 @@ object CrossingMinimizer:
       }
       .sortBy { case (_, bary, idx) => (bary, idx) }
       .map(_._1)
-  end sortByBarycenter
 end CrossingMinimizer

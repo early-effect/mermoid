@@ -94,7 +94,6 @@ object MermoidAscentSpec extends ZIOSpecDefault:
         html.contains("mermoid-node"),
         !html.contains("Narrow"),
       )
-      end for
     },
     test("embedded style is not HTML-escaped") {
       val ui = MermoidAscent.diagram(flow)
@@ -181,7 +180,6 @@ object MermoidAscentSpec extends ZIOSpecDefault:
         html.contains(":where(.mermoid-node) .node-shape"),
         html.contains("""class="mermoid-node node-round fault""""),
       )
-      end for
     },
     test("style fill and color beat the theme on the shape and the button") {
       val src =
@@ -225,7 +223,6 @@ object MermoidAscentSpec extends ZIOSpecDefault:
           style.startsWith("width:"),
           !style.contains("transform"),
         )
-      end for
     },
     test("container fit off does not mark the root as fit") {
       val ui = MermoidAscent.diagram(
@@ -265,7 +262,6 @@ object MermoidAscentSpec extends ZIOSpecDefault:
           !plainRoot.contains("aria-label"),
           !plainRoot.contains("role="),
         )
-      end for
     },
   )
 

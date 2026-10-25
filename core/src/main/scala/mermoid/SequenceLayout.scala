@@ -25,6 +25,7 @@ private[mermoid] object StereotypeIcon:
 
   def height(lineHeight: Double): Double =
     size + gap + lineHeight
+end StereotypeIcon
 
 /** Columns are participants in source order. Rows are statements in source order. No ranker. */
 private[mermoid] object SequenceLayout:
@@ -50,7 +51,6 @@ private[mermoid] object SequenceLayout:
     val env    = Env(laid, seq, lc, pitch, created, measure)
     val cursor = placeStatements(statements, Cursor.start(env.headerBand + seq.headerGap), env)
     finish(cursor, env, config, statements)
-  end place
 
   private def linesOf(text: Option[String]): List[String] =
     text match
@@ -70,6 +70,7 @@ private[mermoid] object SequenceLayout:
 
     def take: (Option[Int], NumState) =
       if on then (Some(next), copy(next = next + step)) else (None, this)
+  end NumState
 
   private object NumState:
     val initial: NumState = NumState(on = false, next = 1, step = 1)
@@ -240,7 +241,6 @@ private[mermoid] object SequenceLayout:
     def frameLeft: Double                    = layout.columns.headOption.map(_.boxLeft - 8).getOrElse(0.0)
     def frameRight: Double                   =
       layout.columns.lastOption.map(c => c.boxLeft + c.boxW + 8).getOrElse(180.0) max (frameLeft + 120)
-  end Env
 
   private case class OpenBar(id: NodeId, depth: Int, y0: Double)
 
@@ -314,7 +314,6 @@ private[mermoid] object SequenceLayout:
     val ids  = SequenceModel.declarations(body).map(_.id)
     val next = placeStatements(body, cursor, env)
     next.copy(bands = next.bands :+ BandDraft(title, fill, ids))
-  end placeBox
 
   private def pushBar(open: List[OpenBar], id: NodeId, y0: Double): List[OpenBar] =
     OpenBar(id, open.count(_.id == id), y0) :: open
@@ -334,7 +333,6 @@ private[mermoid] object SequenceLayout:
     found match
       case None      => (Nil, open)
       case Some(bar) => (List(barOf(bar, y1, env)), rest)
-  end popBar
 
   private def barOf(bar: OpenBar, y1: Double, env: Env): ActivationBar =
     val col = env.byId.get(bar.id)
@@ -422,7 +420,6 @@ private[mermoid] object SequenceLayout:
           noteIndex = cursor.noteIndex + 1,
           notes = cursor.notes :+ PlacedNote(cursor.noteIndex, lines, rect),
         )
-  end placeNote
 
   private def placeGroup(
       cursor: Cursor,
@@ -455,7 +452,6 @@ private[mermoid] object SequenceLayout:
       groupIndex = cursor.groupIndex + 1,
       groups = body.groups.patch(insertAt, List(group), 0),
     )
-  end placeGroup
 
   private def titled(word: String, label: String): String =
     if label.isEmpty then word else s"$word $label"
@@ -538,8 +534,6 @@ private[mermoid] object SequenceLayout:
           accDescr = descr,
           classDefRules = SequenceModel.classRules(statements),
         )
-    end match
-  end finish
 
   private def bandRects(drafts: List[BandDraft], env: Env, endY: Double): List[PlacedBand] =
     drafts.flatMap { draft =>
@@ -559,7 +553,6 @@ private[mermoid] object SequenceLayout:
               Rect(left - 8, -lift, right - left + 16, endY + lift),
             )
           )
-      end match
     }
 
   private def varBounds(
@@ -591,7 +584,6 @@ private[mermoid] object SequenceLayout:
     val withBars   = bars.foldLeft(withNotes)((b, bar) => b.addRect(bar.rect))
     val withGroups = cursor.groups.foldLeft(withBars)((b, g) => b.addRect(g.frame))
     bands.foldLeft(withGroups)((b, band) => b.addRect(band.rect))
-  end varBounds
 
   private def labelBox(at: Point, lines: List[String], middle: Boolean, env: Env, lineH: Double): Rect =
     val w = env.widthOf(lines)
@@ -617,7 +609,6 @@ private[mermoid] object SequenceLayout:
           shiftPoint(head, dx, dy),
         )
     m.copy(path = path, labelAt = shiftPoint(m.labelAt, dx, dy))
-  end shiftMessage
 
   private def shiftGroup(g: PlacedGroup, dx: Double, dy: Double): PlacedGroup =
     g.copy(

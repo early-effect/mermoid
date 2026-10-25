@@ -37,5 +37,4 @@ object DomTextMeasure:
       else
         ctx.font = s"${Num.format(fontSizePx)}px $fontFamily"
         ctx.measureText(text).width.toString.toDoubleOption
-  end measured
 end DomTextMeasure

@@ -25,7 +25,6 @@ object SequenceStereotype:
     case "collections" => Some(SequenceStereotype.Collections)
     case "queue"       => Some(SequenceStereotype.Queue)
     case _             => None
-end SequenceStereotype
 
 enum SequenceLine:
   case Solid
@@ -73,6 +72,7 @@ enum NotePlace:
 
   /** `Over(a, a)` is a note on one column. */
   case Over(from: NodeId, to: NodeId)
+end NotePlace
 
 enum Numbering:
   case On(start: Int, step: Int)
@@ -153,7 +153,6 @@ case class PlacedParticipant(
     tooltip: Option[String] = None,
 ):
   def centerX: Double = box.x + box.w / 2
-end PlacedParticipant
 
 case class Lifeline(id: NodeId, x: Double, y0: Double, y1: Double, destroyed: Boolean = false)
 
@@ -168,7 +167,6 @@ case class PlacedMessage(
     labelAt: Point,
 ):
   def shown: List[String] = PlacedMessage.shown(lines, number)
-end PlacedMessage
 
 object PlacedMessage:
   /** The text paint draws. A number prefixes the first line, and it is the only line when the message has no text. */
@@ -384,7 +382,6 @@ object SequenceModel:
             (seen, created)
       }
     walk(statements, Set.empty, Set.empty)._2
-  end createdIds
 
   def access(statements: List[SequenceStatement]): (Option[String], Option[String]) =
     def walk(
@@ -402,7 +399,6 @@ object SequenceModel:
           case _ => (title, descr)
       }
     walk(statements, None, None)
-  end access
 
   def classRules(statements: List[SequenceStatement]): List[mermoid.css.CssRule] =
     classDefs(statements).toList.flatMap { (name, styles) => StyleResolver.classDefRulesFor(name, styles) }
@@ -427,7 +423,6 @@ object SequenceModel:
           case _ => acc
       }
     walk(stmts, Map.empty)
-  end classDefs
 
   private def paintChrome(
       stmts: List[SequenceStatement],
@@ -465,7 +460,6 @@ object SequenceModel:
           sections.foldLeft(acc)((a, section) => paintChrome(section.body, defs, a))
         case _ => acc
     }
-  end paintChrome
 
   private def withStereo(
       acc: Map[NodeId, ParticipantChrome],

@@ -43,7 +43,6 @@ object MermoidCli extends ZIOAppDefault:
       _       <- write(output, SvgRenderer.render(mermaid.diagram, InitDirective.apply(mermaid.source, RenderConfig())))
       _       <- say(s"Generated SVG: $output")
     yield ()
-  end processFile
 
   /** Writes `index.html` that embeds every example SVG for visual review (e.g. Playwright). */
   private def writeGallery(examplesDir: Path, outDir: Path): IO[CliError, Unit] =

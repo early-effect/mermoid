@@ -182,7 +182,6 @@ object DiagramLayoutSpec extends ZIOSpecDefault:
             !box.overlaps(active, gap) && !box.overlaps(idle, gap)
           case _ => false
         assertTrue(scene.direction == Direction.LR, scene.notes.size == 1, clear)
-      end for
     },
     test("click tooltips land on the scene") {
       val src =
@@ -202,7 +201,6 @@ object DiagramLayoutSpec extends ZIOSpecDefault:
           b.flatMap(_.tooltip).contains("Go B"),
           b.flatMap(_.linkTarget).contains("_blank"),
         )
-      end for
     },
     test("SVG paint emits title for tooltips") {
       val src =

@@ -25,7 +25,6 @@ private[mermoid] object LinkStyle:
           case _                                        => (title, descr)
       }
     walk(stmts, None, None)
-  end flowAccess
 
   private def paintsFor(
       count: Int,
@@ -38,7 +37,6 @@ private[mermoid] object LinkStyle:
       case (acc, (None, _))             => acc
     }
     Vector.tabulate(count)(index => defaults ++ indexed.getOrElse(index, Map.empty))
-  end paintsFor
 
   private def directivesFlow(stmts: List[FlowStatement]): List[(Option[Int], Map[css.CssProperty, String])] =
     stmts.flatMap {

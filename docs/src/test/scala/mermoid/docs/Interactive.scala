@@ -37,7 +37,6 @@ object Interactive extends DocSpec:
       noteTextColor = "#e8e6dc",
     )
     RenderConfig(theme = ThemeName.Dark, customStylesheet = Some(Theme.toStylesheet(colors)))
-  end chalkboard
 
   private val hybridFlow =
     Mermaid("""flowchart LR

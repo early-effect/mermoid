@@ -38,5 +38,4 @@ object SubgraphRenderer:
       List("class" -> WrapperClass.Subgraph.cssName, "id" -> s"subgraph-${frame.id}"),
       rect :: labelSvg :: dividers,
     )
-  end subgraphToSvg
 end SubgraphRenderer

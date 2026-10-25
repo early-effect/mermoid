@@ -45,7 +45,6 @@ private[mermoid] object MermaidLift:
       case NodeShape.Trapezoid        => '{ NodeShape.Trapezoid }
       case NodeShape.TrapezoidAlt     => '{ NodeShape.TrapezoidAlt }
       case NodeShape.DoubleCircle     => '{ NodeShape.DoubleCircle }
-  end given
 
   given ToExpr[EdgeStyle] with
     def apply(x: EdgeStyle)(using Quotes): Expr[EdgeStyle] = x match
@@ -70,7 +69,6 @@ private[mermoid] object MermaidLift:
       case CssProperty.BorderColor     => '{ CssProperty.BorderColor }
       case CssProperty.BorderWidth     => '{ CssProperty.BorderWidth }
       case v: CssProperty.Custom       => product(v)
-  end given
 
   given ToExpr[NodeDef] with
     def apply(x: NodeDef)(using Quotes): Expr[NodeDef] = product(x)
@@ -93,7 +91,6 @@ private[mermoid] object MermaidLift:
       case v: FlowStatement.LinkStyleSt => product(v)
       case v: FlowStatement.AccTitle    => product(v)
       case v: FlowStatement.AccDescr    => product(v)
-  end given
 
   given ToExpr[NotePosition] with
     def apply(x: NotePosition)(using Quotes): Expr[NotePosition] = x match
@@ -140,7 +137,6 @@ private[mermoid] object MermaidLift:
       case v: StateStatement.LinkStyleSt       => product(v)
       case StateStatement.Divider              => '{ StateStatement.Divider }
       case v: StateStatement.UnknownStereo     => product(v)
-  end given
 
   given ToExpr[SequenceStereotype] with
     def apply(x: SequenceStereotype)(using Quotes): Expr[SequenceStereotype] = x match
@@ -169,7 +165,6 @@ private[mermoid] object MermaidLift:
       case SequenceArrow.DashedCross => '{ SequenceArrow.DashedCross }
       case SequenceArrow.SolidOpen   => '{ SequenceArrow.SolidOpen }
       case SequenceArrow.DashedOpen  => '{ SequenceArrow.DashedOpen }
-  end given
 
   given ToExpr[MessageControl] with
     def apply(x: MessageControl)(using Quotes): Expr[MessageControl] = x match
@@ -224,7 +219,6 @@ private[mermoid] object MermaidLift:
       case v: SequenceStatement.AccTitle      => product(v)
       case v: SequenceStatement.AccDescr      => product(v)
       case v: SequenceStatement.BadStereotype => product(v)
-  end given
 
   given ToExpr[MarkKind] with
     def apply(x: MarkKind)(using Quotes): Expr[MarkKind] = x match
@@ -237,7 +231,6 @@ private[mermoid] object MermaidLift:
       case MarkKind.ZeroOrOne   => '{ MarkKind.ZeroOrOne }
       case MarkKind.OneOrMore   => '{ MarkKind.OneOrMore }
       case MarkKind.ZeroOrMore  => '{ MarkKind.ZeroOrMore }
-  end given
 
   given ToExpr[RelationMark] with
     def apply(x: RelationMark)(using Quotes): Expr[RelationMark] = product(x)
@@ -272,7 +265,6 @@ private[mermoid] object MermaidLift:
       case ClassStatement.HideEmptyMembers => '{ ClassStatement.HideEmptyMembers }
       case v: ClassStatement.AccTitle      => product(v)
       case v: ClassStatement.AccDescr      => product(v)
-  end given
 
   given ToExpr[ErAttribute] with
     def apply(x: ErAttribute)(using Quotes): Expr[ErAttribute] = product(x)

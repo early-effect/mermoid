@@ -61,7 +61,6 @@ object SequenceRenderSpec extends ZIOSpecDefault:
             svg.contains("id=\"note-0\""),
             svg.contains("id=\"fragment-0\""),
           )
-      end match
     },
   )
 end SequenceRenderSpec

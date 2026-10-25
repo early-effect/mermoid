@@ -39,7 +39,6 @@ object NoteRenderer:
     val lastLabelBottomY =
       labelBaseY + (selfLoopCount - 1) * (lc.edgeLabelFontSize + 16) + (lc.edgeLabelFontSize + 8) / 2
     Math.max(apexY, lastLabelBottomY)
-  end selfLoopBottomExtent
 
   def noteSize(config: RenderConfig, note: StateNote): (Double, Double) =
     val lc           = config.layout
@@ -96,7 +95,6 @@ object NoteRenderer:
         NoteBox(pushX, belowY, noteW, noteH),
       )
       candidates.find(clear).getOrElse(above)
-    end if
   end placeNote
 
   private def noteId(note: StateNote): String =
@@ -120,7 +118,6 @@ object NoteRenderer:
       "x2"    -> x2.f,
       "y2"    -> y2.f,
     )
-  end connector
 
   /** `None` when the note's state has no laid-out node to attach to. */
   def noteToSvg(
