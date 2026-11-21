@@ -336,7 +336,7 @@ sbt testFull                   # core JVM+JS, ascent, cli, docs assertions
 Once per clone, enable the scalafmt pre-commit hook:
 
 ```bash
-./scripts/install-git-hooks
+./scripts/install-git-hooks  # once per clone: pre-commit runs scalafmtCheckAll, commit-msg rejects agent attribution
 ```
 
 
